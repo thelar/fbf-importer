@@ -100,4 +100,29 @@ class Fbf_Importer_Admin {
 
 	}
 
+    /**
+     * Add an options page under the Settings submenu
+     *
+     * @since  1.0.0
+     */
+    public function add_options_page() {
+
+        $this->plugin_screen_hook_suffix = add_options_page(
+            __( 'Outdated Notice Settings', 'outdated-notice' ),
+            __( 'Outdated Notice', 'outdated-notice' ),
+            'manage_options',
+            $this->plugin_name,
+            array( $this, 'display_options_page' )
+        );
+    }
+
+    /**
+     * Render the options page for plugin
+     *
+     * @since  1.0.0
+     */
+    public function display_options_page() {
+        include_once 'partials/fbf-importer-admin-display.php';
+    }
+
 }
