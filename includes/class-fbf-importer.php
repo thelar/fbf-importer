@@ -163,7 +163,7 @@ class Fbf_Importer {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-        $this->loader->add_action( Fbf_Importer_Cron::FBF_IMPORTER_EVENT_DAILY_HOOK, $plugin_admin, 'run_daily_event' );
+        $this->loader->add_action( Fbf_Importer_Cron::FBF_IMPORTER_EVENT_HOURLY_HOOK, $plugin_admin, 'run_hourly_event' );
 
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
 

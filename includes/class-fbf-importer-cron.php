@@ -20,12 +20,13 @@
  */
 class Fbf_Importer_Cron {
     const FBF_IMPORTER_EVENT_DAILY_HOOK = 'fbf_importer_event_daily';
+    const FBF_IMPORTER_EVENT_HOURLY_HOOK = 'fbf_importer_event_hourly';
     /**
      * Check if already scheduled, and schedule if not.
      */
     public static function schedule() {
-        if ( ! self::next_scheduled_daily() ) {
-            self::daily_schedule();
+        if ( ! self::next_scheduled_hourly() ) {
+            self::hourly_schedule();
         }
     }
     /**
@@ -44,6 +45,18 @@ class Fbf_Importer_Cron {
      * Create new schedule.
      */
     private static function daily_schedule() {
-        wp_schedule_event( time(), 'hourly', self::FBF_IMPORTER_EVENT_DAILY_HOOK );
+        wp_schedule_event( time(), 'daily', self::FBF_IMPORTER_EVENT_DAILY_HOOK );
+    }
+    /**
+     * @return false|int Returns false if not scheduled, or timestamp of next run.
+     */
+    private static function next_scheduled_hourly() {
+        return wp_next_scheduled( self::FBF_IMPORTER_EVENT_HOURLY_HOOK );
+    }
+    /**
+     * Create new schedule.
+     */
+    private static function hourly_schedule() {
+        wp_schedule_event( time(), 'hourly', self::FBF_IMPORTER_EVENT_HOURLY_HOOK );
     }
 }
