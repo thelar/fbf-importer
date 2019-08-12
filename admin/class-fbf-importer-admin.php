@@ -108,8 +108,8 @@ class Fbf_Importer_Admin {
     public function add_options_page() {
 
         $this->plugin_screen_hook_suffix = add_options_page(
-            __( 'Outdated Notice Settings', 'outdated-notice' ),
-            __( 'Outdated Notice', 'outdated-notice' ),
+            __( 'Importer Settings', 'fbf-importer' ),
+            __( 'Importer', 'fbf-importer' ),
             'manage_options',
             $this->plugin_name,
             array( $this, 'display_options_page' )
