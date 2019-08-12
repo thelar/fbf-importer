@@ -40,6 +40,15 @@ class Fbf_Importer_Admin {
 	 */
 	private $version;
 
+    /**
+     * The options name to be used in this plugin
+     *
+     * @since  	1.0.0
+     * @access 	private
+     * @var  	string 		$option_name 	Option name of this plugin
+     */
+    private $option_name = 'fbf_importer';
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -154,6 +163,91 @@ class Fbf_Importer_Admin {
 
         // let's send it
         mail($recepients, $subject, $message);
+    }
+
+    /**
+     * Register settings.
+     *
+     * @since 1.0.9
+     */
+    public function register_settings() {
+        // Add a General section
+        add_settings_section(
+            $this->option_name . '_general',
+            __( 'General', 'fbf-importer' ),
+            array( $this, $this->option_name . '_general_cb' ),
+            $this->plugin_name
+        );
+        add_settings_field(
+            $this->option_name . '_position',
+            __( 'Text position', 'fbf-importer' ),
+            array( $this, $this->option_name . '_position_cb' ),
+            $this->plugin_name,
+            $this->option_name . '_general',
+            array( 'label_for' => $this->option_name . '_position' )
+        );
+        add_settings_field(
+            $this->option_name . '_day',
+            __( 'Post is outdated after', 'fbf-importer' ),
+            array( $this, $this->option_name . '_day_cb' ),
+            $this->plugin_name,
+            $this->option_name . '_general',
+            array( 'label_for' => $this->option_name . '_day' )
+        );
+        register_setting( $this->plugin_name, $this->option_name . '_position', array( $this, $this->option_name . '_sanitize_position' ) );
+        register_setting( $this->plugin_name, $this->option_name . '_day', 'intval' );
+    }
+
+    /**
+     * Render the text for the general section
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_general_cb() {
+        echo '<p>' . __( 'Please change the settings accordingly.', 'fbf-importer' ) . '</p>';
+    }
+
+    /**
+     * Render the radio input field for position option
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_position_cb() {
+        ?>
+        <fieldset>
+            <label>
+                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" id="<?php echo $this->option_name . '_position' ?>" value="before">
+                <?php _e( 'Before the content', 'fbf-importer' ); ?>
+            </label>
+            <br>
+            <label>
+                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" value="after">
+                <?php _e( 'After the content', 'fbf-importer' ); ?>
+            </label>
+        </fieldset>
+        <?php
+    }
+
+    /**
+     * Render the threshold day input for this plugin
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_day_cb() {
+        echo '<input type="text" name="' . $this->option_name . '_day' . '" id="' . $this->option_name . '_day' . '"> '. __( 'days', 'fbf-importer' );
+    }
+
+    /**
+     * Sanitize the text position value before being saved to database
+     *
+     * @param  string $position $_POST value
+     * @since  1.0.0
+     * @return string           Sanitized value
+     */
+    public function fbf_importer_sanitize_position( $position ) {
+        if ( in_array( $position, array( 'before', 'after' ), true ) ) {
+            return $position;
+        }
     }
 
 }

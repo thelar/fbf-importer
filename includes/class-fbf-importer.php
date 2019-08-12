@@ -167,6 +167,8 @@ class Fbf_Importer {
 
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
 
+        $this->loader->add_action( 'admin_init', $plugin_admin, 'register_setting' );
+
 
 	}
 
