@@ -31,6 +31,9 @@ class Fbf_Importer_Activator {
 	 */
 	public static function activate() {
 
+        // schedule events (cron jobs)
+        require_once plugin_dir_path( __FILE__ ) . 'class-fbf-importer-cron.php';
+        Plugin_Name_Cron::schedule();
 	}
 
 }

@@ -30,7 +30,8 @@ class Fbf_Importer_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+        require_once plugin_dir_path( __FILE__ ) . 'class-fbf-importer-cron.php';
+        Plugin_Name_Cron::unschedule();
 	}
 
 }

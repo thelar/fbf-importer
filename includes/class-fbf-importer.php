@@ -90,6 +90,7 @@ class Fbf_Importer {
 	 * - Fbf_Importer_i18n. Defines internationalization functionality.
 	 * - Fbf_Importer_Admin. Defines all hooks for the admin area.
 	 * - Fbf_Importer_Public. Defines all hooks for the public side of the site.
+     * - Fbf_Importer_Cron. Orchestrates scheduling and un-scheduling cron jobs.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -124,6 +125,11 @@ class Fbf_Importer {
 
 		$this->loader = new Fbf_Importer_Loader();
 
+        /**
+         * The class responsible for scheduling and un-scheduling events (cron jobs).
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-cron.php';
+
 	}
 
 	/**
@@ -156,7 +162,11 @@ class Fbf_Importer {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+
+        $this->loader->add_action( Fbf_Importer_Cron::PLUGIN_NAME_EVENT_DAILY_HOOK, $plugin_admin, 'run_daily_event' );
+
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
+
 
 	}
 
