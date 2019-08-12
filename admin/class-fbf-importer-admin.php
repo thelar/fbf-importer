@@ -213,6 +213,7 @@ class Fbf_Importer_Admin {
      * @since  1.0.9
      */
     public function fbf_importer_position_cb() {
+        $position = get_option( $this->option_name . '_position' );
         ?>
         <fieldset>
             <label>
