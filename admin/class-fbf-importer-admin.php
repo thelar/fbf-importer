@@ -148,7 +148,7 @@ class Fbf_Importer_Admin {
         // in this example we're sending an email
 
         // components for our email
-        $recepients = 'you@example.com';
+        $recepients = 'kevin@code-mill.co.uk';
         $subject = 'Hello from your Cron Job';
         $message = 'This is a test mail sent by WordPress automatically as per your schedule.';
 
