@@ -216,12 +216,12 @@ class Fbf_Importer_Admin {
         ?>
         <fieldset>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" id="<?php echo $this->option_name . '_position' ?>" value="before">
+                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" id="<?php echo $this->option_name . '_position' ?>" value="before" <?php checked( $position, 'before' ); ?>>
                 <?php _e( 'Before the content', 'fbf-importer' ); ?>
             </label>
             <br>
             <label>
-                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" value="after">
+                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" value="after" <?php checked( $position, 'after' ); ?>>
                 <?php _e( 'After the content', 'fbf-importer' ); ?>
             </label>
         </fieldset>
@@ -234,7 +234,8 @@ class Fbf_Importer_Admin {
      * @since  1.0.9
      */
     public function fbf_importer_day_cb() {
-        echo '<input type="text" name="' . $this->option_name . '_day' . '" id="' . $this->option_name . '_day' . '"> '. __( 'days', 'fbf-importer' );
+        $day = get_option( $this->option_name . '_day' );
+        echo '<input type="text" name="' . $this->option_name . '_day' . '" id="' . $this->option_name . '_day' . '" value="' . $day . '"> ' . __( 'days', 'fbf-importer' );
     }
 
     /**
