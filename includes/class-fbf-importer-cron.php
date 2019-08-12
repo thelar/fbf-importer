@@ -19,7 +19,7 @@
  * @author     Your Name <email@example.com>
  */
 class Fbf_Importer_Cron {
-    const FBF_IMPORTER_EVENT_DAILY_HOOK = 'plugin_name_event_daily';
+    const FBF_IMPORTER_EVENT_DAILY_HOOK = 'fbf_importer_event_daily';
     /**
      * Check if already scheduled, and schedule if not.
      */
@@ -44,6 +44,6 @@ class Fbf_Importer_Cron {
      * Create new schedule.
      */
     private static function daily_schedule() {
-        wp_schedule_event( time(), 'daily', self::FBF_IMPORTER_EVENT_DAILY_HOOK );
+        wp_schedule_event( time(), 'hourly', self::FBF_IMPORTER_EVENT_DAILY_HOOK );
     }
 }

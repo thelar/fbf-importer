@@ -130,7 +130,7 @@ class Fbf_Importer_Admin {
      *
      * @since 1.0.4
      */
-    public function run_hourly_event() {
+    public function run_daily_event() {
         /**
          * This function is provided for demonstration purposes only.
          *
@@ -143,6 +143,17 @@ class Fbf_Importer_Admin {
          * class.
          */
         // do something every hour
+
+        // do here what needs to be done automatically as per your schedule
+        // in this example we're sending an email
+
+        // components for our email
+        $recepients = 'you@example.com';
+        $subject = 'Hello from your Cron Job';
+        $message = 'This is a test mail sent by WordPress automatically as per your schedule.';
+
+        // let's send it
+        mail($recepients, $subject, $message);
     }
 
 }
