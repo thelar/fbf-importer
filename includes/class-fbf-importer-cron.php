@@ -19,7 +19,7 @@
  * @author     Your Name <email@example.com>
  */
 class Fbf_Importer_Cron {
-    const PLUGIN_NAME_EVENT_DAILY_HOOK = 'plugin_name_event_daily';
+    const FBF_IMPORTER_EVENT_DAILY_HOOK = 'plugin_name_event_daily';
     /**
      * Check if already scheduled, and schedule if not.
      */
@@ -32,18 +32,18 @@ class Fbf_Importer_Cron {
      * Unschedule.
      */
     public static function unschedule() {
-        wp_clear_scheduled_hook( self::PLUGIN_NAME_EVENT_DAILY_HOOK );
+        wp_clear_scheduled_hook( self::FBF_IMPORTER_EVENT_DAILY_HOOK );
     }
     /**
      * @return false|int Returns false if not scheduled, or timestamp of next run.
      */
     private static function next_scheduled_daily() {
-        return wp_next_scheduled( self::PLUGIN_NAME_EVENT_DAILY_HOOK );
+        return wp_next_scheduled( self::FBF_IMPORTER_EVENT_DAILY_HOOK );
     }
     /**
      * Create new schedule.
      */
     private static function daily_schedule() {
-        wp_schedule_event( time(), 'daily', self::PLUGIN_NAME_EVENT_DAILY_HOOK );
+        wp_schedule_event( time(), 'daily', self::FBF_IMPORTER_EVENT_DAILY_HOOK );
     }
 }
