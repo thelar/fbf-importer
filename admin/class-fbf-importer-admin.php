@@ -166,6 +166,37 @@ class Fbf_Importer_Admin {
     }
 
     /**
+     * Example daily event.
+     *
+     * @since 1.0.4
+     */
+    public function run_hourly_event() {
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Plugin_Name_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Plugin_Name_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
+        // do something every hour
+
+        // do here what needs to be done automatically as per your schedule
+        // in this example we're sending an email
+
+        // components for our email
+        $recepients = 'kevin@code-mill.co.uk';
+        $subject = 'Hello from your Cron Job';
+        $message = 'This is a test mail sent by WordPress automatically as per your schedule.';
+
+        // let's send it
+        mail($recepients, $subject, $message);
+    }
+
+    /**
      * Register settings.
      *
      * @since 1.0.9
