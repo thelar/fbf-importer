@@ -22,23 +22,23 @@
  */
 class Fbf_Importer_Admin {
 
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
-	private $plugin_name;
+    /**
+     * The ID of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $plugin_name    The ID of this plugin.
+     */
+    private $plugin_name;
 
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
+    /**
+     * The version of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $version    The current version of this plugin.
+     */
+    private $version;
 
     /**
      * The options name to be used in this plugin
@@ -49,65 +49,65 @@ class Fbf_Importer_Admin {
      */
     private $option_name = 'fbf_importer';
 
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.0
+     * @param      string    $plugin_name       The name of this plugin.
+     * @param      string    $version    The version of this plugin.
+     */
+    public function __construct( $plugin_name, $version ) {
 
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+        $this->plugin_name = $plugin_name;
+        $this->version = $version;
 
-	}
+    }
 
-	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
+    /**
+     * Register the stylesheets for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_styles() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Fbf_Importer_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Fbf_Importer_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Fbf_Importer_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Fbf_Importer_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/fbf-importer-admin.css', array(), $this->version, 'all' );
+        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/fbf-importer-admin.css', array(), $this->version, 'all' );
 
-	}
+    }
 
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
+    /**
+     * Register the JavaScript for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_scripts() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Fbf_Importer_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Fbf_Importer_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Fbf_Importer_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Fbf_Importer_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin.js', array( 'jquery' ), $this->version, false );
+        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin.js', array( 'jquery' ), $this->version, false );
 
-	}
+    }
 
     /**
      * Add an options page under the Settings submenu
@@ -157,7 +157,7 @@ class Fbf_Importer_Admin {
         // in this example we're sending an email
 
         // components for our email
-        $recepients = 'kevin@code-mill.co.uk';
+        $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
         $subject = 'Hello from your Cron Job';
         $message = 'This is a test mail sent by WordPress automatically as per your schedule.';
 
@@ -188,7 +188,7 @@ class Fbf_Importer_Admin {
         // in this example we're sending an email
 
         // components for our email
-        $recepients = 'kevin@code-mill.co.uk';
+        $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
         $subject = 'Hello from your Cron Job';
         $message = 'This is a test mail sent by WordPress automatically as per your schedule.';
 
@@ -209,7 +209,7 @@ class Fbf_Importer_Admin {
             array( $this, $this->option_name . '_general_cb' ),
             $this->plugin_name
         );
-        add_settings_field(
+        /*add_settings_field(
             $this->option_name . '_position',
             __( 'Text position', 'fbf-importer' ),
             array( $this, $this->option_name . '_position_cb' ),
@@ -224,7 +224,7 @@ class Fbf_Importer_Admin {
             $this->plugin_name,
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_day' )
-        );
+        );*/
         add_settings_field(
             $this->option_name . '_file',
             __( 'File name to process', 'fbf-importer' ),
@@ -233,9 +233,18 @@ class Fbf_Importer_Admin {
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_file' )
         );
-        register_setting( $this->plugin_name, $this->option_name . '_position', array( $this, $this->option_name . '_sanitize_position' ) );
-        register_setting( $this->plugin_name, $this->option_name . '_day', 'intval' );
-        register_setting( $this->plugin_name, $this->option_name . '_file', 'string' );
+        add_settings_field(
+            $this->option_name . '_email',
+            __( 'Email address to notify', 'fbf-importer' ),
+            array( $this, $this->option_name . '_email_cb' ),
+            $this->plugin_name,
+            $this->option_name . '_general',
+            array( 'label_for' => $this->option_name . '_email' )
+        );
+        //register_setting( $this->plugin_name, $this->option_name . '_position', array( $this, $this->option_name . '_sanitize_position' ) );
+        //register_setting( $this->plugin_name, $this->option_name . '_day', 'intval' );
+        register_setting( $this->plugin_name, $this->option_name . '_file', 'sanitize_text_field' );
+        register_setting( $this->plugin_name, $this->option_name . '_email', 'sanitize_email' );
     }
 
     /**
@@ -286,7 +295,17 @@ class Fbf_Importer_Admin {
      */
     public function fbf_importer_file_cb() {
         $file = get_option( $this->option_name . '_file' );
-        echo '<input type="text" name="' . $this->option_name . '_file' . '" id="' . $this->option_name . '_file' . '" value="' . $file . '"> ' . __( 'file', 'fbf-importer' );
+        echo '<input type="text" name="' . $this->option_name . '_file' . '" id="' . $this->option_name . '_file' . '" value="' . $file . '"> ';
+    }
+
+    /**
+     * Render the email input for this plugin
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_email_cb() {
+        $email = get_option( $this->option_name . '_email' );
+        echo '<input type="text" name="' . $this->option_name . '_email' . '" id="' . $this->option_name . '_file' . '" value="' . $email . '"> ';
     }
 
     /**
