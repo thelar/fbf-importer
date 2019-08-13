@@ -225,8 +225,17 @@ class Fbf_Importer_Admin {
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_day' )
         );
+        add_settings_field(
+            $this->option_name . '_file',
+            __( 'File name to process', 'fbf-importer' ),
+            array( $this, $this->option_name . '_file_cb' ),
+            $this->plugin_name,
+            $this->option_name . '_general',
+            array( 'label_for' => $this->option_name . '_file' )
+        );
         register_setting( $this->plugin_name, $this->option_name . '_position', array( $this, $this->option_name . '_sanitize_position' ) );
         register_setting( $this->plugin_name, $this->option_name . '_day', 'intval' );
+        register_setting( $this->plugin_name, $this->option_name . '_file', 'string' );
     }
 
     /**
@@ -268,6 +277,16 @@ class Fbf_Importer_Admin {
     public function fbf_importer_day_cb() {
         $day = get_option( $this->option_name . '_day' );
         echo '<input type="text" name="' . $this->option_name . '_day' . '" id="' . $this->option_name . '_day' . '" value="' . $day . '"> ' . __( 'days', 'fbf-importer' );
+    }
+
+    /**
+     * Render the file name input for this plugin
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_file_cb() {
+        $file = get_option( $this->option_name . '_file' );
+        echo '<input type="text" name="' . $this->option_name . '_file' . '" id="' . $this->option_name . '_file' . '" value="' . $file . '"> ' . __( 'file', 'fbf-importer' );
     }
 
     /**
