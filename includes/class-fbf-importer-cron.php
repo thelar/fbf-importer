@@ -33,7 +33,7 @@ class Fbf_Importer_Cron {
      * Unschedule.
      */
     public static function unschedule() {
-        wp_clear_scheduled_hook( self::FBF_IMPORTER_EVENT_DAILY_HOOK );
+        wp_clear_scheduled_hook( self::FBF_IMPORTER_EVENT_HOURLY_HOOK );
     }
     /**
      * @return false|int Returns false if not scheduled, or timestamp of next run.
