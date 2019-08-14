@@ -156,6 +156,8 @@ class Fbf_Importer_Admin {
         // do here what needs to be done automatically as per your schedule
         // in this example we're sending an email
 
+        //TODO: run the import here and make result available for the email
+
         // components for our email
         $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
         $subject = 'Hello from your Cron Job';
@@ -187,6 +189,8 @@ class Fbf_Importer_Admin {
         // do here what needs to be done automatically as per your schedule
         // in this example we're sending an email
 
+        //TODO: run the import here and make result available for the email
+
         // components for our email
         $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
         $subject = 'Hello from your Cron Job';
@@ -209,22 +213,6 @@ class Fbf_Importer_Admin {
             array( $this, $this->option_name . '_general_cb' ),
             $this->plugin_name
         );
-        /*add_settings_field(
-            $this->option_name . '_position',
-            __( 'Text position', 'fbf-importer' ),
-            array( $this, $this->option_name . '_position_cb' ),
-            $this->plugin_name,
-            $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_position' )
-        );
-        add_settings_field(
-            $this->option_name . '_day',
-            __( 'Post is outdated after', 'fbf-importer' ),
-            array( $this, $this->option_name . '_day_cb' ),
-            $this->plugin_name,
-            $this->option_name . '_general',
-            array( 'label_for' => $this->option_name . '_day' )
-        );*/
         add_settings_field(
             $this->option_name . '_file',
             __( 'File name to process', 'fbf-importer' ),
@@ -241,8 +229,6 @@ class Fbf_Importer_Admin {
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_email' )
         );
-        //register_setting( $this->plugin_name, $this->option_name . '_position', array( $this, $this->option_name . '_sanitize_position' ) );
-        //register_setting( $this->plugin_name, $this->option_name . '_day', 'intval' );
         register_setting( $this->plugin_name, $this->option_name . '_file', 'sanitize_text_field' );
         register_setting( $this->plugin_name, $this->option_name . '_email', 'sanitize_email' );
     }
@@ -254,38 +240,6 @@ class Fbf_Importer_Admin {
      */
     public function fbf_importer_general_cb() {
         echo '<p>' . __( 'Please change the settings accordingly.', 'fbf-importer' ) . '</p>';
-    }
-
-    /**
-     * Render the radio input field for position option
-     *
-     * @since  1.0.9
-     */
-    public function fbf_importer_position_cb() {
-        $position = get_option( $this->option_name . '_position' );
-        ?>
-        <fieldset>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" id="<?php echo $this->option_name . '_position' ?>" value="before" <?php checked( $position, 'before' ); ?>>
-                <?php _e( 'Before the content', 'fbf-importer' ); ?>
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="<?php echo $this->option_name . '_position' ?>" value="after" <?php checked( $position, 'after' ); ?>>
-                <?php _e( 'After the content', 'fbf-importer' ); ?>
-            </label>
-        </fieldset>
-        <?php
-    }
-
-    /**
-     * Render the threshold day input for this plugin
-     *
-     * @since  1.0.9
-     */
-    public function fbf_importer_day_cb() {
-        $day = get_option( $this->option_name . '_day' );
-        echo '<input type="text" name="' . $this->option_name . '_day' . '" id="' . $this->option_name . '_day' . '" value="' . $day . '"> ' . __( 'days', 'fbf-importer' );
     }
 
     /**
@@ -306,6 +260,7 @@ class Fbf_Importer_Admin {
     public function fbf_importer_email_cb() {
         $email = get_option( $this->option_name . '_email' );
         echo '<input type="text" name="' . $this->option_name . '_email' . '" id="' . $this->option_name . '_file' . '" value="' . $email . '"> ';
+
     }
 
     /**
@@ -321,4 +276,15 @@ class Fbf_Importer_Admin {
         }
     }
 
+    /**
+     * Perform the import task
+     *
+     * @return boolean
+     */
+    private function do_import()
+    {
+        include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-file-parser.php';
+        $it = new Fbf_Importer_File_Parser($this->plugin_name);
+        return $it->file_exists();
+    }
 }
