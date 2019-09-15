@@ -1,0 +1,13 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+.transparent {
+    background: transparent;
+}
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+.error {
+    color: #cc0000 !important;
+}
