@@ -6,7 +6,7 @@ class Fbf_Importer_Product_Image
     private $product_id;
     private $image_name;
     private $image_filepath;
-    private static $source_image_dir = 'source_images';
+    private static $source_image_dir = 'images';
     private $return_data = [];
 
     public function __construct($product_id, $image)
