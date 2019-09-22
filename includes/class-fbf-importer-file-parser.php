@@ -7,6 +7,7 @@
  * @subpackage Plugin_Name/includes
  * @author     Your Name <email@example.com>
  */
+
 class Fbf_Importer_File_Parser {
     private $plugin_name;
     private $option_name = 'fbf_importer';
@@ -20,12 +21,19 @@ class Fbf_Importer_File_Parser {
         'file_exists',
         'file_valid',
         'build_stock_array',
-        'import_stock'
+        'get_rsp_rules',
+        'import_stock',
+        'write_rsp_xml'
     ];
     private $stage;
     public $stock;
     public $stock_num;
     private $mapping;
+    private $rsp_rules;
+    private $rsp = [];
+    private $min_stock;
+    private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
+    private static $sku_file = 'sku_xml.xml';
 
     public function __construct($plugin_name)
     {
@@ -154,9 +162,11 @@ class Fbf_Importer_File_Parser {
             'posts_per_page' => -1,
             'fields' => 'ids',
         ]);
+        $counter = 0;
 
-        foreach($this->stock as $item){
-            $sku = (string) $item['Product Code'];
+
+        foreach ($this->stock as $item) {
+            $sku = (string)$item['Product Code'];
 
             $status = [];
 
@@ -169,11 +179,11 @@ class Fbf_Importer_File_Parser {
                 'Include in Price Match',
                 //'EAN' - doesn't seem to be present on all items
             ];
-            if(isset($item['Wheel Tyre Accessory'])){
-                if($item['Wheel Tyre Accessory'] == 'Tyre'){
+            if (isset($item['Wheel Tyre Accessory'])) {
+                if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                     //Its a Tyre
                     array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Quality', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
-                    $name = sprintf('%s/%s/%s %s %s %s', isset($item['Tyre Width'])?$item['Tyre Width']:'', isset($item['Tyre Profile'])?$item['Tyre Profile']:'', isset($item['Tyre Size'])?$item['Tyre Size']:'', isset($item['Brand Name'])?$item['Brand Name']:'', isset($item['Model Name'])?$item['Model Name']:'', isset($item['Load/Speed Rating'])?$item['Load/Speed Rating']:'');
+                    $name = sprintf('%s/%s/%s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
                     $attrs = [
                         'Load/Speed Rating' => 'load-speed-rating',
                         'Brand Name' => 'brand-name',
@@ -205,10 +215,10 @@ class Fbf_Importer_File_Parser {
                             'scope' => 'local'
                         ]
                     ];
-                }else if($item['Wheel Tyre Accessory'] != 'Accessories'){
+                } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
                     //It's a Wheel
                     array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
-                    $name = sprintf('%s x %s %s %s %s ET%s', isset($item['Wheel Size'])?$item['Wheel Size']:'', isset($item['Wheel Width'])?$item['Wheel Width']:'', isset($item['Brand Name'])?$item['Brand Name']:'', isset($item['Model Name'])?$item['Model Name']:'', isset($item['Wheel Colour'])?$item['Wheel Colour']:'', isset($item['Wheel Offset'])?$item['Wheel Offset']:'');
+                    $name = sprintf('%s x %s %s %s %s ET%s', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '');
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
@@ -233,9 +243,9 @@ class Fbf_Importer_File_Parser {
                             'scope' => 'local'
                         ]
                     ];
-                }else{
+                } else {
                     //It's an Accessory
-                    $name = sprintf('%s %s', isset($item['Brand Name'])?$item['Brand Name']:'', isset($item['Model Name'])?$item['Model Name']:'');
+                    $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
@@ -250,12 +260,12 @@ class Fbf_Importer_File_Parser {
                     ];
                 }
                 $data_valid = $this->validate($item, $mandatory);
-                if($data_valid===true){
+                if ($data_valid === true) {
                     //Data is valid
                     $status['data_valid'] = true;
 
                     //Does the product exist?
-                    if($product_id = wc_get_product_id_by_sku($sku)){
+                    if ($product_id = wc_get_product_id_by_sku($sku)) {
                         //Check if we need to update the product
                         $status['action'] = 'Update';
                         $product = new WC_Product($product_id);
@@ -263,10 +273,10 @@ class Fbf_Importer_File_Parser {
 
                         //Delete the product id from $all_products so that it doesn't get set to invisible
                         $key = array_search($product->get_id(), $products_to_hide);
-                        if($key!==false){
+                        if ($key !== false) {
                             unset($products_to_hide[$key]);
                         }
-                    }else{
+                    } else {
                         //Create the product
                         $status['action'] = 'Create';
                         $product = new WC_Product();
@@ -275,81 +285,92 @@ class Fbf_Importer_File_Parser {
                     $product->set_name($name);
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
-                    $product->set_regular_price((string) $item['RSP Exc Vat']);
+                    $product->set_regular_price((string)$item['RSP Exc Vat']);
 
                     //Category
-                    if($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])){
+                    if ($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])) {
                         $product->set_category_ids([$pc_id]);
-                    }else{
+                    } else {
                         $status['errors'][] = 'Error setting product category';
                     }
 
                     //Attributes
                     $wc_attrs = $product->get_attributes();
                     $new_attrs = [];
-                    foreach($attrs as $ak => $av){
-                        if(isset($item[$ak])){
-                            try{
+                    foreach ($attrs as $ak => $av) {
+                        if (isset($item[$ak])) {
+                            try {
                                 $new_attr = $this->check_attribute($product, $av, $item[$ak], $wc_attrs);
-                                if($new_attr){
-                                    if(is_array($av)){
+                                if ($new_attr) {
+                                    if (is_array($av)) {
                                         $new_attrs['pa_' . $av['slug']] = $new_attr;
-                                    }else{
+                                    } else {
                                         $new_attrs['pa_' . $av] = $new_attr;
                                     }
-                                }else{
+                                } else {
                                     $status['errors'][] = 'Check attribute returned false for ' . $av;
                                 }
-                            }catch(Exception $e){
+                            } catch (Exception $e) {
                                 $status['errors'][] = $e->getMessage();
                             }
                         }
                     }
-                    if(!empty($new_attrs) && !in_array(false, $new_attrs)){
+                    if (!empty($new_attrs) && !in_array(false, $new_attrs)) {
                         $product->set_attributes($new_attrs);
                     }
 
                     //Weight and dimensions
-                    if(isset($item['Weight KG'])){
-                        $product->set_weight((string) $item['Weight KG']);
+                    if (isset($item['Weight KG'])) {
+                        $product->set_weight((string)$item['Weight KG']);
                     }
-                    if(isset($item['Length CM'])){
-                        $product->set_length((string) $item['Length CM']);
+                    if (isset($item['Length CM'])) {
+                        $product->set_length((string)$item['Length CM']);
                     }
-                    if(isset($item['Width CM'])){
-                        $product->set_width((string) $item['Width CM']);
+                    if (isset($item['Width CM'])) {
+                        $product->set_width((string)$item['Width CM']);
                     }
-                    if(isset($item['Depth CM'])){
-                        $product->set_height((string) $item['Depth CM']);
+                    if (isset($item['Depth CM'])) {
+                        $product->set_height((string)$item['Depth CM']);
                     }
 
                     //Stock level
                     $this->set_stock($product, $item);
 
-                    if(!$product_id = $product->save()){
+                    if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
-                    }else{
+                    } else {
                         //Product saved - handle the product image
                         include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
-                        if(isset($item['Image name'])){
-                            $image_handler = new Fbf_Importer_Product_Image($product_id, (string) $item['Image name']);
+                        if (isset($item['Image name'])) {
+                            $image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
                             $image_import = $image_handler->process($status['action']);
-                            if(isset($image_import['errors'])){
+                            if (isset($image_import['errors'])) {
                                 $status['errors'] = $image_import['errors'];
-                            }else{
+                            } else {
                                 $status['image_info'] = $image_import['info'];
                             }
                         }
                     }
-                }else{
+
+                    //RSP calculation
+                    if ($item['Wheel Tyre Accessory'] == 'Tyre') {
+                        $this->rsp[] = [
+                            'Variant_Code' => $sku,
+                            'RSP_Inc' => round($this->get_rsp($item, $product_id, $product->get_regular_price()),2)
+                        ];
+                    }
+
+
+                } else {
                     //Data is not valid
                     $status['data_valid'] = false;
                     $status['errors'] = $data_valid;
                 }
                 $stock_status[$sku] = $status;
-            }else{
+            } else {
                 $status['errors'][] = 'Category is not set';
             }
+            $counter++;
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
@@ -367,6 +388,100 @@ class Fbf_Importer_File_Parser {
             $stock_status[$sku] = $status;
         }
         $this->info[$this->stage]['stock_status'] = $stock_status;
+    }
+
+    private function write_rsp_xml()
+    {
+        $xml = new DOMDocument();
+        $root = $xml->createElement("Variants");
+        $xml->appendChild($root);
+        foreach($this->rsp as $node){
+            $variant = $xml->createElement("Variant");
+            $variant_code = $xml->createElement("Variant_Code", $node['Variant_Code']);
+            $RSP_Inc = $xml->createElement("RSP_Inc", $node['RSP_Inc']);
+            $variant->appendChild($variant_code);
+            $variant->appendChild($RSP_Inc);
+            $root->appendChild($variant);
+        }
+        $xml->save(get_home_path() . '../supplier/' . self::$sku_file);
+    }
+
+    private function get_rsp_rules()
+    {
+        if(!is_plugin_active('fbf-rsp-generator/fbf-rsp-generator.php')){
+            $this->errors[$this->stage] = ['RSP Generator plugin - not active'];
+            $this->info[$this->stage]['errors'] = ['RSP Generator plugin - not active'];
+        }else {
+            $this->rsp_rules = Fbf_Rsp_Generator_Admin::fbf_rsp_generator_generate_rules();
+            $this->min_stock = get_option('fbf_rsp_generator_min_stock');
+        }
+    }
+
+    public static function fbf_importer_file_parser_read_xml()
+    {
+        $file = file_get_contents(get_home_path() . '../supplier/' . self::$sku_file);
+        echo $file;
+    }
+
+    private function get_rsp($item, $product_id, $price)
+    {
+        $price = $this->get_supplier_cost($item, $price);
+
+        $pc = 0;
+        //1. Loop through the rules
+        foreach($this->rsp_rules as $rule){
+            if($this->does_rule_apply($rule, $product_id)){
+                $pc = $rule['amount'];
+                break;
+            }else{
+                $pc = 0;
+            }
+        }
+        if($pc){
+            return (($pc/100) * $price) + $price;
+        }else{
+            return $price;
+        }
+
+    }
+
+    private function get_supplier_cost($item, $price)
+    {
+        //Get the cheapest supplier with at least the $min_stock
+        $cheapest = null;
+        foreach($item['Suppliers'] as $supplier){
+            if((int) $supplier['Supplier Stock Qty'] >= $this->min_stock){
+                if($cheapest===null){
+                    $cheapest = (float) $supplier['Supplier Cost Price'];
+                }else{
+                    if((float) $supplier['Supplier Cost Price'] < $cheapest){
+                        $cheapest = (float) $supplier['Supplier Cost Price'];
+                    }
+                }
+
+            }
+        }
+        if($cheapest===null){
+            return $price;
+        }else{
+            return $cheapest;
+        }
+    }
+
+    private function does_rule_apply($rule, $id)
+    {
+        //If the rule has taxonomy terms
+        if(!is_null($rule['rules'])){
+            //Loop through all the taxonomy terms and see if the item has them - note it needs all of them for the rule to apply
+            foreach($rule['rules'] as $taxonomy => $term){
+                if(!has_term($term, $taxonomy, $id)){
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            return true;
+        }
     }
 
     private function validate($item, $checks)
@@ -660,6 +775,7 @@ class Fbf_Importer_File_Parser {
             if($this->hasErrors($stage)){ //Any errors at any stage will break the run script immediately
                 $this->log_info($start, false);
                 $this->redirect_to_settings();
+                break;
             }
         }
 
@@ -670,7 +786,7 @@ class Fbf_Importer_File_Parser {
 
     private function redirect_to_settings()
     {
-        //wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name);
+        wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name);
     }
 
     private function log_info($start_time, $success){
