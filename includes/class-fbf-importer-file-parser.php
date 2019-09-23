@@ -32,6 +32,7 @@ class Fbf_Importer_File_Parser {
     private $rsp_rules;
     private $rsp = [];
     private $min_stock;
+    private $flat_fee;
     private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
     private static $sku_file = 'sku_xml.xml';
 
@@ -89,30 +90,6 @@ class Fbf_Importer_File_Parser {
         ];
     }
 
-   /* public function file_exists()
-    {
-        $filename = get_option($this->option_name . '_file');
-        $path = get_home_path() . '../supplier/' . $filename;
-        if(file_exists($path)){
-            $x = new XMLReader();
-            $doc = new DOMDocument;
-            $x->open($path);
-            $counter = 0;
-            $array = [];
-
-            // reading xml data...
-            while($x->read()) {
-                if ($x->nodeType == XMLReader::ELEMENT && $x->name == 'Variant') {
-                    $counter+=1;
-                    $node = simplexml_import_dom($doc->importNode($x->expand(), true));
-                    $array[] = $node;
-                }
-            }
-            return $array;
-        }else{
-            return false;
-        }
-    }*/
     private function file_exists()
     {
         if(!file_exists($this->filepath)){
@@ -414,6 +391,7 @@ class Fbf_Importer_File_Parser {
         }else {
             $this->rsp_rules = Fbf_Rsp_Generator_Admin::fbf_rsp_generator_generate_rules();
             $this->min_stock = get_option('fbf_rsp_generator_min_stock');
+            $this->flat_fee = get_options('fbf_rsp_generator_flat_fee');
         }
     }
 
@@ -438,7 +416,7 @@ class Fbf_Importer_File_Parser {
             }
         }
         if($pc){
-            return (($pc/100) * $price) + $price;
+            return (($pc/100) * $price) + $price + $this->flat_fee;
         }else{
             return $price;
         }
