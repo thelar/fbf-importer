@@ -427,6 +427,9 @@ class Fbf_Importer_File_Parser {
 
     private function get_supplier_cost($item, $price)
     {
+        if((int) $item['Stock Qty'] >= 2){
+            return $price;
+        }
         //Get the cheapest supplier with at least the $min_stock
         $cheapest = null;
         foreach($item['Suppliers'] as $supplier){
