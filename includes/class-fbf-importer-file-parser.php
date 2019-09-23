@@ -403,20 +403,22 @@ class Fbf_Importer_File_Parser {
 
     private function get_rsp($item, $product_id, $price)
     {
-        $price = $this->get_supplier_cost($item, $price);
-
+        $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
-        //1. Loop through the rules
-        foreach($this->rsp_rules as $rule){
-            if($this->does_rule_apply($rule, $product_id)){
-                $pc = $rule['amount'];
-                break;
-            }else{
-                $pc = 0;
+
+        if($s_price != $price){
+            //1. Loop through the rules
+            foreach ($this->rsp_rules as $rule) {
+                if ($this->does_rule_apply($rule, $product_id)) {
+                    $pc = $rule['amount'];
+                    break;
+                } else {
+                    $pc = 0;
+                }
             }
         }
         if($pc){
-            return (($pc/100) * $price) + $price + $this->flat_fee;
+            return (($pc/100) * $s_price) + $s_price + $this->flat_fee;
         }else{
             return $price;
         }
