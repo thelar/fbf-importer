@@ -391,7 +391,7 @@ class Fbf_Importer_File_Parser {
         }else {
             $this->rsp_rules = Fbf_Rsp_Generator_Admin::fbf_rsp_generator_generate_rules();
             $this->min_stock = get_option('fbf_rsp_generator_min_stock');
-            $this->flat_fee = get_options('fbf_rsp_generator_flat_fee');
+            $this->flat_fee = get_option('fbf_rsp_generator_flat_fee');
         }
     }
 
