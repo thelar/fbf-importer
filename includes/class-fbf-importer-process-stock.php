@@ -6,7 +6,7 @@ class Fbf_Importer_Stock_Processor
     private $plugin_name;
     private $errors = [];
     const STOCK_FEED_LOCATION = ABSPATH . '../../supplier/stock/';
-    const UPLOAD_LOCATION = ABSPATH . '../../supplier_stock/Upload/';
+    const UPLOAD_LOCATION = ABSPATH . '../../supplier/stock/Upload/';
     public function __construct($plugin_name)
     {
         require ABSPATH . '../../vendor/autoload.php';
