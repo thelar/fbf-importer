@@ -138,7 +138,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[10]['mapping_array'] = array('0', '0', '2', '1');
         $supplier_array[10]['delimiter'] = ",";
 
-        $supplier_array[11]['name'] = "WOLFRACE";
+        $supplier_array[11]['name'] = "wolfrace";
         $supplier_array[11]['read_filename'] = "wolfrace_trade_stock.csv";
         $supplier_array[11]['write_filename'] = "Wolfrace";
         $supplier_array[11]['cell_1a'] = "WOLFR";
@@ -195,7 +195,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[15]['delimiter'] = ";";
 
         $supplier_array[16]['name'] = "etb";
-        $supplier_array[16]['read_filename'] = "ZTG005.csv";
+        $supplier_array[16]['read_filename'] = "ZTG005.CSV";
         $supplier_array[16]['write_filename'] = "etb";
         $supplier_array[16]['cell_1a'] = "ETBWORCE";
         $supplier_array[16]['data_start_row'] = "1";
