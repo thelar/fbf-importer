@@ -138,9 +138,9 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[10]['mapping_array'] = array('0', '0', '2', '1');
         $supplier_array[10]['delimiter'] = ",";
 
-        $supplier_array[11]['name'] = "wolfrace";
+        $supplier_array[11]['name'] = "WOLFRACE";
         $supplier_array[11]['read_filename'] = "wolfrace_trade_stock.csv";
-        $supplier_array[11]['write_filename'] = "Wolfrace";
+        $supplier_array[11]['write_filename'] = "wolfrace";
         $supplier_array[11]['cell_1a'] = "WOLFR";
         $supplier_array[11]['data_start_row'] = "2";
         $supplier_array[11]['mapping_array'] = array('0', '0', '4', '1');
@@ -322,7 +322,7 @@ class Fbf_Importer_Stock_Processor
                 }
                 fclose($handle);
             }else{
-                $this->errors[] = 'Could not open supplier stock file: <strong>' . $supplier_data['read_filename'] . '</strong>';
+                $this->errors[] = 'Could not open supplier stock file: <strong>' . $supplier_id['write_filename'] . '/' . $supplier_data['read_filename'] . '</strong>';
             }
 
 
