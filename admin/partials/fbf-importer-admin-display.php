@@ -28,5 +28,10 @@
         <input type="submit" value="Do the import" class="button-primary">
     </form>
 
+    <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" style="margin-bottom: 1em">
+        <input type="hidden" name="action" value="fbf_importer_process_stock">
+        <input type="submit" value="Process Supplier Stock" class="button-primary">
+    </form>
+
     <?php $this->display_log_table(); ?>
 </div>

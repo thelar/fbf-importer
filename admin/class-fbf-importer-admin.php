@@ -449,6 +449,23 @@ class Fbf_Importer_Admin {
     }
 
     /**
+     * Process the stock feeds
+     */
+    public function fbf_importer_process_stock()
+    {
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-process-stock.php';
+        $processor = new Fbf_Importer_Stock_Processor($this->plugin_name);
+        if($processor->process()){
+            $status = 'success';
+            $message = urlencode('<strong>Success</strong> - processed Stock files');
+        }else{
+            $status = 'error';
+            $message = urlencode('<strong>Failed</strong> - Stock files were not processed');
+        }
+        //wp_redirect(get_admin_url() . 'admin.php?page=' . $this->plugin_name . '&fbf_importer_status=' . $status . '&fbf_importer_message=' . $message);
+    }
+
+    /**
      * Perform the data clean
      *
      * @return boolean
@@ -460,11 +477,11 @@ class Fbf_Importer_Admin {
         $cleaner->run();
     }
 
-    public function fbf_importer_admin_notice()
+    public function fbf_importer_admin_notices()
     {
-        if(isset($_REQUEST['fbf_status'])) {
-            printf('<div class="notice notice-%s is-dismissible">', $_REQUEST['fbf_status']);
-            printf('<p>%s</p>', $_REQUEST['fbf_message']);
+        if(isset($_REQUEST['fbf_importer_status'])) {
+            printf('<div class="notice notice-%s is-dismissible">', $_REQUEST['fbf_importer_status']);
+            printf('<p>%s</p>', $_REQUEST['fbf_importer_message']);
             echo '</div>';
         }
     }

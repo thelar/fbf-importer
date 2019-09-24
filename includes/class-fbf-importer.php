@@ -157,21 +157,15 @@ class Fbf_Importer {
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
-
 		$plugin_admin = new Fbf_Importer_Admin( $this->get_plugin_name(), $this->get_version() );
-
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
         $this->loader->add_action( Fbf_Importer_Cron::FBF_IMPORTER_EVENT_HOURLY_HOOK, $plugin_admin, 'run_hourly_event' );
-
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'add_options_page' );
-
         $this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
-
         $this->loader->add_action( 'admin_post_fbf_importer_run_import', $plugin_admin, 'fbf_importer_run_import' );
-
-
+        $this->loader->add_action( 'admin_post_fbf_importer_process_stock', $plugin_admin, 'fbf_importer_process_stock' );
+        $this->loader->add_action( 'admin_notices', $plugin_admin, 'fbf_importer_admin_notices');
 	}
 
 	/**
@@ -229,5 +223,17 @@ class Fbf_Importer {
 	public function get_version() {
 		return $this->version;
 	}
+
+    /**
+     * Admin notices
+     */
+    public function fbf_importer_admin_notices()
+    {
+        if(isset($_REQUEST['fbf_importer_status'])) {
+            printf('<div class="notice notice-%s is-dismissible">', $_REQUEST['fbf_importer_status']);
+            printf('<p>%s</p>', $_REQUEST['fbf_importer_message']);
+            echo '</div>';
+        }
+    }
 
 }

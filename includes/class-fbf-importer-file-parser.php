@@ -422,7 +422,6 @@ class Fbf_Importer_File_Parser {
         }else{
             return $price;
         }
-
     }
 
     private function get_supplier_cost($item, $price)
