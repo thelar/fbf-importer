@@ -21,7 +21,6 @@
  * @author     Kevin Price-Ward <kevin.price-ward@chapteragency.com>
  */
 class Fbf_Importer_Deactivator {
-
 	/**
 	 * Short Description. (use period)
 	 *
@@ -33,5 +32,4 @@ class Fbf_Importer_Deactivator {
         require_once plugin_dir_path( __FILE__ ) . 'class-fbf-importer-cron.php';
         Fbf_Importer_Cron::unschedule();
 	}
-
 }
