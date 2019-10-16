@@ -276,7 +276,32 @@ class Fbf_Importer_File_Parser {
                     $new_attrs = [];
                     foreach ($attrs as $ak => $av) {
                         if (isset($item[$ak])) {
+
+
                             try {
+                                //If it's a tyre and has a key of 'Load/Speed Rating' need to split it out into Load and Speed
+                                if($ak==='Load/Speed Rating'){
+                                    preg_match('/[a-zA-Z]+/i', $item[$ak], $matches, PREG_OFFSET_CAPTURE);
+                                    if(count($matches)===1){
+                                        $pos = $matches[0][1];
+                                        $load = substr($item[$ak], 0, $pos);
+                                        $speed = substr($item[$ak], $pos);
+
+                                        $new_load_attr = $this->check_attribute($product, 'tyre-load', $load, $wc_attrs);
+                                        $new_attrs['pa_tyre-load'] = $new_load_attr;
+                                        $new_speed_attr = $this->check_attribute($product, 'tyre-speed', $speed, $wc_attrs);
+                                        $new_attrs['pa_tyre-speed'] = $new_speed_attr;
+
+                                    }
+                                }
+
+                                //If it's a tyre and has a key of 'Tyre Size' then we need to add a further attribute for size label which is a combination of {tyre_width}/{tyre_profile}/{tyre_size}
+                                if($ak==='Tyre Size'){
+                                    $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$item['Tyre Profile'], (string)$item['Tyre Size']);
+                                    $new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
+                                    $new_attrs['pa_tyre-size-label'] = $new_size_attr;
+                                }
+
                                 $new_attr = $this->check_attribute($product, $av, $item[$ak], $wc_attrs);
                                 if ($new_attr) {
                                     if (is_array($av)) {
@@ -284,6 +309,9 @@ class Fbf_Importer_File_Parser {
                                     } else {
                                         $new_attrs['pa_' . $av] = $new_attr;
                                     }
+
+
+
                                 } else {
                                     $status['errors'][] = 'Check attribute returned false for ' . $av;
                                 }
