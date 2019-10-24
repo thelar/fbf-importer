@@ -359,10 +359,17 @@ class Fbf_Importer_File_Parser {
 
                     //RSP calculation
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
-                        $this->rsp[] = [
-                            'Variant_Code' => $sku,
-                            'RSP_Inc' => round($this->get_rsp($item, $product_id, $product->get_regular_price()),2)
-                        ];
+                        if((string)$item['Include in Price Match']=='True'){
+                            $this->rsp[] = [
+                                'Variant_Code' => $sku,
+                                'RSP_Inc' => round($this->get_rsp($item, $product_id, $product->get_regular_price()),2)
+                            ];
+                        }else{
+                            $this->rsp[] = [
+                                'Variant_Code' => $sku,
+                                'RSP_Inc' => round((string)$item['RSP Exc Vat'], 2)
+                            ];
+                        }
                     }
 
 
