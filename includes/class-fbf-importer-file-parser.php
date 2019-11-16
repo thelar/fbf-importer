@@ -144,6 +144,7 @@ class Fbf_Importer_File_Parser {
 
         foreach ($this->stock as $item) {
             $sku = (string)$item['Product Code'];
+            $is_variable = false;
 
             $status = [];
 
@@ -192,6 +193,10 @@ class Fbf_Importer_File_Parser {
                             'scope' => 'local'
                         ]
                     ];
+                    //White lettering?
+                    if($item['Tyre White Lettering'] == 'True'){
+                        $is_variable = true;
+                    }
                 } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
                     //It's a Wheel
                     array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
@@ -245,7 +250,12 @@ class Fbf_Importer_File_Parser {
                     if ($product_id = wc_get_product_id_by_sku($sku)) {
                         //Check if we need to update the product
                         $status['action'] = 'Update';
-                        $product = new WC_Product($product_id);
+                        if($is_variable){
+                            $product = new WC_Product_Variable($product_id);
+                        }else{
+                            $product = new WC_Product($product_id);
+                        }
+
 
 
                         //Delete the product id from $all_products so that it doesn't get set to invisible
@@ -256,7 +266,11 @@ class Fbf_Importer_File_Parser {
                     } else {
                         //Create the product
                         $status['action'] = 'Create';
-                        $product = new WC_Product();
+                        if($is_variable){
+                            $product = new WC_Product_Variable();
+                        }else{
+                            $product = new WC_Product();
+                        }
                     }
 
                     $product->set_name($name);
@@ -276,8 +290,6 @@ class Fbf_Importer_File_Parser {
                     $new_attrs = [];
                     foreach ($attrs as $ak => $av) {
                         if (isset($item[$ak])) {
-
-
                             try {
                                 //If it's a tyre and has a key of 'Load/Speed Rating' need to split it out into Load and Speed
                                 if($ak==='Load/Speed Rating'){
@@ -309,9 +321,6 @@ class Fbf_Importer_File_Parser {
                                     } else {
                                         $new_attrs['pa_' . $av] = $new_attr;
                                     }
-
-
-
                                 } else {
                                     $status['errors'][] = 'Check attribute returned false for ' . $av;
                                 }
@@ -320,9 +329,28 @@ class Fbf_Importer_File_Parser {
                             }
                         }
                     }
+
+                    //White lettering
+                    if($is_variable){
+                        //Here if we need to add white lettering option basically
+                        $variable_attribute = new WC_Product_Attribute();
+                        $variable_attribute->set_id(0);
+                        $variable_attribute->set_name('pa_var-white-lettering');
+                        $variable_attribute->set_options([
+                            'no',
+                            'yes'
+                        ]);
+                        $variable_attribute->set_position(0);
+                        $variable_attribute->set_variation(1);
+
+                        $new_attrs['pa_var-white-lettering'] = $variable_attribute;
+                    }
+
                     if (!empty($new_attrs) && !in_array(false, $new_attrs)) {
                         $product->set_attributes($new_attrs);
                     }
+
+
 
                     //Weight and dimensions
                     if (isset($item['Weight KG'])) {
@@ -341,9 +369,23 @@ class Fbf_Importer_File_Parser {
                     //Stock level
                     $this->set_stock($product, $item);
 
+
+
                     if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
                     } else {
+
+                        //White lettering available
+                        if($is_variable){
+                            $variation = new WC_Product_Variation();
+                            $variation->set_regular_price((string)$item['RSP Exc Vat']);
+                            $variation->set_parent_id($product_id);
+                            $variation->set_attributes(array(
+                                'pa_var-white-lettering' => 'no', // -> removed 'pa_' prefix
+                            ));
+                            $var_id = $variation->save();
+                        }
+
                         //Product saved - handle the product image
                         include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
                         if (isset($item['Image name'])) {
