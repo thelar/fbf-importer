@@ -335,15 +335,15 @@ class Fbf_Importer_File_Parser {
                         //Here if we need to add white lettering option basically
                         $variable_attribute = new WC_Product_Attribute();
                         $variable_attribute->set_id(0);
-                        $variable_attribute->set_name('pa_var-white-lettering');
+                        $variable_attribute->set_name('lettering');
                         $variable_attribute->set_options([
-                            'no',
-                            'yes'
+                            'Black Lettering',
+                            'White Lettering'
                         ]);
                         $variable_attribute->set_position(0);
                         $variable_attribute->set_variation(1);
 
-                        $new_attrs['pa_var-white-lettering'] = $variable_attribute;
+                        $new_attrs['lettering'] = $variable_attribute;
                     }
 
                     if (!empty($new_attrs) && !in_array(false, $new_attrs)) {
@@ -377,13 +377,43 @@ class Fbf_Importer_File_Parser {
 
                         //White lettering available
                         if($is_variable){
-                            $variation = new WC_Product_Variation();
-                            $variation->set_regular_price((string)$item['RSP Exc Vat']);
-                            $variation->set_parent_id($product_id);
-                            $variation->set_attributes(array(
-                                'pa_var-white-lettering' => 'no', // -> removed 'pa_' prefix
-                            ));
-                            $var_id = $variation->save();
+                            //Does the product have any children (variants)
+                            $children = $product->get_children();
+                            $white_lettering_attrs = [];
+                            if(is_array($children)){
+                                foreach($children as $child){
+                                    $var = new WC_Product_Variation($child);
+                                    $var_attrs = $var->get_variation_attributes();
+                                    if(array_key_exists('attribute_lettering', $var_attrs)){
+                                        $white_lettering_attrs[] = $var_attrs['attribute_lettering'];
+                                    }
+                                }
+                            }
+
+                            if(!in_array('White Lettering', $white_lettering_attrs)){
+                                $variation_yes = new WC_Product_Variation();
+                                $variation_yes->set_regular_price((string)$item['RSP Exc Vat']);
+                                $variation_yes->set_parent_id($product_id);
+                                $variation_yes->set_attributes(array(
+                                    'lettering' => 'White Lettering', // -> removed 'pa_' prefix
+                                ));
+                                $variation_yes->save();
+                            }
+
+                            if(!in_array('Black Lettering', $white_lettering_attrs)){
+                                $variation_no = new WC_Product_Variation();
+                                $variation_no->set_regular_price((string)$item['RSP Exc Vat']);
+                                $variation_no->set_parent_id($product_id);
+                                $variation_no->set_attributes(array(
+                                    'lettering' => 'Black Lettering', // -> removed 'pa_' prefix
+                                ));
+                                $variation_no->save();
+                            }
+
+                            $default_attrs = [
+                                'lettering' => 'Black Lettering'
+                            ];
+                            update_post_meta($product_id, '_default_attributes', $default_attrs);
                         }
 
                         //Product saved - handle the product image
