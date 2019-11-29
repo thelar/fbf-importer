@@ -33,6 +33,7 @@ class Fbf_Importer_File_Parser {
     private $rsp = [];
     private $min_stock;
     private $flat_fee;
+    private $suppliers;
     private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
     private static $sku_file = 'sku_xml.xml';
 
@@ -43,6 +44,7 @@ class Fbf_Importer_File_Parser {
         $this->filepath = get_home_path() . '../supplier/' . $this->filename;
         $this->xml = new XMLReader();
         $this->doc = new DOMDocument;
+        $this->suppliers = $this->build_suppliers();
         $this->mapping = [
             'VariantCode' => 'Product Code',
             'StockQty' => 'Stock Qty',
@@ -129,6 +131,22 @@ class Fbf_Importer_File_Parser {
             $this->errors[$this->stage] = ['Stock is either empty or not an Array'];
             $this->info[$this->stage]['errors'] = ['Stock is either empty or not an Array'];
         }
+    }
+
+    private function build_suppliers()
+    {
+        $suppliers_a = null;
+        $suppliers = get_posts([
+            'post_type' => 'suppliers',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ]);
+        if(!empty($suppliers)){
+            foreach($suppliers as $supplier_id){
+                $suppliers_a[get_field('supplier_id', $supplier_id)] = get_field('lead_time', $supplier_id);
+            }
+        }
+        return $suppliers_a;
     }
 
     private function import_stock()
@@ -369,8 +387,6 @@ class Fbf_Importer_File_Parser {
                     //Stock level
                     $this->set_stock($product, $item);
 
-
-
                     if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
                     } else {
@@ -415,6 +431,9 @@ class Fbf_Importer_File_Parser {
                             ];
                             update_post_meta($product_id, '_default_attributes', $default_attrs);
                         }
+
+                        //Store the stockist array for lead times
+                        update_post_meta($product_id, '_stockist_lead_times', $this->get_supplier_lead_times($product, $item));
 
                         //Product saved - handle the product image
                         include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
@@ -555,6 +574,32 @@ class Fbf_Importer_File_Parser {
         }else{
             return $cheapest;
         }
+    }
+
+    private function get_supplier_lead_times($product, $item)
+    {
+        $suppliers = [];
+        foreach($item['Suppliers'] as $item_supplier){
+            $supplier_id = (string)$item_supplier['Supplier ID'];
+            $supplier_cost = (string)$item_supplier['Supplier Cost Price'];
+            $supplier_stock = (int)$item_supplier['Supplier Stock Qty'];
+            $supplier_lead_time = (string)$item_supplier['Supplier Lead Time'];
+            $supplier_name = (string)$item_supplier['Supplier Name'];
+
+            if($supplier_stock > 0){
+                if(array_key_exists($supplier_id, $this->suppliers) && !empty($this->suppliers[$supplier_id])){
+                    $supplier_lead_time = $this->suppliers[$supplier_id];
+                }
+
+                $suppliers[$supplier_id] = [
+                    'stock' => $supplier_stock,
+                    'cost' => $supplier_cost,
+                    'lead_time' => $supplier_lead_time,
+                    'name' => $supplier_name
+                ];
+            }
+        }
+        return $suppliers;
     }
 
     private function does_rule_apply($rule, $id)
