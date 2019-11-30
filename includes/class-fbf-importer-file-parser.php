@@ -23,7 +23,8 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'import_stock',
-        'write_rsp_xml'
+        'write_rsp_xml',
+        'collate_suppliers'
     ];
     private $stage;
     public $stock;
@@ -34,6 +35,7 @@ class Fbf_Importer_File_Parser {
     private $min_stock;
     private $flat_fee;
     private $suppliers;
+    private $supplier_stock_errors;
     private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
     private static $sku_file = 'sku_xml.xml';
 
@@ -509,6 +511,12 @@ class Fbf_Importer_File_Parser {
         $xml->save(get_home_path() . '../supplier/' . self::$sku_file);
     }
 
+    private function collate_suppliers()
+    {
+        $e = $this->supplier_stock_errors;
+        return $e;
+    }
+
     private function get_rsp_rules()
     {
         if(!is_plugin_active('fbf-rsp-generator/fbf-rsp-generator.php')){
@@ -579,24 +587,37 @@ class Fbf_Importer_File_Parser {
     private function get_supplier_lead_times($product, $item)
     {
         $suppliers = [];
-        foreach($item['Suppliers'] as $item_supplier){
-            $supplier_id = (string)$item_supplier['Supplier ID'];
-            $supplier_cost = (string)$item_supplier['Supplier Cost Price'];
-            $supplier_stock = (int)$item_supplier['Supplier Stock Qty'];
-            $supplier_lead_time = (string)$item_supplier['Supplier Lead Time'];
-            $supplier_name = (string)$item_supplier['Supplier Name'];
-
-            if($supplier_stock > 0){
-                if(array_key_exists($supplier_id, $this->suppliers) && !empty($this->suppliers[$supplier_id])){
-                    $supplier_lead_time = $this->suppliers[$supplier_id];
+        if(array_key_exists('Suppliers', $item)){
+            foreach($item['Suppliers'] as $item_supplier){
+                $supplier_id = (string)$item_supplier['Supplier ID'];
+                $supplier_cost = (string)$item_supplier['Supplier Cost Price'];
+                if(array_key_exists('Supplier Lead Time', $item_supplier)){
+                    $supplier_lead_time = (string)$item_supplier['Supplier Lead Time'];
+                }else{
+                    $supplier_lead_time = '0';
                 }
+                $supplier_stock = (int)$item_supplier['Supplier Stock Qty'];
+                $supplier_name = (string)$item_supplier['Supplier Name'];
 
-                $suppliers[$supplier_id] = [
-                    'stock' => $supplier_stock,
-                    'cost' => $supplier_cost,
-                    'lead_time' => $supplier_lead_time,
-                    'name' => $supplier_name
-                ];
+                if($supplier_stock > 0){
+                    if(array_key_exists($supplier_id, $this->suppliers) && !empty($this->suppliers[$supplier_id])){
+                        $supplier_lead_time = $this->suppliers[$supplier_id];
+                    }
+
+                    $suppliers[$supplier_id] = [
+                        'stock' => $supplier_stock,
+                        'cost' => $supplier_cost,
+                        'lead_time' => $supplier_lead_time,
+                        'name' => $supplier_name
+                    ];
+
+                    if((int)$supplier_lead_time===0){
+                        $this->supplier_stock_errors[$supplier_id][] = [
+                            'sku' => $product->get_sku(),
+                            'stock' => $supplier_stock,
+                        ];
+                    }
+                }
             }
         }
         return $suppliers;
