@@ -19,12 +19,26 @@ class Fbf_Importer_Product_Image
         if($this->source_image_exists()){
             //if we are creating the product, we only need to worry about creating the product image, otherwise we need to check the existing product image and compare it before processing
             if($product_action=='Create'){
-                $this->return_data['info'][] = 'New product therefore no image exists';
-                $this->product_add_image();
+
+                if($attach_id = $this->is_image_in_media_library()){
+                    $this->return_data['info'][] = 'New product and ' . basename($this->image_filepath) . ' exists with identical filesize';
+                    set_post_thumbnail( $this->product_id, $attach_id );
+                }else{
+                    $this->return_data['info'][] = 'New product and image does not exist in media library';
+                    $this->product_add_image();
+                }
+
             }else if($product_action=='Update'){
                 if(!$this->product_has_image()){
-                    $this->return_data['info'][] = 'Product has no image';
-                    $this->product_add_image();
+
+                    if($attach_id = $this->is_image_in_media_library()){
+                        $this->return_data['info'][] = 'Existing product and ' . $this->image_filepath . ' exists in media library with identical filesize';
+                        set_post_thumbnail( $this->product_id, $attach_id );
+                    }else{
+                        $this->return_data['info'][] = 'Existing product and image does not exist in media library';
+                        $this->product_add_image();
+                    }
+
                 }else{
                     if($this->images_differ()){
                         $this->return_data['info'][] = 'Source image and product image do not match';
@@ -99,6 +113,7 @@ class Fbf_Importer_Product_Image
                 $attachment_data = wp_generate_attachment_metadata( $attachment_id, $upload_file['file'] );
                 wp_update_attachment_metadata( $attachment_id,  $attachment_data );
                 set_post_thumbnail( $parent_post_id, $attachment_id );
+                add_post_meta($attachment_id, '_fbf_imagename', $filename);
                 $this->return_data['info'][] = $filename . ' added to media library';
             }else{
                 $this->return_data['errors'][] = 'wp_insert_attachement error';
@@ -127,20 +142,38 @@ class Fbf_Importer_Product_Image
     private function images_differ()
     {
         $src_filesize = filesize($this->image_filepath);
-        $src_name = preg_replace('/\.[^.]+$/', '', basename($this->image_filepath));
+        //$src_name = preg_replace('/\.[^.]+$/', '', basename($this->image_filepath));
+        $src_name = basename($this->image_filepath);
 
         $attach_id = get_post_thumbnail_id($this->product_id);
-        $attach_title = get_the_title($attach_id);
-        $attach_filepath = wp_get_attachment_image_src(get_post_thumbnail_id($this->product_id), 'full')[0];
-
-        $wp_upload_dir = wp_upload_dir();
-        $attach_name = basename($attach_filepath);
-        $attach_filesize = filesize($wp_upload_dir['path'] . '/' . $attach_name);
+        $attach_title = get_post_meta($attach_id, '_fbf_imagename', true);
+        $attach_filesize = filesize(get_attached_file($attach_id, true));
 
         if($src_filesize!=$attach_filesize||$src_name!=$attach_title){
             return true;
         }else{
             return false;
         }
+    }
+
+    private function is_image_in_media_library()
+    {
+        $args = [
+            'post_type' => 'attachment',
+            'posts_per_page' => -1,
+            'post_status' => 'inherit',
+            'meta_key' => '_fbf_imagename',
+            'meta_value' => basename($this->image_filepath)
+        ];
+        $images = get_posts($args);
+
+        foreach($images as $image){
+            $id = $image->ID;
+            $file = get_attached_file($id);
+            if(filesize($file)===filesize($this->image_filepath)){
+                return $id;
+            }
+        }
+        return false;
     }
 }
