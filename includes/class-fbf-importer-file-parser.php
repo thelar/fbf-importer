@@ -296,7 +296,7 @@ class Fbf_Importer_File_Parser {
                     $product->set_name($name);
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
-                    $product->set_regular_price((string)$item['RSP Exc Vat']);
+                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
                     //Category
                     if ($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])) {
