@@ -198,6 +198,9 @@ class Fbf_Importer_Admin {
         // in this example we're sending an email
 
         //TODO: run the import here and make result available for the email
+        if(date('G')==='7'){
+            $this->fbf_importer_run_import(true); //Run at 7AM
+        }
 
         // components for our email
         $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
@@ -275,6 +278,7 @@ class Fbf_Importer_Admin {
             echo '<th>Start time</th>';
             echo '<th>End time</th>';
             echo '<th>Status</th>';
+            echo '<th>Type</th>';
             echo '<th></th>';
             echo '</tr>';
             echo '</thead>';
@@ -284,6 +288,7 @@ class Fbf_Importer_Admin {
                 printf('<td>%s</td>', $logs[$i]['starttime']);
                 printf('<td>%s</td>', $logs[$i]['endtime']);
                 printf('<td>%s</td>', $logs[$i]['success']?'<span style="color:green;font-weight:bold;">Success</span>':'<span style="color:red;font-weight:bold;">Fail</span>');
+                printf('<td>%s</td>', $logs[$i]['type']);
                 printf('<td><a href="%s">%s</a></td>', get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&log_id=' . $logs[$i]['id'], 'View log');
                 printf('</tr>');
             }
@@ -435,11 +440,11 @@ class Fbf_Importer_Admin {
      *
      * @return boolean
      */
-    public function fbf_importer_run_import()
+    public function fbf_importer_run_import($auto=null)
     {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
         $importer = new Fbf_Importer_File_Parser($this->plugin_name);
-        if($importer->run()===true){
+        if($importer->run($auto)===true){
             //Importer was successful
             var_dump('import done');
         }else{

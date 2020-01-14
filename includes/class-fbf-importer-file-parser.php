@@ -22,7 +22,7 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
-        'import_stock',
+        //'import_stock',
         'write_rsp_xml',
         'collate_suppliers'
     ];
@@ -911,7 +911,7 @@ class Fbf_Importer_File_Parser {
         return $product_attribute;
     }
 
-    public function run()
+    public function run($auto)
     {
         $start = time();
 
@@ -928,15 +928,18 @@ class Fbf_Importer_File_Parser {
             $this->info[$stage]['Execution time'] = $exec_time;
 
             if($this->hasErrors($stage)){ //Any errors at any stage will break the run script immediately
-                $this->log_info($start, false);
-                $this->redirect_to_settings();
+                $this->log_info($start, false, $auto);
+                if(!$auto){
+                    $this->redirect_to_settings();
+                }
                 break;
             }
         }
 
-        $this->log_info($start, true);
-        $this->redirect_to_settings();
-
+        $this->log_info($start, true, $auto);
+        if(!$auto){
+            $this->redirect_to_settings();
+        }
     }
 
     private function redirect_to_settings()
@@ -944,7 +947,7 @@ class Fbf_Importer_File_Parser {
         wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name);
     }
 
-    private function log_info($start_time, $success){
+    private function log_info($start_time, $success, $auto){
         global $wpdb;
         $table_name = $wpdb->prefix . 'fbf_importer_log';
 
@@ -954,6 +957,7 @@ class Fbf_Importer_File_Parser {
                 'starttime' => date('Y-m-d H:i:s', $start_time),
                 'endtime' => date('Y-m-d H:i:s'),
                 'success' => $success,
+                'type' => $auto?'automatic':'manual',
                 'log' => json_encode($this->info)
             ]
         );

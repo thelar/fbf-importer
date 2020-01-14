@@ -48,6 +48,7 @@ class Fbf_Importer_Activator {
           starttime datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           endtime datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           success boolean,
+          type varchar(20),
           log mediumtext NOT NULL,
           PRIMARY KEY  (id)
         ) $charset_collate;";
