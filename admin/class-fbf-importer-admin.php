@@ -198,14 +198,14 @@ class Fbf_Importer_Admin {
         // in this example we're sending an email
 
         //TODO: run the import here and make result available for the email
-        if(date('G')==='7'){
-            $this->fbf_importer_run_import(true); //Run at 7AM
-        }
+        //if(date('G')==='7'){
+        $this->fbf_importer_run_import(true); //Run at 7AM
+        //}
 
         // components for our email
         $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
         $subject = 'Hello from your Cron Job';
-        $message = 'This is a test mail sent by WordPress automatically as per your schedule.';
+        $message = 'This is a test mail sent by WordPress automatically as per your hourly schedule.';
 
         // let's send it
         mail($recepients, $subject, $message);
