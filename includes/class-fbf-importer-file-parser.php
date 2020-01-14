@@ -22,7 +22,7 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
-        //'import_stock',
+        'import_stock',
         'write_rsp_xml',
         'collate_suppliers'
     ];
