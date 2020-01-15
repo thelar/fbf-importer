@@ -199,7 +199,7 @@ class Fbf_Importer_Admin {
 
         //TODO: run the import here and make result available for the email
         //if(date('G')==='7'){
-        $this->fbf_importer_run_import(true); //Run at 7AM
+        //$this->fbf_importer_run_import(true); //Run at 7AM
         //}
 
         // components for our email
