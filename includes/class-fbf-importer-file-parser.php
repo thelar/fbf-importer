@@ -659,7 +659,7 @@ class Fbf_Importer_File_Parser {
     {
         $qty = 0;
         $product->set_manage_stock(true);
-        if(isset($item['Stock Qty'])&&(int) $item['Stock Qty']!==0){
+        if(isset($item['Stock Qty'])&&(int) $item['Stock Qty']>0){
             $qty = (int) $item['Stock Qty'];
             $product->update_meta_data('_instock_at_fbf', 'yes'); //Need this for next day delivery option
         }else{
