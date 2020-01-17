@@ -130,6 +130,11 @@ class Fbf_Importer {
          */
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-cron.php';
 
+        /**
+         * The class responsible for the api.
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-api.php';
+
 	}
 
 	/**
@@ -158,6 +163,7 @@ class Fbf_Importer {
 	 */
 	private function define_admin_hooks() {
 		$plugin_admin = new Fbf_Importer_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_api = new Fbf_Importer_Api($this->get_plugin_name(), $this->get_version());
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
         $this->loader->add_action( Fbf_Importer_Cron::FBF_IMPORTER_EVENT_HOURLY_HOOK, $plugin_admin, 'run_hourly_event' );

@@ -20,11 +20,11 @@ class Fbf_Importer_File_Parser {
     private $stages = [
         'file_exists',
         'file_valid',
-        'build_stock_array',
-        'get_rsp_rules',
-        'import_stock',
-        'write_rsp_xml',
-        'collate_suppliers'
+        //'build_stock_array',
+        //'get_rsp_rules',
+        //'import_stock',
+        //'write_rsp_xml',
+        //'collate_suppliers'
     ];
     private $stage;
     public $stock;
@@ -41,6 +41,7 @@ class Fbf_Importer_File_Parser {
 
     public function __construct($plugin_name)
     {
+        global $wp;
         $this->plugin_name = $plugin_name;
         $this->filename = get_option($this->option_name . '_file');
         $this->filepath = get_home_path() . '../supplier/' . $this->filename;
