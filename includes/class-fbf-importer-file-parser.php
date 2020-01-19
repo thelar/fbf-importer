@@ -20,11 +20,11 @@ class Fbf_Importer_File_Parser {
     private $stages = [
         'file_exists',
         'file_valid',
-        //'build_stock_array',
-        //'get_rsp_rules',
-        //'import_stock',
-        //'write_rsp_xml',
-        //'collate_suppliers'
+        'build_stock_array',
+        'get_rsp_rules',
+        'import_stock',
+        'write_rsp_xml',
+        'collate_suppliers'
     ];
     private $stage;
     public $stock;
