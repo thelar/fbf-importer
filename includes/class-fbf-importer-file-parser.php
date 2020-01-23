@@ -297,7 +297,19 @@ class Fbf_Importer_File_Parser {
                     $product->set_name($name);
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
-                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+
+                    if($is_variable){
+                        $ch = $product->get_children();
+                        if(is_array($ch)){
+                            foreach($ch as $ch_i){
+                                update_post_meta($ch_i, '_price', round((string)$item['RSP Exc Vat'], 2));
+                                update_post_meta($ch_i, '_regular_price', round((string)$item['RSP Exc Vat'], 2));
+                            }
+                        }
+                    }else{
+                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                    }
+
 
                     //Category
                     if ($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])) {
