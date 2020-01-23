@@ -308,7 +308,7 @@ class Fbf_Importer_File_Parser {
                             }
                         }
                     }else{
-                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));``
+                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
                     }
 
 
