@@ -300,6 +300,7 @@ class Fbf_Importer_File_Parser {
 
                     if($is_variable){
                         $ch = $product->get_children();
+                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
                         if(is_array($ch)){
                             foreach($ch as $ch_i){
                                 update_post_meta($ch_i, '_price', round((string)$item['RSP Exc Vat'], 2));
@@ -307,7 +308,7 @@ class Fbf_Importer_File_Parser {
                             }
                         }
                     }else{
-                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));``
                     }
 
 
