@@ -297,9 +297,9 @@ class Fbf_Importer_File_Parser {
                     $product->set_name($name);
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
-                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                    //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
-                    /*if($is_variable){
+                    if($is_variable){
                         $ch = $product->get_children();
                         $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
                         if(is_array($ch)){
@@ -310,7 +310,7 @@ class Fbf_Importer_File_Parser {
                         }
                     }else{
                         $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
-                    }*/
+                    }
 
 
                     //Category
