@@ -500,6 +500,7 @@ class Fbf_Importer_File_Parser {
             $name = $product_to_hide->get_title();
 
             $product_to_hide->set_catalog_visibility('hidden');
+            $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
             if(!$product_to_hide->save()){
                 $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
             }
