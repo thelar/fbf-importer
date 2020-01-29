@@ -48,21 +48,21 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[0]['mapping_array'] = array('1', '2', '39', '41');
         $supplier_array[0]['delimiter'] = ",";*/
 
-        $supplier_array[1]['name'] = "BOND";
+        /*$supplier_array[1]['name'] = "BOND";
         $supplier_array[1]['read_filename'] = "bond.csv";
         $supplier_array[1]['write_filename'] = "bond";
         $supplier_array[1]['cell_1a'] = "BONDINTE";
         $supplier_array[1]['data_start_row'] = "1";
         $supplier_array[1]['mapping_array'] = array('0', '1', '24', '23');
-        $supplier_array[1]['delimiter'] = ",";
+        $supplier_array[1]['delimiter'] = ",";*/
 
-        $supplier_array[2]['name'] = "STAPLETONS";
+        /*$supplier_array[2]['name'] = "STAPLETONS";
         $supplier_array[2]['read_filename'] = "EXP48419S.CSV";
         $supplier_array[2]['write_filename'] = "stapletons";
         $supplier_array[2]['cell_1a'] = "STPTYRES";
         $supplier_array[2]['data_start_row'] = "1";
         $supplier_array[2]['mapping_array'] = array('0', '16', '13', '15');
-        $supplier_array[2]['delimiter'] = ",";
+        $supplier_array[2]['delimiter'] = ",";*/
 
         $supplier_array[3]['name'] = "MALVERN";
         $supplier_array[3]['read_filename'] = "cooper.xls";
@@ -72,21 +72,21 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[3]['mapping_array'] = array('0', '1', '3', '6');
         $supplier_array[3]['delimiter'] = ",";
 
-        $supplier_array[4]['name'] = "DELDO";
+        /*$supplier_array[4]['name'] = "DELDO";
         $supplier_array[4]['read_filename'] = "deldo47545.csv"; //"TOPGEAR.csv";
         $supplier_array[4]['write_filename'] = "deldo";
         $supplier_array[4]['cell_1a'] = "DELDO";
         $supplier_array[4]['data_start_row'] = "2";
         $supplier_array[4]['mapping_array'] = array('0', '19', '16', '15');
-        $supplier_array[4]['delimiter'] = ";";
+        $supplier_array[4]['delimiter'] = ";";*/
 
-        $supplier_array[5]['name'] = "NANKANG";
+        /*$supplier_array[5]['name'] = "NANKANG";
         $supplier_array[5]['read_filename'] = "topgear.CSV";
         $supplier_array[5]['write_filename'] = "nankang";
         $supplier_array[5]['cell_1a'] = "WESTLAND";
         $supplier_array[5]['data_start_row'] = "2";
         $supplier_array[5]['mapping_array'] = array('0', '4', '3', '2');
-        $supplier_array[5]['delimiter'] = ",";
+        $supplier_array[5]['delimiter'] = ",";*/
 
         /*$supplier_array[6]['name'] = "yoko";
         $supplier_array[6]['read_filename'] = "yoko.csv";
@@ -96,21 +96,21 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[6]['mapping_array'] = array('0', '0', '16', '11');
         $supplier_array[6]['delimiter'] = ",";*/
 
-        $supplier_array[7]['name'] = "ets";
+        /*$supplier_array[7]['name'] = "ets";
         $supplier_array[7]['read_filename'] = "edentyresales.csv";
         $supplier_array[7]['write_filename'] = "edentyresales";
         $supplier_array[7]['cell_1a'] = "EDENTYRE";
         $supplier_array[7]['data_start_row'] = "2";
         $supplier_array[7]['mapping_array'] = array('1', '3', '18', '19');
-        $supplier_array[7]['delimiter'] = ",";
+        $supplier_array[7]['delimiter'] = ",";*/
 
-        $supplier_array[8]['name'] = "tyrespot";
+        /*$supplier_array[8]['name'] = "tyrespot";
         $supplier_array[8]['read_filename'] = "4x4TYR03.csv";
         $supplier_array[8]['write_filename'] = "tyrespot";
         $supplier_array[8]['cell_1a'] = "TYRESPOT";
         $supplier_array[8]['data_start_row'] = "2";
         $supplier_array[8]['mapping_array'] = array('1', '2', '38', '40');
-        $supplier_array[8]['delimiter'] = ",";
+        $supplier_array[8]['delimiter'] = ",";*/
 
         /*$supplier_array[9]['name'] = "vandeban";
         $supplier_array[9]['read_filename'] = "565921.csv";
@@ -178,13 +178,13 @@ class Fbf_Importer_Stock_Processor
         //$supplier_array[14]['mapping_array'] = array('0', '0', '10', '10');
         //$supplier_array[14]['delimiter'] = ",";
 
-        $supplier_array[14]['name'] = "Sixonetwo";
+        /*$supplier_array[14]['name'] = "Sixonetwo";
         $supplier_array[14]['read_filename'] = "sixonetwo wheels daily stockist pricing (full spec).csv";
         $supplier_array[14]['write_filename'] = "sixonetwo";
         $supplier_array[14]['cell_1a'] = "SIXONETW";
         $supplier_array[14]['data_start_row'] = "1";
         $supplier_array[14]['mapping_array'] = array('0', '0', '12', '11');
-        $supplier_array[14]['delimiter'] = ",";
+        $supplier_array[14]['delimiter'] = ",";*/
 
         /*$supplier_array[15]['name'] = "deklok";
         $supplier_array[15]['read_filename'] = "deklok47.csv";
@@ -247,7 +247,7 @@ class Fbf_Importer_Stock_Processor
             $write_array = array();
 
             if(pathinfo($supplier_data['read_filename'], PATHINFO_EXTENSION) == 'xls' || pathinfo($supplier_data['read_filename'], PATHINFO_EXTENSION) == 'XLS') {
-                tep_xls_to_csv_single_file(STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['read_filename'], STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['write_filename'] . '.csv');
+                tep_xls_to_csv_single_file(self::STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['read_filename'], self::STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['write_filename'] . '.csv');
                 $supplier_data['read_filename'] = $supplier_data['write_filename'] . '.csv';
             }
 
