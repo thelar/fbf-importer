@@ -17,14 +17,14 @@ class Fbf_Importer_Stock_Processor
     {
 //        var_dump(ABSPATH);
 //        var_dump(__DIR__);
-        file_put_contents(self::UPLOAD_LOCATION . "wheelwright/stockfile_00w0.csv", fopen("http://dealer.wheelwright.co.uk/wheelwright_stock_listing_00w0?token=7xUBeYEaoYPBzV7wVPkd", 'r'));
+        /*file_put_contents(self::UPLOAD_LOCATION . "wheelwright/stockfile_00w0.csv", fopen("http://dealer.wheelwright.co.uk/wheelwright_stock_listing_00w0?token=7xUBeYEaoYPBzV7wVPkd", 'r'));
         file_put_contents(self::UPLOAD_LOCATION . "tyresdirect/tyresdirect.csv", fopen("https://www.dropbox.com/s/t6mxrb7f7m879qh/malatesta%20stock.csv?dl=1", 'r'));
         file_put_contents(self::UPLOAD_LOCATION . "tyresdirect/tyresdirect_fedima.csv", fopen("https://www.dropbox.com/s/p8s6zui83p2xhjk/fedima%20stock.csv?dl=1", 'r'));
 
         file_put_contents(self::UPLOAD_LOCATION . 'tyresdirect/tyresdirect_merged.csv',
             file_get_contents(self::UPLOAD_LOCATION . 'tyresdirect/tyresdirect.csv') .
             file_get_contents(self::UPLOAD_LOCATION . 'tyresdirect/tyresdirect_fedima.csv')
-        );
+        );*/
 
 
         //echo(STOCK_FEED_LOCATION);
@@ -40,13 +40,13 @@ class Fbf_Importer_Stock_Processor
 
         $supplier_array = array();
 
-        $supplier_array[0]['name'] = "MICHELDEVER";
+        /*$supplier_array[0]['name'] = "MICHELDEVER";
         $supplier_array[0]['read_filename'] = "3WHEELWH.CSV";
         $supplier_array[0]['write_filename'] = "3wheelwh";
         $supplier_array[0]['cell_1a'] = "SOUTHAMT";
         $supplier_array[0]['data_start_row'] = "1";
         $supplier_array[0]['mapping_array'] = array('1', '2', '39', '41');
-        $supplier_array[0]['delimiter'] = ",";
+        $supplier_array[0]['delimiter'] = ",";*/
 
         $supplier_array[1]['name'] = "BOND";
         $supplier_array[1]['read_filename'] = "bond.csv";
@@ -64,13 +64,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[2]['mapping_array'] = array('0', '16', '13', '15');
         $supplier_array[2]['delimiter'] = ",";
 
-        /*$supplier_array[3]['name'] = "MALVERN";
+        $supplier_array[3]['name'] = "MALVERN";
         $supplier_array[3]['read_filename'] = "cooper.xls";
         $supplier_array[3]['write_filename'] = "malvern";
         $supplier_array[3]['cell_1a'] = "MALVERN";
         $supplier_array[3]['data_start_row'] = "3";
         $supplier_array[3]['mapping_array'] = array('0', '1', '3', '6');
-        $supplier_array[3]['delimiter'] = ",";*/
+        $supplier_array[3]['delimiter'] = ",";
 
         $supplier_array[4]['name'] = "DELDO";
         $supplier_array[4]['read_filename'] = "deldo47545.csv"; //"TOPGEAR.csv";
@@ -88,13 +88,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[5]['mapping_array'] = array('0', '4', '3', '2');
         $supplier_array[5]['delimiter'] = ",";
 
-        $supplier_array[6]['name'] = "yoko";
+        /*$supplier_array[6]['name'] = "yoko";
         $supplier_array[6]['read_filename'] = "yoko.csv";
         $supplier_array[6]['write_filename'] = "yokohama";
         $supplier_array[6]['cell_1a'] = "YOKOH";
         $supplier_array[6]['data_start_row'] = "2";
         $supplier_array[6]['mapping_array'] = array('0', '0', '16', '11');
-        $supplier_array[6]['delimiter'] = ",";
+        $supplier_array[6]['delimiter'] = ",";*/
 
         $supplier_array[7]['name'] = "ets";
         $supplier_array[7]['read_filename'] = "edentyresales.csv";
@@ -104,21 +104,21 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[7]['mapping_array'] = array('1', '3', '18', '19');
         $supplier_array[7]['delimiter'] = ",";
 
-        /*$supplier_array[8]['name'] = "tyrespot";
+        $supplier_array[8]['name'] = "tyrespot";
         $supplier_array[8]['read_filename'] = "4x4TYR03.csv";
         $supplier_array[8]['write_filename'] = "tyrespot";
         $supplier_array[8]['cell_1a'] = "TYRESPOT";
         $supplier_array[8]['data_start_row'] = "2";
         $supplier_array[8]['mapping_array'] = array('1', '2', '38', '40');
-        $supplier_array[8]['delimiter'] = ",";*/
+        $supplier_array[8]['delimiter'] = ",";
 
-        $supplier_array[9]['name'] = "vandeban";
+        /*$supplier_array[9]['name'] = "vandeban";
         $supplier_array[9]['read_filename'] = "565921.csv";
         $supplier_array[9]['write_filename'] = "vandeban";
         $supplier_array[9]['cell_1a'] = "VANDEBAN";
         $supplier_array[9]['data_start_row'] = "2";
         $supplier_array[9]['mapping_array'] = array('0', '2', '13', '14');
-        $supplier_array[9]['delimiter'] = ";";
+        $supplier_array[9]['delimiter'] = ";";*/
 
 //commented, because we using merged csv with fedima [16]
         //$supplier_array[10]['name'] = "tyresdirect";
@@ -129,30 +129,30 @@ class Fbf_Importer_Stock_Processor
         //$supplier_array[10]['mapping_array'] = array('0', '0', '2', '1');
         //$supplier_array[10]['delimiter'] = ",";
 
-        $supplier_array[10]['name'] = "tyresdirect";
+        /*$supplier_array[10]['name'] = "tyresdirect";
         $supplier_array[10]['read_filename'] = "tyresdirect_merged.csv";
         $supplier_array[10]['write_filename'] = "tyresdirect";
         $supplier_array[10]['cell_1a'] = "TYRDIR";
         $supplier_array[10]['data_start_row'] = "1";
         //$supplier_array[10]['mapping_array'] = array('0', '0', '3', '2');
         $supplier_array[10]['mapping_array'] = array('0', '0', '2', '1');
-        $supplier_array[10]['delimiter'] = ",";
+        $supplier_array[10]['delimiter'] = ",";*/
 
-        $supplier_array[11]['name'] = "WOLFRACE";
+        /*$supplier_array[11]['name'] = "WOLFRACE";
         $supplier_array[11]['read_filename'] = "wolfrace_trade_stock.csv";
         $supplier_array[11]['write_filename'] = "wolfrace";
         $supplier_array[11]['cell_1a'] = "WOLFR";
         $supplier_array[11]['data_start_row'] = "2";
         $supplier_array[11]['mapping_array'] = array('0', '0', '4', '1');
-        $supplier_array[11]['delimiter'] = ",";
+        $supplier_array[11]['delimiter'] = ",";*/
 
-        $supplier_array[12]['name'] = "wheelwright";
+        /*$supplier_array[12]['name'] = "wheelwright";
         $supplier_array[12]['read_filename'] = "stockfile_00w0.csv";
         $supplier_array[12]['write_filename'] = "wheelwright";
         $supplier_array[12]['cell_1a'] = "WHEELWRI";
         $supplier_array[12]['data_start_row'] = "1";
         $supplier_array[12]['mapping_array'] = array('0', '0', '14', '2');
-        $supplier_array[12]['delimiter'] = ",";
+        $supplier_array[12]['delimiter'] = ",";*/
 
         //$supplier_array[13]['name'] = "Reifen";
         //$supplier_array[13]['read_filename'] = "Gundlach.csv";
@@ -162,13 +162,13 @@ class Fbf_Importer_Stock_Processor
         //$supplier_array[13]['mapping_array'] = array('0', '21', '19', '20');
         //$supplier_array[13]['delimiter'] = ";";
 
-        $supplier_array[13]['name'] = "kahn_design";
+        /*$supplier_array[13]['name'] = "kahn_design";
         $supplier_array[13]['read_filename'] = "KahnDesignWheelsStock.csv";
         $supplier_array[13]['write_filename'] = "kahn_design";
         $supplier_array[13]['cell_1a'] = "AKAHN";
         $supplier_array[13]['data_start_row'] = "1";
         $supplier_array[13]['mapping_array'] = array('0', '0', '4', '2');
-        $supplier_array[13]['delimiter'] = ",";
+        $supplier_array[13]['delimiter'] = ",";*/
 
         //$supplier_array[14]['name'] = "Sixonetwo";
         //$supplier_array[14]['read_filename'] = "sixonetwo wheels stocklist.xls";
@@ -180,27 +180,27 @@ class Fbf_Importer_Stock_Processor
 
         $supplier_array[14]['name'] = "Sixonetwo";
         $supplier_array[14]['read_filename'] = "sixonetwo wheels daily stockist pricing (full spec).csv";
-        $supplier_array[14]['write_filename'] = "Sixonetwo";
+        $supplier_array[14]['write_filename'] = "sixonetwo";
         $supplier_array[14]['cell_1a'] = "SIXONETW";
         $supplier_array[14]['data_start_row'] = "1";
         $supplier_array[14]['mapping_array'] = array('0', '0', '12', '11');
         $supplier_array[14]['delimiter'] = ",";
 
-        $supplier_array[15]['name'] = "deklok";
+        /*$supplier_array[15]['name'] = "deklok";
         $supplier_array[15]['read_filename'] = "deklok47.csv";
         $supplier_array[15]['write_filename'] = "deklok";
         $supplier_array[15]['cell_1a'] = "DEKLOK";
         $supplier_array[15]['data_start_row'] = "0";
         $supplier_array[15]['mapping_array'] = array('2', '21', '19', '20');
-        $supplier_array[15]['delimiter'] = ";";
+        $supplier_array[15]['delimiter'] = ";";*/
 
-        $supplier_array[16]['name'] = "etb";
+        /*$supplier_array[16]['name'] = "etb";
         $supplier_array[16]['read_filename'] = "ZTG005.CSV";
         $supplier_array[16]['write_filename'] = "etb";
         $supplier_array[16]['cell_1a'] = "ETBWORCE";
         $supplier_array[16]['data_start_row'] = "1";
         $supplier_array[16]['mapping_array'] = array('1', '2', '39', '41');
-        $supplier_array[16]['delimiter'] = ",";
+        $supplier_array[16]['delimiter'] = ",";*/
 
         // $supplier_array[16]['name'] = "etb";
         // $supplier_array[16]['read_filename'] = "ZTG005.csv";
