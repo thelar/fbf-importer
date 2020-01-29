@@ -81,7 +81,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[4]['delimiter'] = ";";
 
         $supplier_array[5]['name'] = "NANKANG";
-        $supplier_array[5]['read_filename'] = "topgear.CSV";
+        $supplier_array[5]['read_filename'] = "topgear.csv";
         $supplier_array[5]['write_filename'] = "nankang";
         $supplier_array[5]['cell_1a'] = "WESTLAND";
         $supplier_array[5]['data_start_row'] = "2";
