@@ -232,6 +232,14 @@ class Fbf_Importer_Stock_Processor
         //$supplier_array[15]['mapping_array'] = array('0', '0', '2', '1');
         //$supplier_array[15]['delimiter'] = ",";
 
+        $supplier_array[17]['name'] = "tux";
+        $supplier_array[17]['read_filename'] = "stock.csv";
+        $supplier_array[17]['write_filename'] = "tux";
+        $supplier_array[17]['cell_1a'] = "TUX";
+        $supplier_array[17]['data_start_row'] = "1";
+        $supplier_array[17]['mapping_array'] = array('0', '0', '13', '10');
+        $supplier_array[17]['delimiter'] = ",";
+
 
 
         if (!function_exists('tep_xls_to_csv_single_file')){
