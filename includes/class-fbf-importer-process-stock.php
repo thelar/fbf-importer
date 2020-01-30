@@ -198,13 +198,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[15]['mapping_array'] = array('2', '21', '19', '20');
         $supplier_array[15]['delimiter'] = ";";*/
 
-        /*$supplier_array[16]['name'] = "etb";
+        $supplier_array[16]['name'] = "etb";
         $supplier_array[16]['read_filename'] = "ZTG005.CSV";
         $supplier_array[16]['write_filename'] = "etb";
         $supplier_array[16]['cell_1a'] = "ETBWORCE";
         $supplier_array[16]['data_start_row'] = "1";
         $supplier_array[16]['mapping_array'] = array('1', '2', '39', '41');
-        $supplier_array[16]['delimiter'] = ",";*/
+        $supplier_array[16]['delimiter'] = ",";
 
         // $supplier_array[16]['name'] = "etb";
         // $supplier_array[16]['read_filename'] = "ZTG005.csv";
