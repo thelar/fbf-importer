@@ -101,7 +101,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[7]['write_filename'] = "edentyresales";
         $supplier_array[7]['cell_1a'] = "EDENTYRE";
         $supplier_array[7]['data_start_row'] = "2";
-        $supplier_array[7]['mapping_array'] = array('1', '3', '18', '19');
+        $supplier_array[7]['mapping_array'] = array('0', '1', '4', '17');
         $supplier_array[7]['delimiter'] = ",";
 
         $supplier_array[8]['name'] = "tyrespot";
