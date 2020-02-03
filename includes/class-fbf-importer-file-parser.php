@@ -678,14 +678,16 @@ class Fbf_Importer_File_Parser {
         $supplier_qty = 0;
         $product->set_manage_stock(true);
         if(isset($item['Stock Qty'])&&(int) $item['Stock Qty']>0){
-            $fbf_qty+= (int) $item['Stock Qty'];
             $product->update_meta_data('_instock_at_fbf', 'yes'); //Need this for next day delivery option
         }else{
             $product->update_meta_data('_instock_at_fbf', 'no'); //Need this for next day delivery option
-            if(isset($item['Suppliers'])){
-                foreach($item['Suppliers'] as $supplier){
-                    $supplier_qty+= (int) $supplier['Supplier Stock Qty'];
-                }
+        }
+
+        //Stock here - grand total of 4x4 AND all supplier stock
+        $fbf_qty+= (int) $item['Stock Qty'];
+        if(isset($item['Suppliers'])){
+            foreach($item['Suppliers'] as $supplier){
+                $supplier_qty+= (int) $supplier['Supplier Stock Qty'];
             }
         }
         $product->set_stock_quantity($fbf_qty + $supplier_qty);
