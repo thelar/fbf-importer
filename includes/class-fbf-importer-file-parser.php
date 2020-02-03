@@ -674,19 +674,21 @@ class Fbf_Importer_File_Parser {
     private function set_stock(WC_Product $product, $item)
     {
         $qty = 0;
+        $fbf_qty = 0;
+        $supplier_qty = 0;
         $product->set_manage_stock(true);
         if(isset($item['Stock Qty'])&&(int) $item['Stock Qty']>0){
-            $qty = (int) $item['Stock Qty'];
+            $fbf_qty+= (int) $item['Stock Qty'];
             $product->update_meta_data('_instock_at_fbf', 'yes'); //Need this for next day delivery option
         }else{
             $product->update_meta_data('_instock_at_fbf', 'no'); //Need this for next day delivery option
             if(isset($item['Suppliers'])){
                 foreach($item['Suppliers'] as $supplier){
-                    $qty+= (int) $supplier['Supplier Stock Qty'];
+                    $supplier_qty+= (int) $supplier['Supplier Stock Qty'];
                 }
             }
         }
-        $product->set_stock_quantity($qty);
+        $product->set_stock_quantity($fbf_qty + $supplier_qty);
     }
 
     private function get_name($item)
