@@ -44,13 +44,13 @@ class Fbf_Importer_Stock_Processor
 
         $supplier_array = array();
 
-        /*$supplier_array[0]['name'] = "MICHELDEVER";
+        $supplier_array[0]['name'] = "MICHELDEVER";
         $supplier_array[0]['read_filename'] = "3WHEELWH.CSV";
         $supplier_array[0]['write_filename'] = "3wheelwh";
         $supplier_array[0]['cell_1a'] = "SOUTHAMT";
         $supplier_array[0]['data_start_row'] = "1";
         $supplier_array[0]['mapping_array'] = array('1', '2', '39', '41');
-        $supplier_array[0]['delimiter'] = ",";*/
+        $supplier_array[0]['delimiter'] = ",";
 
         $supplier_array[1]['name'] = "BOND";
         $supplier_array[1]['read_filename'] = "bond.csv";
@@ -232,9 +232,9 @@ class Fbf_Importer_Stock_Processor
         //$supplier_array[15]['mapping_array'] = array('0', '0', '2', '1');
         //$supplier_array[15]['delimiter'] = ",";
 
-        $supplier_array[17]['name'] = "tux";
+        $supplier_array[17]['name'] = "COMPAUTO";
         $supplier_array[17]['read_filename'] = "stock.csv";
-        $supplier_array[17]['write_filename'] = "tux";
+        $supplier_array[17]['write_filename'] = "compauto";
         $supplier_array[17]['cell_1a'] = "TUX";
         $supplier_array[17]['data_start_row'] = "1";
         $supplier_array[17]['mapping_array'] = array('0', '0', '13', '10');
