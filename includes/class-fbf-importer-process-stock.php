@@ -235,7 +235,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[17]['name'] = "COMPAUTO";
         $supplier_array[17]['read_filename'] = "stock.csv";
         $supplier_array[17]['write_filename'] = "compauto";
-        $supplier_array[17]['cell_1a'] = "TUX";
+        $supplier_array[17]['cell_1a'] = "COMPAUTO";
         $supplier_array[17]['data_start_row'] = "1";
         $supplier_array[17]['mapping_array'] = array('0', '0', '13', '10');
         $supplier_array[17]['delimiter'] = ",";
