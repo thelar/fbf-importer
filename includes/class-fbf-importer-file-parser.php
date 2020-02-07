@@ -295,6 +295,7 @@ class Fbf_Importer_File_Parser {
                     }
 
                     $product->set_name($name);
+                    $this->add_to_yoast_seo($product_id, '', $name, '');
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
@@ -1010,21 +1011,14 @@ class Fbf_Importer_File_Parser {
     private function add_to_yoast_seo($post_id, $metatitle, $metadesc, $metakeywords){
         $ret = false;
 
-        //construct title
+        $desc = sprintf('Buy %1$s online today with next day delivery available & no fuss return policy. We won\'t be beaten on price.', $metadesc);
 
+        $updated_desc = update_post_meta($post_id, '_yoast_wpseo_metadesc', $desc);
+        //$updated_kw = update_post_meta($post_id, '_yoast_wpseo_metakeywords', $metakeywords);
 
-        // Include plugin library to check if Yoast Seo is presently active
-        include_once( ABSPATH.'panel/includes/plugin.php' );
-        if(is_plugin_active(ABSPATH.'wp-content/plugins/wordpress-seo/wp-seo.php')) {
-            //plugin is activated
-            //$updated_title = update_post_meta($post_id, '_yoast_wpseo_title', $metatitle);
-            $updated_desc = update_post_meta($post_id, '_yoast_wpseo_metadesc', $metadesc);
-            //$updated_kw = update_post_meta($post_id, '_yoast_wpseo_metakeywords', $metakeywords);
-
-            //if($updated_title && $updated_desc && $updated_kw){
-            if($updated_desc){
-                $ret = true;
-            }
+        //if($updated_title && $updated_desc && $updated_kw){
+        if($updated_desc){
+            $ret = true;
         }
         return $ret;
     }
