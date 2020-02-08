@@ -469,8 +469,7 @@ class Fbf_Importer_File_Parser {
                     //RSP calculation
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                         if((string)$item['Include in Price Match']=='True'){
-                            //$rsp_price = round($this->get_rsp($item, $product_id, $product->get_regular_price()) * 1.2,2); //Added vat here
-                            $rsp_price = round($this->get_rsp($item, $product_id, (string)$item['Cost Price']) * 1.2,2);
+                            $rsp_price = round($this->get_rsp($item, $product_id, $product->get_regular_price()) * 1.2,2); //Added vat here
                         }else{
                             $rsp_price = round((string)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
                         }
@@ -556,7 +555,7 @@ class Fbf_Importer_File_Parser {
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
 
-        //if($s_price != $price){
+        if($s_price != $price){
             //1. Loop through the rules
             foreach ($this->rsp_rules as $rule) {
                 if ($this->does_rule_apply($rule, $product_id)) {
@@ -566,7 +565,7 @@ class Fbf_Importer_File_Parser {
                     $pc = 0;
                 }
             }
-        //}
+        }
         if($pc){
             return (($pc/100) * $s_price) + $s_price + $this->flat_fee;
         }else{
