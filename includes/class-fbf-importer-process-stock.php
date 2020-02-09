@@ -13,7 +13,7 @@ class Fbf_Importer_Stock_Processor
         $this->plugin_name = $plugin_name;
     }
 
-    public function process()
+    public function process($redirect=true)
     {
 //        var_dump(ABSPATH);
 //        var_dump(__DIR__);
@@ -429,9 +429,17 @@ class Fbf_Importer_Stock_Processor
         }
 
         if(!empty($this->errors)){
-            wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&fbf_importer_status=error&fbf_importer_message=' . $this->get_errors());
+            if($redirect){
+                wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&fbf_importer_status=error&fbf_importer_message=' . $this->get_errors());
+            }else{
+                return false;
+            }
         }else{
-            wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&fbf_importer_status=success&fbf_importer_message=' . $this->get_success());
+            if($redirect){
+                wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&fbf_importer_status=success&fbf_importer_message=' . $this->get_success());
+            }else{
+                return true;
+            }
         }
     }
 
