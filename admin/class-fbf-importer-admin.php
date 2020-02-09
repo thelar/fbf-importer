@@ -452,7 +452,6 @@ class Fbf_Importer_Admin {
             var_dump($importer->errors);
         }
     }
-
     /**
      * Process the stock feeds
      */
