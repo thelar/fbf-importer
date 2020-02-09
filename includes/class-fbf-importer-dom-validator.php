@@ -30,7 +30,12 @@ class Fbf_Importer_Dom_Validator
     public function __construct()
     {
         $this->handler = new \DOMDocument('1.0', 'utf-8');
-        $this->feedSchema = get_home_path() . '../supplier/stock.xsd';
+        if(function_exists('get_home_path')){
+            $this->feedSchema = get_home_path() . '../supplier/stock.xsd';
+        }else{
+            $this->feedSchema = ABSPATH . '../../supplier/stock.xsd';
+        }
+
     }
     /**
      * @param \libXMLError object $error

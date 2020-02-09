@@ -444,9 +444,9 @@ class Fbf_Importer_Admin {
     {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
         $importer = new Fbf_Importer_File_Parser($this->plugin_name);
-        if($importer->run($auto)===true){
+        if($importer->run($auto)===true){ //Returns true if automatic (cron)
             //Importer was successful
-            var_dump('import done');
+            mail('kevin@code-mill.co.uk', '4x4 Import', 'Import done');
         }else{
             //Importer failed TODO: report the errors
             var_dump($importer->errors);

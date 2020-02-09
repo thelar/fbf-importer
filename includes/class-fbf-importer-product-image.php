@@ -13,7 +13,12 @@ class Fbf_Importer_Product_Image
     {
         $this->product_id = $product_id;
         $this->image_name = $image;
-        $this->image_filepath = get_home_path() . '../supplier/' . self::$source_image_dir . '/' . $this->image_name;
+        if(function_exists('get_home_path')){
+            $this->image_filepath = get_home_path() . '../supplier/' . self::$source_image_dir . '/' . $this->image_name;
+        }else{
+            $this->image_filepath = ABSPATH . '../../supplier/' . self::$source_image_dir . '/' . $this->image_name;
+        }
+
     }
     public function process($product_action){
         if($this->source_image_exists()){

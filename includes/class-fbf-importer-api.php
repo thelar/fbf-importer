@@ -61,9 +61,8 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
 
         // if endpoint
         if ($wp->request == 'api/v2/import') {
-            // Your own function to process end pint
+            // Your own function to process end point
             $this->fbf_importer_run_import('automatic');
-            echo 'import here';
             exit;
         }
     }

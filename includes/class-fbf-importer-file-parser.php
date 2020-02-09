@@ -44,7 +44,13 @@ class Fbf_Importer_File_Parser {
         global $wp;
         $this->plugin_name = $plugin_name;
         $this->filename = get_option($this->option_name . '_file');
-        $this->filepath = get_home_path() . '../supplier/' . $this->filename;
+
+        if(function_exists('get_home_path')){
+            $this->filepath = get_home_path() . '../supplier/' . $this->filename;
+        }else{
+            $this->filepath = ABSPATH . '../../supplier/' . $this->filename;
+        }
+
         $this->xml = new XMLReader();
         $this->doc = new DOMDocument;
         $this->suppliers = $this->build_suppliers();
@@ -469,9 +475,9 @@ class Fbf_Importer_File_Parser {
                     //RSP calculation
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                         if((string)$item['Include in Price Match']=='True'){
-                            $rsp_price = round($this->get_rsp($item, $product_id, $product->get_regular_price()) * 1.2,2); //Added vat here
+                            $rsp_price = round($this->get_rsp($item, $product_id, (float)$product->get_regular_price()) * 1.2,2); //Added vat here
                         }else{
-                            $rsp_price = round((string)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
+                            $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
                         }
                         $this->rsp[] = [
                             'Variant_Code' => $sku,
@@ -523,7 +529,11 @@ class Fbf_Importer_File_Parser {
             $variant->appendChild($RSP_Inc);
             $root->appendChild($variant);
         }
-        $xml->save(get_home_path() . '../supplier/' . self::$sku_file);
+        if(function_exists('get_home_path')){
+            $xml->save(get_home_path() . '../supplier/' . self::$sku_file);
+        }else{
+            $xml->save(ABSPATH . '../../supplier/' . self::$sku_file);
+        }
     }
 
     private function collate_suppliers()
@@ -580,16 +590,18 @@ class Fbf_Importer_File_Parser {
         }
         //Get the cheapest supplier with at least the $min_stock
         $cheapest = null;
-        foreach($item['Suppliers'] as $supplier){
-            if((int) $supplier['Supplier Stock Qty'] >= $this->min_stock){
-                if($cheapest===null){
-                    $cheapest = (float) $supplier['Supplier Cost Price'];
-                }else{
-                    if((float) $supplier['Supplier Cost Price'] < $cheapest){
+        if(isset($item['Suppliers'])){
+            foreach($item['Suppliers'] as $supplier){
+                if((int) $supplier['Supplier Stock Qty'] >= $this->min_stock){
+                    if($cheapest===null){
                         $cheapest = (float) $supplier['Supplier Cost Price'];
+                    }else{
+                        if((float) $supplier['Supplier Cost Price'] < $cheapest){
+                            $cheapest = (float) $supplier['Supplier Cost Price'];
+                        }
                     }
-                }
 
+                }
             }
         }
         if($cheapest===null){
@@ -957,9 +969,13 @@ class Fbf_Importer_File_Parser {
             }
         }
 
+        //If we get to here then the script has run successfully
         $this->log_info($start, true, $auto);
+
         if(!$auto){
             $this->redirect_to_settings();
+        }else{
+            return true;
         }
     }
 
