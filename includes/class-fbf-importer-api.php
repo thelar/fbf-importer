@@ -67,6 +67,9 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
         }else if($wp->request == 'api/v2/index') {
             $this->fbf_importer_relevanssi_index();
             exit;
+        }else if($wp->request == 'api/v2/stock'){
+            $this->fbf_importer_process_stock();
+            exit;
         }
 
 
@@ -76,5 +79,6 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
     {
         add_rewrite_endpoint('importer', EP_PERMALINK | EP_PAGES, true);
         add_rewrite_endpoint('index', EP_PERMALINK | EP_PAGES, true);
+        add_rewrite_endpoint('stock', EP_PERMALINK | EP_PAGES, true);
     }
 }
