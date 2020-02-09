@@ -490,4 +490,10 @@ class Fbf_Importer_Admin {
             echo '</div>';
         }
     }
+
+    public function fbf_importer_relevanssi_index()
+    {
+        relevanssi_build_index(false, false);
+        mail('kevin@code-mill.co.uk', '4x4 Index', 'Indexing done');
+    }
 }

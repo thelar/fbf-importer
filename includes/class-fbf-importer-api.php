@@ -64,11 +64,17 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             // Your own function to process end point
             $this->fbf_importer_run_import('automatic');
             exit;
+        }else if($wp->request == 'api/v2/index') {
+            $this->fbf_importer_relevanssi_index();
+            exit;
         }
+
+
     }
 
     public function add_endpoint()
     {
         add_rewrite_endpoint('importer', EP_PERMALINK | EP_PAGES, true);
+        add_rewrite_endpoint('index', EP_PERMALINK | EP_PAGES, true);
     }
 }
