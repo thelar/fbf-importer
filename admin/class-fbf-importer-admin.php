@@ -446,7 +446,7 @@ class Fbf_Importer_Admin {
         $importer = new Fbf_Importer_File_Parser($this->plugin_name);
         if($importer->run($auto)===true){ //Returns true if automatic (cron)
             //Importer was successful
-            mail('kevin@code-mill.co.uk', '4x4 Import', 'Import done');
+            //mail('kevin@code-mill.co.uk', '4x4 Import', 'Import done');
         }else{
             //Importer failed TODO: report the errors
             var_dump($importer->errors);
@@ -493,6 +493,6 @@ class Fbf_Importer_Admin {
     public function fbf_importer_relevanssi_index()
     {
         relevanssi_build_index(false, false);
-        mail('kevin@code-mill.co.uk', '4x4 Index', 'Indexing done');
+        //mail('kevin@code-mill.co.uk', '4x4 Index', 'Indexing done');
     }
 }

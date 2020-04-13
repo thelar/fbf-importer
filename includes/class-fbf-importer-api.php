@@ -71,9 +71,9 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-process-stock.php';
             $processor = new Fbf_Importer_Stock_Processor($this->plugin_name);
             if($processor->process(false)){
-                mail('kevin@code-mill.co.uk', '4x4 Process Stock', 'Processed stock');
+                //mail('kevin@code-mill.co.uk', '4x4 Process Stock', 'Processed stock');
             }else{
-                mail('kevin@code-mill.co.uk', '4x4 Process Stock', 'Stock not processed');
+                //mail('kevin@code-mill.co.uk', '4x4 Process Stock', 'Stock not processed');
             }
             exit;
         }
