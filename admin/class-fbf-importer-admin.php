@@ -208,7 +208,7 @@ class Fbf_Importer_Admin {
         $message = 'This is a test mail sent by WordPress automatically as per your hourly schedule.';
 
         // let's send it
-        mail($recepients, $subject, $message);
+        //mail($recepients, $subject, $message);
     }
 
     /**
