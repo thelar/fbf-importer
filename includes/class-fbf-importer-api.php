@@ -8,6 +8,7 @@
  * @author     Kevin Price-Ward <kevin.price-ward@chapteragency.com>
  */
 
+
 class Fbf_Importer_Api extends Fbf_Importer_Admin
 {
     /**
@@ -76,9 +77,35 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
                 //mail('kevin@code-mill.co.uk', '4x4 Process Stock', 'Stock not processed');
             }
             exit;
+        }else if($wp->request == 'api/v2/tier1stock'){
+            $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/trade_price_list/Tier 1/';
+            $filename = 'PriceListwithStock.xlsx';
+            $file = $path . $filename;
+            if(file_exists($file)){
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="tier1stock.xlsx"');
+                header('Cache-Control: max-age=0');
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();;
+                $sheet = $reader->load($file);
+                $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($sheet);
+                $objWriter->save('php://output');
+            }
+            exit;
+        }else if($wp->request == 'api/v2/tier2stock') {
+            $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/trade_price_list/Tier 2/';
+            $filename = 'PriceListwithStock.xlsx';
+            $file = $path . $filename;
+            if (file_exists($file)) {
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="tier2stock.xlsx"');
+                header('Cache-Control: max-age=0');
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();;
+                $sheet = $reader->load($file);
+                $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($sheet);
+                $objWriter->save('php://output');
+            }
+            exit;
         }
-
-
     }
 
     public function add_endpoint()
