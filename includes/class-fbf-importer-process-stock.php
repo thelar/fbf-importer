@@ -116,13 +116,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[8]['mapping_array'] = array('1', '2', '38', '40');
         $supplier_array[8]['delimiter'] = ",";
 
-        /*$supplier_array[9]['name'] = "vandeban";
+        $supplier_array[9]['name'] = "vandeban";
         $supplier_array[9]['read_filename'] = "565921.csv";
         $supplier_array[9]['write_filename'] = "vandeban";
         $supplier_array[9]['cell_1a'] = "VANDEBAN";
         $supplier_array[9]['data_start_row'] = "2";
         $supplier_array[9]['mapping_array'] = array('0', '2', '13', '14');
-        $supplier_array[9]['delimiter'] = ";";*/
+        $supplier_array[9]['delimiter'] = ";";
 
 //commented, because we using merged csv with fedima [16]
         //$supplier_array[10]['name'] = "tyresdirect";
