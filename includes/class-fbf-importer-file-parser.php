@@ -87,6 +87,7 @@ class Fbf_Importer_File_Parser {
             'm8' => 'EC Label Wet Grip',
             'm9' => 'Tyre Label Noise',
             'm10' => 'Wheel PCD',
+            'n3' => 'Centre Bore',
             'Length' => 'Length CM',
             'Width' => 'Width CM',
             'Depth' => 'Depth CM',
@@ -247,6 +248,7 @@ class Fbf_Importer_File_Parser {
                         'Wheel Load Rating' => 'wheel-load-rating',
                         'Wheel Offset' => 'wheel-offset',
                         'Wheel PCD' => 'wheel-pcd',
+                        'Centre Bore' => 'centre-bore',
                         'EAN' => [
                             'slug' => 'ean',
                             'scope' => 'local'
