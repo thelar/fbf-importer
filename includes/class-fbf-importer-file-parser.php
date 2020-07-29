@@ -477,7 +477,18 @@ class Fbf_Importer_File_Parser {
                     //RSP calculation
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                         if((string)$item['Include in Price Match']=='True'){
-                            $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
+                            // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
+
+                            if($is_variable){
+                                if(isset($children[0]) && wc_get_product($children[0])!==false){
+                                    $reg_price = wc_get_product($children[0])->get_regular_price();
+                                }else{
+                                    $reg_price = $product->get_price();
+                                }
+                                $rsp_price = round($this->get_rsp($item, $product_id, (float)$reg_price) * 1.2, 2);
+                            }else{
+                                $rsp_price = round($this->get_rsp($item, $product_id, (float)$product->get_regular_price()) * 1.2, 2);
+                            }
                         }else{
                             $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
                         }
