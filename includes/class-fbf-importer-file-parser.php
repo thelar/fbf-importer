@@ -492,13 +492,22 @@ class Fbf_Importer_File_Parser {
                         }else{
                             $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
                         }
-                        $this->rsp[] = [
-                            'Variant_Code' => $sku,
-                            'RSP_Inc' => $rsp_price
-                        ];
+
+                        //Handle zero here - throw a warning and don't add to RSP
+                        if($rsp_price!==(float)0){
+                            $this->rsp[] = [
+                                'Variant_Code' => $sku,
+                                'RSP_Inc' => $rsp_price
+                            ];
+                        }else{
+                            $status['errors'][] = 'RSP was calculated as zero';
+                            //Just set the RSP to the PriceExcVat in the stock file
+                            $this->rsp[] = [
+                                'Variant_Code' => $sku,
+                                'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2)
+                            ];
+                        }
                     }
-
-
                 } else {
                     //Data is not valid
                     $status['data_valid'] = false;
@@ -577,6 +586,10 @@ class Fbf_Importer_File_Parser {
     {
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
+
+        if($s_price === (float)0){
+            return $s_price; //Return with zero so we can catch error
+        }
 
         if($s_price != $price){
             //1. Loop through the rules
