@@ -587,9 +587,9 @@ class Fbf_Importer_File_Parser {
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
 
-//        if($s_price === (float)0){
-//            return $s_price; //Return with zero so we can catch error
-//        }
+        if($s_price === (float)0){
+            return $s_price; //Return with zero so we can catch error
+        }
 
         if($s_price != $price){
             //1. Loop through the rules
@@ -612,7 +612,13 @@ class Fbf_Importer_File_Parser {
     private function get_supplier_cost($item, $price)
     {
         if((int) $item['Stock Qty'] >= 2){
-            return $price;
+            //Here we are going to look at the AvgPrice and put in a failsafe
+            $failsafe = (float)30;
+            if((float)$item['Cost Price'] < $failsafe){
+                return $price;
+            }else{
+                return (float)$item['Cost Price'];
+            }
         }
         //Get the cheapest supplier with at least the $min_stock
         $cheapest = null;
