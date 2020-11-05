@@ -587,9 +587,9 @@ class Fbf_Importer_File_Parser {
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
 
-        if($s_price === (float)0){
-            return $s_price; //Return with zero so we can catch error
-        }
+//        if($s_price === (float)0){
+//            return $s_price; //Return with zero so we can catch error
+//        }
 
         if($s_price != $price){
             //1. Loop through the rules
