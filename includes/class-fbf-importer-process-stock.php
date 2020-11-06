@@ -89,7 +89,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[5]['write_filename'] = "nankang";
         $supplier_array[5]['cell_1a'] = "WESTLAND";
         $supplier_array[5]['data_start_row'] = "2";
-        $supplier_array[5]['mapping_array'] = array('0', '4', '3', '2');
+        $supplier_array[5]['mapping_array'] = array('0', '4', '2', '3');
         $supplier_array[5]['delimiter'] = ",";
 
         /*$supplier_array[6]['name'] = "yoko";
