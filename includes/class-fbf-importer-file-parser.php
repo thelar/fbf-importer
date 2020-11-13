@@ -306,7 +306,7 @@ class Fbf_Importer_File_Parser {
                     $this->add_to_yoast_seo($product_id, '', $name, '');
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
-                    $product->set_backorders('notify');
+                    //$product->set_backorders('notify'); - uncomment on Monday!!
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
                     if($is_variable){
