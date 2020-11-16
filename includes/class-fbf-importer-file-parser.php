@@ -22,6 +22,7 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
+        'rotate_stock_files',
         'import_stock',
         'write_rsp_xml',
         'collate_suppliers'
@@ -38,6 +39,8 @@ class Fbf_Importer_File_Parser {
     private $supplier_stock_errors;
     private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
     private static $sku_file = 'sku_xml.xml';
+    private $save_stock_files_to = 'imported_stock';
+    private $days_to_keep = 7;
 
     public function __construct($plugin_name)
     {
@@ -537,6 +540,32 @@ class Fbf_Importer_File_Parser {
             $stock_status[$sku] = $status;
         }
         $this->info[$this->stage]['stock_status'] = $stock_status;
+    }
+
+    private function rotate_stock_files()
+    {
+        if(function_exists('get_home_path')){
+            $read_path = get_home_path() . '../supplier/' . $this->save_stock_files_to . '/';
+            $save_path = get_home_path() . '../supplier/' . $this->save_stock_files_to . '/imported_' .date('m-d-Y_hia') . '.xml';
+        }else{
+            $read_path = ABSPATH . '../../supplier/' . $this->save_stock_files_to . '/';
+            $save_path = ABSPATH . '../../supplier/' . $this->save_stock_files_to . '/imported_' .date('m-d-Y_hia') .
+                '.xml';
+        }
+        $copy = copy($this->filepath, $save_path);
+
+        //Now delete files older than $days_to_keep
+        if($h = opendir($read_path)){
+            while(false !== ($file = readdir($h))){
+                if (is_file($read_path.$file)){
+                    if (filemtime($read_path.$file) < ( time() - ( $this->days_to_keep * 24 * 60 * 60 ) ) )
+                    {
+                        // Do the deletion
+                        unlink($read_path.$file);
+                    }
+                }
+            }
+        }
     }
 
     private function write_rsp_xml()
