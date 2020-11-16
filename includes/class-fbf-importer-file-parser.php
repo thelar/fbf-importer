@@ -22,8 +22,8 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
-        'rotate_stock_files',
         'import_stock',
+        'rotate_stock_files',
         'write_rsp_xml',
         'collate_suppliers'
     ];
