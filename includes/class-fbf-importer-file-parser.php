@@ -318,6 +318,7 @@ class Fbf_Importer_File_Parser {
                         if(is_array($ch)){
                             foreach($ch as $ch_i){
                                 update_post_meta($ch_i, '_price', round((string)$item['RSP Exc Vat'], 2));
+
                                 update_post_meta($ch_i, '_regular_price', round((string)$item['RSP Exc Vat'], 2));
                             }
                         }
