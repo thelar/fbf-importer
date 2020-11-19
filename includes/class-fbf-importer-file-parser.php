@@ -428,7 +428,12 @@ class Fbf_Importer_File_Parser {
 
                     // Set backordering based on when the product went out of stock - if it's been out of stock for
                     // more than 3 months, no backordering
-                    $product->set_backorders('no'); // For now just set backordering to off
+                    $cat = $item['Wheel Tyre Accessory'];
+                    if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
+                        $product->set_backorders('notify');
+                    }else{
+                        $product->set_backorders('no');
+                    }
 
                     if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
