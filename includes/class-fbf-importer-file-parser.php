@@ -422,6 +422,8 @@ class Fbf_Importer_File_Parser {
                         if(empty($went_out_of_stock_on)){
                             $product->update_meta_data('_went_out_of_stock_on', time());
                         }
+                    }else{
+                        $product->update_meta_data('_went_out_of_stock_on', '');
                     }
 
                     // Set backordering based on when the product went out of stock - if it's been out of stock for
