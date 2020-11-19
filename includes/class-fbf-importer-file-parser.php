@@ -309,7 +309,6 @@ class Fbf_Importer_File_Parser {
                     $this->add_to_yoast_seo($product_id, '', $name, '');
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
-                    $product->set_backorders('no');
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
                     if($is_variable){
@@ -417,6 +416,17 @@ class Fbf_Importer_File_Parser {
 
                     //Stock level
                     $this->set_stock($product, $item);
+
+                    if($product->get_stock_quantity()<=0){
+                        $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
+                        if(empty($went_out_of_stock_on)){
+                            $product->update_meta_data('_went_out_of_stock_on', time());
+                        }
+                    }
+
+                    // Set backordering based on when the product went out of stock - if it's been out of stock for
+                    // more than 3 months, no backordering
+                    $product->set_backorders('no'); // For now just set backordering to off
 
                     if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
