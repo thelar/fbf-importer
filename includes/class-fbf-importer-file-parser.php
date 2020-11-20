@@ -417,23 +417,46 @@ class Fbf_Importer_File_Parser {
                     //Stock level
                     $this->set_stock($product, $item);
 
+                    $cat = $item['Wheel Tyre Accessory'];
                     if($product->get_stock_quantity()<=0){
                         $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
-                        if(empty($went_out_of_stock_on)){
-                            $product->update_meta_data('_went_out_of_stock_on', time());
+
+                        //On first run set it 3 months out of stock if it's a tyre
+                        if($cat=='Tyre'){
+                            $tyre_out_of_stock_date = new DateTime('now');
+                            $tyre_out_of_stock_date->modify('-3 month');
+                            $product->update_meta_data('_went_out_of_stock_on', $tyre_out_of_stock_date->getTimestamp());
+                        }else{
+                            if(empty($went_out_of_stock_on)){
+                                $product->update_meta_data('_went_out_of_stock_on', time());
+                            }
                         }
+
+                        // Set backordering based on when the product went out of stock - if it's been out of stock for
+                        // more than 3 months, no backordering
+                        $now = new DateTime('now');
+                        $stock_date = new DateTime();
+                        $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
+
+                        // Check whether product went out of stock 3 or more months ago
+                        if($stock_date->diff($now)->m >= 3){
+                            $product->set_backorders('no');
+                        }else{
+                            $product->set_backorders('notify');
+                        }
+
                     }else{
                         $product->update_meta_data('_went_out_of_stock_on', '');
+                        $product->set_backorders('notify');
                     }
 
-                    // Set backordering based on when the product went out of stock - if it's been out of stock for
-                    // more than 3 months, no backordering
-                    $cat = $item['Wheel Tyre Accessory'];
-                    if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
+
+
+                    /*if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
                         $product->set_backorders('notify');
                     }else{
                         $product->set_backorders('no');
-                    }
+                    }*/
 
                     if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
