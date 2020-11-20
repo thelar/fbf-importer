@@ -421,15 +421,9 @@ class Fbf_Importer_File_Parser {
                     if($product->get_stock_quantity()<=0){
                         $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
 
-                        //On first run set it 3 months out of stock if it's a tyre
-                        if($cat=='Tyre'){
-                            $tyre_out_of_stock_date = new DateTime('now');
-                            $tyre_out_of_stock_date->modify('-3 month');
-                            $product->update_meta_data('_went_out_of_stock_on', $tyre_out_of_stock_date->getTimestamp());
-                        }else {
-                            if (empty($went_out_of_stock_on)) {
-                                $product->update_meta_data('_went_out_of_stock_on', time());
-                            }
+                        // Only set the out of stock date if it's currently empty
+                        if(empty($went_out_of_stock_on)){
+                            $product->update_meta_data('_went_out_of_stock_on', time());
                         }
 
                         // Set backordering based on when the product went out of stock - if it's been out of stock for
