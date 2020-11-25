@@ -683,7 +683,24 @@ class Fbf_Importer_File_Parser {
             if((float)$item['Cost Price'] < $failsafe){
                 return $price;
             }else{
-                return (float)$item['Cost Price'];
+                //return (float)$item['Cost Price'];
+                // Return cheapest supplier with stock or Avg whichever is less
+                $cheapest = (float)$item['Cost Price'];
+                if(isset($item['Suppliers'])){
+                    foreach($item['Suppliers'] as $supplier){
+                        if((int) $supplier['Supplier Stock Qty'] >= $this->min_stock){
+                            if($cheapest===null){
+                                $cheapest = (float) $supplier['Supplier Cost Price'];
+                            }else{
+                                if((float) $supplier['Supplier Cost Price'] < $cheapest){
+                                    $cheapest = (float) $supplier['Supplier Cost Price'];
+                                }
+                            }
+
+                        }
+                    }
+                }
+                return $cheapest;
             }
         }
         //Get the cheapest supplier with at least the $min_stock
