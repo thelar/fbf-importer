@@ -25,7 +25,7 @@
 
     <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" style="margin-bottom: 1em">
         <input type="hidden" name="action" value="fbf_importer_run_import">
-        <input type="submit" value="Do the import" class="button-primary">
+        <input type="submit" value="Standard Cost & Supplier Stock Qty Import" class="button-primary">
     </form>
 
     <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" style="margin-bottom: 1em">
