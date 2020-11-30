@@ -79,7 +79,7 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             exit;
         }else if($wp->request == 'api/v2/tier1stock'){
             $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/trade_price_list/Tier 1/';
-            $filename = 'PriceListwithStock.csv';
+            $filename = 'PriceListwithStock.xlsx';
             $file = $path . $filename;
             if(file_exists($file)){
                 header('Content-Type: text/csv');
@@ -87,13 +87,19 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
                 header('Cache-Control: max-age=0');
                 $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();;
                 $sheet = $reader->load($file);
-                $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($sheet, "Csv");
+
+                $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($sheet);
+                $writer->setDelimiter(',');
+
+                /*$writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($sheet, "Csv");
+                $writer->setSheetIndex(0);   // Select which sheet to export.
+                $writer->setDelimiter(',');  // Set delimiter.*/
                 $writer->save('php://output');
             }
             exit;
         }else if($wp->request == 'api/v2/tier2stock') {
             $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/trade_price_list/Tier 2/';
-            $filename = 'PriceListwithStock.csv';
+            $filename = 'PriceListwithStock.xlsx';
             $file = $path . $filename;
             if (file_exists($file)) {
                 header('Content-Type: text/csv');
@@ -101,7 +107,13 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
                 header('Cache-Control: max-age=0');
                 $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
                 $sheet = $reader->load($file);
-                $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($sheet, "Csv");
+
+                $writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($sheet);
+                $writer->setDelimiter(',');
+
+                //$writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($sheet, "Csv");
+                //$writer->setSheetIndex(0);   // Select which sheet to export.
+                //$writer->setDelimiter(',');  // Set delimiter.
                 $writer->save('php://output');
                 /*
                 $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Csv($sheet);
