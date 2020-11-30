@@ -87,8 +87,8 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
                 header('Cache-Control: max-age=0');
                 $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();;
                 $sheet = $reader->load($file);
-                $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Csv($sheet);
-                $objWriter->save('php://output');
+                $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($sheet, "Csv");
+                $writer->save('php://output');
             }
             exit;
         }else if($wp->request == 'api/v2/tier2stock') {
@@ -101,8 +101,12 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
                 header('Cache-Control: max-age=0');
                 $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
                 $sheet = $reader->load($file);
+                $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($sheet, "Csv");
+                $writer->save('php://output');
+                /*
                 $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Csv($sheet);
                 $objWriter->save('php://output');
+                */
             }
             exit;
         }
