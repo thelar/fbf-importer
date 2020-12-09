@@ -444,7 +444,12 @@ class Fbf_Importer_File_Parser {
                         $product->set_backorders('notify');
                     }
 
-
+                    // Add tyre shipping class to tyres
+                    if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('tyre')){
+                        if ($item['Wheel Tyre Accessory'] == 'Tyre'){
+                            $product->set_shipping_class_id($shipping_class_id);
+                        }
+                    }
 
                     /*if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
                         $product->set_backorders('notify');
