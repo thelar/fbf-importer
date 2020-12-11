@@ -518,6 +518,14 @@ class Fbf_Importer_File_Parser {
                         }
                     }
 
+                    // Add meta for profit margin
+                    try {
+                        $cost = $this->get_cost($product, $item, $this->min_stock);
+                        update_post_meta($product_id, '_item_cost', $cost);
+                    } catch (Exception $e) {
+                        $status['errors'][] = $e->getMessage();
+                    }
+
                     //RSP calculation
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                         if((string)$item['Include in Price Match']=='True'){
@@ -728,6 +736,44 @@ class Fbf_Importer_File_Parser {
             return $price;
         }else{
             return $cheapest;
+        }
+    }
+
+    private function get_cost($product, $item, $min){
+        $failsafe = 30;
+        if($item['Wheel Tyre Accessory'] != 'Accessories'){
+            $delivery_cost = $this->flat_fee;
+        }else{
+            $delivery_cost = 0;
+        }
+        if((int) $item['Stock Qty'] >= $min){
+            $cost = (float)$item['Cost Price'] + $delivery_cost;
+        }else{
+            //Get the cheapest supplier with at least the $min_stock
+            $cost = null;
+            if(isset($item['Suppliers'])){
+                foreach($item['Suppliers'] as $supplier){
+                    if((int) $supplier['Supplier Stock Qty'] >= $this->min_stock){
+                        if($cost===null){
+                            $cost = (float) $supplier['Supplier Cost Price'];
+                        }else{
+                            if((float) $supplier['Supplier Cost Price'] < $cost){
+                                $cost = (float) $supplier['Supplier Cost Price'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if($cost===null){
+            throw new Exception('Cost is null');
+        }else if($cost == 0){
+            throw new Exception('Cost is 0');
+        }else if($cost < $failsafe){
+            throw new Exception('Cost is lower than ' . $failsafe);
+        }else{
+            return $cost;
         }
     }
 
