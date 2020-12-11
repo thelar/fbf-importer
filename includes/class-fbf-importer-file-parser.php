@@ -521,10 +521,19 @@ class Fbf_Importer_File_Parser {
                     // Add meta for profit margin
                     $cost = $this->get_cost($product, $item, $this->min_stock);
                     if(!empty($cost)){
+                        if($item['Wheel Tyre Accessory'] != 'Accessories'){
+                            $delivery_cost = $this->flat_fee;
+                        }else{
+                            $delivery_cost = 0;
+                        }
                         if($cost['code'] > 1){
                             $status['errors'][] = 'Profit margin error code ' . $cost['code'] . ': ' . $cost['msg'];
+                            if($cost['code'] === 2){
+                                update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
+                            }
                         }else{
                             $status['margin'] = 'Profit margin set to: ' . $cost['cost'];
+                            update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
                         }
                     }else{
                         $status['errors'][] = 'Profit margin error code 0: $cost was empty';
@@ -751,13 +760,8 @@ class Fbf_Importer_File_Parser {
     private function get_cost($product, $item, $min){
         $failsafe = 30;
         $result = [];
-        if($item['Wheel Tyre Accessory'] != 'Accessories'){
-            $delivery_cost = $this->flat_fee;
-        }else{
-            $delivery_cost = 0;
-        }
         if((int) $item['Stock Qty'] >= $min){
-            $cost = (float)$item['Cost Price'] + $delivery_cost;
+            $cost = (float)$item['Cost Price'];
         }else{
             //Get the cheapest supplier with at least the $min_stock
             $cost = null;
