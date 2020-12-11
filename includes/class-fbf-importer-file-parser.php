@@ -519,12 +519,21 @@ class Fbf_Importer_File_Parser {
                     }
 
                     // Add meta for profit margin
-                    try {
-                        $cost = $this->get_cost($product, $item, $this->min_stock);
-                        update_post_meta($product_id, '_item_cost', $cost);
-                    } catch (Exception $e) {
-                        $status['errors'][] = $e->getMessage();
+                    $cost = $this->get_cost($product, $item, $this->min_stock);
+                    if(!empty($cost)){
+                        if($cost['code'] > 1){
+                            $status['errors'][] = 'Profit margin error code ' . $cost['code'] . ': ' . $cost['msg'];
+                        }else{
+                            $status['margin'] = 'Profit margin set to: ' . $cost['cost'];
+                        }
+                    }else{
+                        $status['errors'][] = 'Profit margin error code 0: $cost was empty';
                     }
+
+                    /*    update_post_meta($product_id, '_item_cost', $cost);
+                    } catch (Throwable $e) {
+                        $status['errors'][] = $e->getMessage();
+                    }*/
 
                     //RSP calculation
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
@@ -741,6 +750,7 @@ class Fbf_Importer_File_Parser {
 
     private function get_cost($product, $item, $min){
         $failsafe = 30;
+        $result = [];
         if($item['Wheel Tyre Accessory'] != 'Accessories'){
             $delivery_cost = $this->flat_fee;
         }else{
@@ -767,14 +777,46 @@ class Fbf_Importer_File_Parser {
         }
 
         if($cost===null){
-            throw new Exception('Cost is null');
+            if((float)$item['Cost Price'] == 0){
+                $result = [
+                    'code' => 4,
+                    'cost' => (float)$item['Cost Price'],
+                    'msg' => 'No stock and AvgCost is 0'
+                ];
+            }else if((float)$item['Cost Price'] < $failsafe){
+                $result = [
+                    'code' => 3,
+                    'cost' => (float)$item['Cost Price'],
+                    'msg' => 'No stock and AvgCost is lower than ' . $failsafe
+                ];
+            }else{
+                $result = [
+                    'code' => 2,
+                    'cost' => (float)$item['Cost Price'],
+                    'msg' => 'No stock, using AvgCost - ' . (float)$item['Cost Price']
+                ];
+            }
         }else if($cost == 0){
-            throw new Exception('Cost is 0');
+            $result = [
+                'code' => 5,
+                'cost' => $cost,
+                'msg' => 'In stock, cost is 0'
+            ];
         }else if($cost < $failsafe){
-            throw new Exception('Cost is lower than ' . $failsafe);
+            $result = [
+                'code' => 6,
+                'cost' => $cost,
+                'msg' => 'In stock, cost is lower than ' . $failsafe, ['code' => 1]
+            ];
         }else{
-            return $cost;
+            $result = [
+                'code' => 1,
+                'cost' => $cost,
+                'msg' => 'In stock'
+            ];
         }
+
+        return $result;
     }
 
     private function get_supplier_lead_times($product, $item)
