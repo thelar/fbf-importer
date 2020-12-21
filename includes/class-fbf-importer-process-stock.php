@@ -245,7 +245,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[17]['write_filename'] = "bickers";
         $supplier_array[17]['cell_1a'] = "BICKERS";
         $supplier_array[17]['data_start_row'] = "1";
-        $supplier_array[17]['mapping_array'] = array('0', '0', '6', '7');
+        $supplier_array[17]['mapping_array'] = array('0', '0', '3', '2');
         $supplier_array[17]['delimiter'] = ",";
 
 
