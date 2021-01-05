@@ -777,6 +777,19 @@ class Fbf_Importer_File_Parser {
                         }
                     }
                 }
+
+                //If we get here and $cost is still null look for cheapest supplier but WITHOUT stock
+                if($cost===null){
+                    foreach($item['Suppliers'] as $supplier){
+                        if($cost===null){
+                            $cost = (float) $supplier['Supplier Cost Price'];
+                        }else{
+                            if((float) $supplier['Supplier Cost Price'] < $cost){
+                                $cost = (float) $supplier['Supplier Cost Price'];
+                            }
+                        }
+                    }
+                }
             }
         }
 
