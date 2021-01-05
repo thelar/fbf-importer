@@ -528,9 +528,9 @@ class Fbf_Importer_File_Parser {
                         }
                         if($cost['code'] > 1){
                             $status['errors'][] = 'Profit margin error code ' . $cost['code'] . ': ' . $cost['msg'];
-                            if($cost['code'] === 2){
+                            /*if($cost['code'] === 2){
                                 update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
-                            }
+                            }*/
                         }else{
                             $status['margin'] = 'Profit margin set to: ' . $cost['cost'];
                             update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
@@ -794,24 +794,16 @@ class Fbf_Importer_File_Parser {
         }
 
         if($cost===null){
-            if((float)$item['Cost Price'] == 0){
-                $result = [
-                    'code' => 4,
-                    'cost' => (float)$item['Cost Price'],
-                    'msg' => 'No stock and AvgCost is 0'
-                ];
-            }else{
-                $result = [
-                    'code' => 2,
-                    'cost' => (float)$item['Cost Price'],
-                    'msg' => 'No stock, using AvgCost - ' . (float)$item['Cost Price']
-                ];
-            }
+            $result = [
+                'code' => 4,
+                'cost' => (float)$item['Cost Price'],
+                'msg' => 'Cost is null'
+            ];
         }else if($cost == 0){
             $result = [
                 'code' => 5,
                 'cost' => $cost,
-                'msg' => 'In stock, cost is 0'
+                'msg' => 'Cost is 0'
             ];
         }else{
             $result = [
