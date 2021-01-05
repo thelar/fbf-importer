@@ -758,7 +758,7 @@ class Fbf_Importer_File_Parser {
     }
 
     private function get_cost($product, $item, $min){
-        $failsafe = 30;
+        // $failsafe = 30;
         $result = [];
         if((int) $item['Stock Qty'] >= $min){
             $cost = (float)$item['Cost Price'];
@@ -800,12 +800,6 @@ class Fbf_Importer_File_Parser {
                     'cost' => (float)$item['Cost Price'],
                     'msg' => 'No stock and AvgCost is 0'
                 ];
-            }else if((float)$item['Cost Price'] < $failsafe){
-                $result = [
-                    'code' => 3,
-                    'cost' => (float)$item['Cost Price'],
-                    'msg' => 'No stock and AvgCost is lower than ' . $failsafe
-                ];
             }else{
                 $result = [
                     'code' => 2,
@@ -818,12 +812,6 @@ class Fbf_Importer_File_Parser {
                 'code' => 5,
                 'cost' => $cost,
                 'msg' => 'In stock, cost is 0'
-            ];
-        }else if($cost < $failsafe){
-            $result = [
-                'code' => 6,
-                'cost' => $cost,
-                'msg' => 'In stock, cost is lower than ' . $failsafe, ['code' => 1]
             ];
         }else{
             $result = [
