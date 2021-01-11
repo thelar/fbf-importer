@@ -901,8 +901,10 @@ class Fbf_Importer_File_Parser {
         $product->set_manage_stock(true);
         if(isset($item['Stock Qty'])&&(int) $item['Stock Qty']>0){
             $product->update_meta_data('_instock_at_fbf', 'yes'); //Need this for next day delivery option
+            $product->update_meta_data('_fbf_stock', (int) $item['Stock Qty']);
         }else{
             $product->update_meta_data('_instock_at_fbf', 'no'); //Need this for next day delivery option
+            $product->update_meta_data('_fbf_stock', 0);
         }
 
         //Stock here - grand total of 4x4 AND all supplier stock

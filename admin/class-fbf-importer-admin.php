@@ -453,6 +453,16 @@ class Fbf_Importer_Admin {
         }
     }
     /**
+     * Perform the free stock update
+     *
+     * @return integer or boolean false
+     */
+    public function fbf_free_stock_update()
+    {
+
+    }
+
+    /**
      * Process the stock feeds
      */
     public function fbf_importer_process_stock()
