@@ -451,6 +451,14 @@ class Fbf_Importer_File_Parser {
                         }
                     }
 
+                    // Add spacer shipping class to spacers
+                    if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('spacer')) {
+                        $match = preg_match('/^TTSPACE.*$/i', $sku); //If the SKU begins with TTSPACE
+                        if ($match === 1) {
+                            $product->set_shipping_class_id($shipping_class_id);
+                        }
+                    }
+
                     /*if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
                         $product->set_backorders('notify');
                     }else{
@@ -578,6 +586,9 @@ class Fbf_Importer_File_Parser {
                             ];
                         }
                     }
+
+
+
                 } else {
                     //Data is not valid
                     $status['data_valid'] = false;
