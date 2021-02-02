@@ -83,7 +83,7 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             }
             exit;
         }else if($wp->request == 'api/v2/tier1stock'){
-            $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/trade_price_list/Tier 1/';
+            $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/azure/tier_1_price_list/';
             $filename = 'PriceListwithStock.xlsx';
             $file = $path . $filename;
             if(file_exists($file)){
@@ -103,7 +103,7 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             }
             exit;
         }else if($wp->request == 'api/v2/tier2stock') {
-            $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/trade_price_list/Tier 2/';
+            $path = $_SERVER['DOCUMENT_ROOT'] . '/../supplier/azure/tier_2_price_list/';
             $filename = 'PriceListwithStock.xlsx';
             $file = $path . $filename;
             if (file_exists($file)) {
