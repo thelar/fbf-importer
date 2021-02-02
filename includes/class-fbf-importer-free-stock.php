@@ -1,53 +1,61 @@
 <?php
 
-
 class Fbf_Importer_Free_Stock
 {
     private $plugin_name;
-    private $filename = 'FreeStock.csv';
     private $filepath;
     public function __construct($plugin_name)
     {
-        require ABSPATH . '../../vendor/autoload.php';
+
         $this->plugin_name = $plugin_name;
 
 
         if(function_exists('get_home_path')){
-            $this->filepath = get_home_path() . '../supplier/' . $this->filename;
+            $this->filepath = get_home_path() . '../supplier/azure/free_stock_for_website/';
         }else{
-            $this->filepath = ABSPATH . '../../supplier/' . $this->filename;
+            $this->filepath = ABSPATH . '../../supplier/azure/free_stock_for_website/';
         }
     }
 
     public function run()
     {
-        $free_stock = [];
-        $csv = fopen($this->filepath, 'r');
-        $update_count = 0;
-        if($csv){
-            while(($line = fgetcsv($csv))!==false){
-                $free_stock[$line[0]] = [
-                    'free_stock' => $line[1],
-                    'fbf_stock' => $line[2]
-                ];
-            }
+        $files = array_diff(scandir($this->filepath, SCANDIR_SORT_DESCENDING), array('.', '..'));
+        if(!empty($files)){
+            $newest_file = $files[0];
         }
-        fclose($csv);
 
-        if(!empty($free_stock)){
-            foreach($free_stock as $sk => $sv){
-                $sku = $sk;
-                $free_stock = $sv['free_stock'];
-                $fbf_stock = $sv['fbf_stock'];
+        $xl = $this->filepath . $newest_file;
 
-                if ($product_id = wc_get_product_id_by_sku($sku)) {
-                    $update_free_stock = update_post_meta($product_id, '_free_stock', $free_stock);
-                    $update_fbf_stock = update_post_meta($product_id, '_fbf_stock', $fbf_stock);
-                    $update_stock_time = update_post_meta($product_id, '_fbf_stock_time', time());
-                    $update_count+= 1;
+        $inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify($this->filepath . $newest_file);
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load( $this->filepath . $newest_file );
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+        $update_count = 0;
+
+        if(!empty($rows)){
+            foreach($rows as $sk => $sv){
+                if($sk > 0){
+                    $sku = $sv[0];
+                    $free_stock = $sv[1];
+                    $fbf_stock = $sv[2];
+                    if($fbf_stock > 0){
+                        if ($product_id = wc_get_product_id_by_sku($sku)) {
+                            $update_free_stock = update_post_meta($product_id, '_free_stock', $free_stock);
+                            $update_fbf_stock = update_post_meta($product_id, '_fbf_stock', $fbf_stock);
+                            $update_stock_time = update_post_meta($product_id, '_fbf_stock_time', time());
+                            $update_count+= 1;
+                        }
+                    }
                 }
             }
         }
-        return $update_count;
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success',
+            'files' => $files,
+            'newest' => $newest_file,
+            'updated' => $update_count
+        ]);
     }
 }
