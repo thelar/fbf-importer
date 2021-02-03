@@ -50,6 +50,14 @@ class Fbf_Importer_Free_Stock
             }
         }
 
+        //Delete files other than newest
+        foreach($files as $file){
+            if($file!==$newest_file){
+                //unlink file here
+                unlink($this->filepath . $file);
+            }
+        }
+
         header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
