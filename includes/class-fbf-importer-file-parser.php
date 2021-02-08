@@ -23,6 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'import_stock',
+        'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
         'collate_suppliers'
@@ -169,6 +170,14 @@ class Fbf_Importer_File_Parser {
             'post_type' => 'product',
             'posts_per_page' => -1,
             'fields' => 'ids',
+            'tax_query' => [ //Added to exclude packages
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => ['package'],
+                    'operator' => 'NOT IN'
+                ]
+            ]
         ]);
         $counter = 0;
 
@@ -618,6 +627,30 @@ class Fbf_Importer_File_Parser {
             $stock_status[$sku] = $status;
         }
         $this->info[$this->stage]['stock_status'] = $stock_status;
+    }
+
+    private function update_ebay_packages()
+    {
+        $packages = get_posts([
+            'post_type' => 'product',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [ //Added to exclude packages
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => ['package'],
+                    'operator' => 'IN'
+                ]
+            ]
+        ]);
+
+        //Loop through the packages
+        if(is_plugin_active('fbf-ebay-packages/fbf-ebay-packages.php')){
+            foreach($packages as $package){
+                $update = Fbf_Ebay_Packages_Admin::update_package($package);
+            }
+        }
     }
 
     private function rotate_stock_files()
