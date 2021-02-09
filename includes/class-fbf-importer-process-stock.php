@@ -76,13 +76,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[3]['mapping_array'] = array('0', '1', '3', '6');
         $supplier_array[3]['delimiter'] = ",";
 
-        $supplier_array[4]['name'] = "DELDO";
+        /*$supplier_array[4]['name'] = "DELDO";
         $supplier_array[4]['read_filename'] = "deldo47545.csv"; //"TOPGEAR.csv";
         $supplier_array[4]['write_filename'] = "deldo";
         $supplier_array[4]['cell_1a'] = "DELDO";
         $supplier_array[4]['data_start_row'] = "2";
         $supplier_array[4]['mapping_array'] = array('0', '19', '16', '15');
-        $supplier_array[4]['delimiter'] = ";";
+        $supplier_array[4]['delimiter'] = ";";*/
 
         $supplier_array[5]['name'] = "NANKANG";
         $supplier_array[5]['read_filename'] = "nankang.csv";
@@ -116,13 +116,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[8]['mapping_array'] = array('1', '2', '38', '40');
         $supplier_array[8]['delimiter'] = ",";
 
-        $supplier_array[9]['name'] = "vandeban";
+        /*$supplier_array[9]['name'] = "vandeban";
         $supplier_array[9]['read_filename'] = "565921.csv";
         $supplier_array[9]['write_filename'] = "vandeban";
         $supplier_array[9]['cell_1a'] = "VANDEBAN";
         $supplier_array[9]['data_start_row'] = "2";
         $supplier_array[9]['mapping_array'] = array('0', '2', '13', '14');
-        $supplier_array[9]['delimiter'] = ";";
+        $supplier_array[9]['delimiter'] = ";";*/
 
 //commented, because we using merged csv with fedima [16]
         //$supplier_array[10]['name'] = "tyresdirect";
