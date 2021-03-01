@@ -427,31 +427,39 @@ class Fbf_Importer_File_Parser {
                     $this->set_stock($product, $item);
 
                     $cat = $item['Wheel Tyre Accessory'];
-                    if($product->get_stock_quantity()<=0){
-                        $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
 
-                        // Only set the out of stock date if it's currently empty
-                        if(empty($went_out_of_stock_on)){
-                            $product->update_meta_data('_went_out_of_stock_on', time());
-                        }
+                    //Dan request 1 Mar 2021 - need to exclude Steel wheels from 3 month rule
+                    if((string)$cat=='Steel Wheel'){
+                        $product->set_backorders('notify');
+                        $product->update_meta_data('_went_out_of_stock_on', '');
+                    }else{
+                        if($product->get_stock_quantity()<=0){
+                            $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
 
-                        // Set backordering based on when the product went out of stock - if it's been out of stock for
-                        // more than 3 months, no backordering
-                        $now = new DateTime('now');
-                        $stock_date = new DateTime();
-                        $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
+                            // Only set the out of stock date if it's currently empty
+                            if(empty($went_out_of_stock_on)){
+                                $product->update_meta_data('_went_out_of_stock_on', time());
+                            }
 
-                        // Check whether product went out of stock 3 or more months ago
-                        if($stock_date->diff($now)->m >= 3){
-                            $product->set_backorders('no');
+                            // Set backordering based on when the product went out of stock - if it's been out of stock for
+                            // more than 3 months, no backordering
+                            $now = new DateTime('now');
+                            $stock_date = new DateTime();
+                            $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
+
+                            // Check whether product went out of stock 3 or more months ago
+                            if($stock_date->diff($now)->m >= 3){
+                                $product->set_backorders('no');
+                            }else{
+                                $product->set_backorders('notify');
+                            }
+
                         }else{
+                            $product->update_meta_data('_went_out_of_stock_on', '');
                             $product->set_backorders('notify');
                         }
-
-                    }else{
-                        $product->update_meta_data('_went_out_of_stock_on', '');
-                        $product->set_backorders('notify');
                     }
+
 
                     // Add tyre shipping class to tyres
                     if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('tyre')){
