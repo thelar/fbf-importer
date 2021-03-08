@@ -424,6 +424,7 @@ class Fbf_Importer_File_Parser {
                     }
 
                     //Stock level
+                    $initial_stock = $product->get_stock_quantity();
                     $this->set_stock($product, $item);
 
                     $cat = $item['Wheel Tyre Accessory'];
@@ -432,8 +433,14 @@ class Fbf_Importer_File_Parser {
                     if((string)$cat=='Steel Wheel'){
                         $product->set_backorders('notify');
                         $product->update_meta_data('_went_out_of_stock_on', '');
+
+                        // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
+                        if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
+                            $product->update_meta_data('_back_in_stock_date', time());
+                        }
                     }else{
                         if($product->get_stock_quantity()<=0){
+                            // Here if there isn't stock
                             $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
 
                             // Only set the out of stock date if it's currently empty
@@ -455,8 +462,14 @@ class Fbf_Importer_File_Parser {
                             }
 
                         }else{
+                            // Here if there is stock
                             $product->update_meta_data('_went_out_of_stock_on', '');
                             $product->set_backorders('notify');
+
+                            // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
+                            if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
+                                $product->update_meta_data('_back_in_stock_date', time());
+                            }
                         }
                     }
 
