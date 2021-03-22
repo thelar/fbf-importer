@@ -102,6 +102,12 @@ class Fbf_Importer_File_Parser {
                 'StockQty' => 'Supplier Stock Qty',
                 'LeadTime' => 'Supplier Lead Time',
                 'ID' => 'Supplier ID'
+            ],
+            'PurchaseOrders' => [
+                'Name' => 'PO Name',
+                'PONumber' => 'PO Number',
+                'FreeStockQty' => 'PO Free Stock',
+                'PromisedDate' => 'PO Promised Date'
             ]
         ];
     }
@@ -437,6 +443,12 @@ class Fbf_Importer_File_Parser {
                         // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
                         if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
                             $product->update_meta_data('_back_in_stock_date', time());
+                        }else if($product->get_stock_quantity()<=0){
+                            //Here if there isn't stock
+                            $back_in_stock = $this->get_back_in_stock_date($product, $item);
+                            if($back_in_stock){
+                                $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
+                            }
                         }
                     }else{
                         if($product->get_stock_quantity()<=0){
@@ -460,7 +472,10 @@ class Fbf_Importer_File_Parser {
                             }else{
                                 $product->set_backorders('notify');
                             }
-
+                            $back_in_stock = $this->get_back_in_stock_date($product, $item);
+                            if($back_in_stock){
+                                $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
+                            }
                         }else{
                             // Here if there is stock
                             $product->update_meta_data('_went_out_of_stock_on', '');
@@ -982,6 +997,28 @@ class Fbf_Importer_File_Parser {
         $product->set_stock_quantity($fbf_qty + $supplier_qty);
     }
 
+    private function get_back_in_stock_date(WC_Product $product, $item)
+    {
+        $today = new DateTime();
+        if(array_key_exists('PurchaseOrders', $item)){
+            foreach($item['PurchaseOrders'] as $purchaseOrder){
+                $po_free_stock = (string)$purchaseOrder['PO Free Stock'];
+                $po_date = new DateTime((string)$purchaseOrder['PO Promised Date']);
+
+                if($po_date>$today){
+                    if((!isset($earliest) || $po_date<$earliest) && $po_free_stock >= 5){
+                        $earliest = $po_date;
+                    }
+                }
+            }
+        }
+        if(!is_null($earliest)){
+            return $earliest->format('Y-m-d');
+        }else{
+            return false;
+        }
+    }
+
     private function get_name($item)
     {
         $errors = [];
@@ -1085,20 +1122,35 @@ class Fbf_Importer_File_Parser {
                 $has_data = !empty($data);
 
                 if($has_data||$is_zero){
-                    if($map_key != 'Suppliers'){
+                    if($map_key != 'Suppliers' && $map_key != 'PurchaseOrders'){
                         $item[$map_label] = $node->{$map_key};
                     }else{
-                        //parse suppliers here
-                        $suppliers = $node->xpath('Suppliers/Supplier');
-                        $supplier_mapping = $this->mapping[$map_key];
-                        $supplier_data = [];
-                        foreach($suppliers as $supplier){
-                            foreach($supplier_mapping as $supplier_map_key => $supplier_map_label){
-                                if(!empty($supplier->{$supplier_map_key})){
-                                    $supplier_data[$supplier_map_label] = $supplier->{$supplier_map_key};
+                        if($map_key == 'Suppliers'){
+                            //parse suppliers here
+                            $suppliers = $node->xpath('Suppliers/Supplier');
+                            $supplier_mapping = $this->mapping[$map_key];
+                            $supplier_data = [];
+                            foreach($suppliers as $supplier){
+                                foreach($supplier_mapping as $supplier_map_key => $supplier_map_label){
+                                    if(!empty($supplier->{$supplier_map_key})){
+                                        $supplier_data[$supplier_map_label] = $supplier->{$supplier_map_key};
+                                    }
                                 }
+                                $item[$map_key][] = $supplier_data;
                             }
-                            $item[$map_key][] = $supplier_data;
+                        }else if($map_key == 'PurchaseOrders'){
+                            //parse suppliers here
+                            $purchase_orders = $node->xpath('PurchaseOrders/PurchaseOrder');
+                            $purchase_order_mapping = $this->mapping[$map_key];
+                            $purchase_order_data = [];
+                            foreach($purchase_orders as $purchase_order) {
+                                foreach ($purchase_order_mapping as $purchase_order_map_key => $purchase_order_map_label) {
+                                    if (!empty($purchase_order->{$purchase_order_map_key})) {
+                                        $purchase_order_data[$purchase_order_map_label] = $purchase_order->{$purchase_order_map_key};
+                                    }
+                                }
+                                $item[$map_key][] = $purchase_order_data;
+                            }
                         }
                     }
                 }
