@@ -435,6 +435,12 @@ class Fbf_Importer_File_Parser {
 
                     $cat = $item['Wheel Tyre Accessory'];
 
+                    //Set the back in stock date for everything - this is needed because we need to show it on low stock items as well as out of stock
+                    $back_in_stock = $this->get_back_in_stock_date($product, $item);
+                    if($back_in_stock){
+                        $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
+                    }
+
                     //Dan request 1 Mar 2021 - need to exclude Steel wheels from 3 month rule
                     if((string)$cat=='Steel Wheel'){
                         $product->set_backorders('notify');
@@ -443,12 +449,6 @@ class Fbf_Importer_File_Parser {
                         // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
                         if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
                             $product->update_meta_data('_back_in_stock_date', time());
-                        }else if($product->get_stock_quantity()<=0){
-                            //Here if there isn't stock
-                            $back_in_stock = $this->get_back_in_stock_date($product, $item);
-                            if($back_in_stock){
-                                $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
-                            }
                         }
                     }else{
                         if($product->get_stock_quantity()<=0){
@@ -471,10 +471,6 @@ class Fbf_Importer_File_Parser {
                                 $product->set_backorders('no');
                             }else{
                                 $product->set_backorders('notify');
-                            }
-                            $back_in_stock = $this->get_back_in_stock_date($product, $item);
-                            if($back_in_stock){
-                                $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
                             }
                         }else{
                             // Here if there is stock
