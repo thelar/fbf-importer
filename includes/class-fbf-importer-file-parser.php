@@ -437,8 +437,10 @@ class Fbf_Importer_File_Parser {
 
                     //Set the back in stock date for everything - this is needed because we need to show it on low stock items as well as out of stock
                     $back_in_stock = $this->get_back_in_stock_date($product, $item);
-                    if($back_in_stock){
+                    if($back_in_stock && ((string)$cat=='Steel Wheel'||(string)$cat=='Alloy Wheel')){
                         $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
+                    }else{
+                        $product->update_meta_data('_expected_back_in_stock_date', false);
                     }
 
                     //Dan request 1 Mar 2021 - need to exclude Steel wheels from 3 month rule
