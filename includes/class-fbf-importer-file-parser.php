@@ -468,8 +468,13 @@ class Fbf_Importer_File_Parser {
                             $stock_date = new DateTime();
                             $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
 
-                            // Check whether product went out of stock 3 or more months ago
-                            if($stock_date->diff($now)->m >= 3){
+                            // Check whether product went out of stock 3 or more months ago (6 months for Tyres - requested by Dan 29th March 21)
+                            if((string)$cat=='Tyre'){
+                                $months = 6;
+                            }else{
+                                $months = 3;
+                            }
+                            if($stock_date->diff($now)->m >= $months){
                                 $product->set_backorders('no');
                             }else{
                                 $product->set_backorders('notify');
