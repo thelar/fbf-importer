@@ -322,6 +322,10 @@ class Fbf_Importer_File_Parser {
 
                     $product->set_name($name);
                     $this->add_to_yoast_seo($product_id, '', $name, '');
+
+                    //Set the title in the post meta - this is for eBay Package searches and other searches where we need to filter by both SKU and Title
+                    update_post_meta($product->get_id(), '_fbf_product_title', $name);
+
                     $product->set_sku($sku);
                     $product->set_catalog_visibility('visible');
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
