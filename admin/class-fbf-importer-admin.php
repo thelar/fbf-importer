@@ -203,8 +203,7 @@ class Fbf_Importer_Admin {
         //}
 
         // components for our email
-        //$recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
-        $recepients = 'kevin.price-ward@4x4tyres.co.uk';
+        $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
         $subject = 'Hello from your Cron Job';
         $message = 'This is a test mail sent by WordPress automatically as per your hourly schedule.';
 
