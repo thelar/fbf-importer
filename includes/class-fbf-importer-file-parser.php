@@ -1281,7 +1281,11 @@ class Fbf_Importer_File_Parser {
 
     public function run($auto)
     {
-        $start = time();
+        //$start = time();
+        $dt = new DateTime();
+        $tz = new DateTimeZone("Europe/London");
+        $dt->setTimezone($tz);
+        $start = $dt->getTimestamp();
 
         //Loop through $this->stages executing each in turn and fail and return if any errors occur
         foreach($this->stages as $stage){
@@ -1323,11 +1327,16 @@ class Fbf_Importer_File_Parser {
         global $wpdb;
         $table_name = $wpdb->prefix . 'fbf_importer_log';
 
+        $et = new DateTime();
+        $etz = new DateTimeZone('Europe/London');
+        $et->setTimezone($etz);
+        $end_time = $et->getTimestamp();
+
         $inserted = $wpdb->insert(
             $table_name,
             [
                 'starttime' => date('Y-m-d H:i:s', $start_time),
-                'endtime' => date('Y-m-d H:i:s'),
+                'endtime' => date('Y-m-d H:i:s', $end_time),
                 'success' => $success,
                 'type' => $auto?'automatic':'manual',
                 'log' => json_encode($this->info)
