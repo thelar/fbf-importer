@@ -1331,7 +1331,7 @@ class Fbf_Importer_File_Parser {
         $etz = new DateTimeZone('Europe/London');
         $et->setTimezone($etz);
         $end_time = $et->getTimestamp();
-        $offset = $et->getTimestamp();
+        $offset = $et->getOffset();
 
         $inserted = $wpdb->insert(
             $table_name,
