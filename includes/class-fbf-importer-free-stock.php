@@ -76,6 +76,7 @@ class Fbf_Importer_Free_Stock
     {
         $files = array_diff(scandir($this->tyre_availability_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
         $updates = 0;
+        $log = [];
         if(!empty($files)){
             $newest_file = $files[0];
         }
@@ -108,6 +109,10 @@ class Fbf_Importer_Free_Stock
                                 // This corresponds to similar for wheels in import script - line 443
                                 update_post_meta($product_id, '_expected_back_in_stock_date', $date->format('Y-m-d'));
                                 $updates++;
+                                $log[] = [
+                                    'id' => $product_id,
+                                    'date' => $date->format('Y-m-d')
+                                ];
                             }
                         }
                     }
@@ -116,11 +121,13 @@ class Fbf_Importer_Free_Stock
         }
 
         header('Content-Type: application/json');
+
         echo json_encode([
             'status' => 'success',
             'files' => $files,
             'newest' => $newest_file,
-            'updated' => $updates
+            'updated' => $updates,
+            'log' => $log
         ]);
     }
 }
