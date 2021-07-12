@@ -70,6 +70,11 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             $free_stock = new Fbf_Importer_Free_Stock($this->plugin_name);
             $free_stock->run();
             exit;
+        }else if($wp->request == 'api/v2/tyre_availability'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-free-stock.php';
+            $free_stock = new Fbf_Importer_Free_Stock($this->plugin_name);
+            $free_stock->tyre_availability();
+            exit;
         }else if($wp->request == 'api/v2/index') {
             $this->fbf_importer_relevanssi_index();
             exit;
