@@ -448,7 +448,7 @@ class Fbf_Importer_File_Parser {
                     }
 
                     //Dan request 1 Mar 2021 - need to exclude Steel wheels from 3 month rule
-                    if((string)$cat=='Steel Wheel'){
+                    if((string)$cat=='Steel Wheel' || (string)$cat=='Alloy Wheel'){
                         $product->set_backorders('notify');
                         $product->update_meta_data('_went_out_of_stock_on', '');
 
