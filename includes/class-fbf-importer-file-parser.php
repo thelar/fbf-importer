@@ -101,7 +101,8 @@ class Fbf_Importer_File_Parser {
                 'Cost' => 'Supplier Cost Price',
                 'StockQty' => 'Supplier Stock Qty',
                 'LeadTime' => 'Supplier Lead Time',
-                'ID' => 'Supplier ID'
+                'ID' => 'Supplier ID',
+                'l2' => 'Main Supplier'
             ],
             'PurchaseOrders' => [
                 'Name' => 'PO Name',
@@ -839,6 +840,27 @@ class Fbf_Importer_File_Parser {
             }
         }
         if($cheapest===null){
+            // If we are here then 4x4 have no stock and All suppliers have no stock - look for the main supplier with a cost price that isn't 0 OR if no main supplier, then take average (excluding 0 costs)
+            if(isset($item['Suppliers'])){
+                foreach($item['Suppliers'] as $supplier){
+                    if((string)$supplier['Main Supplier']==='True' && (float)$supplier['Supplier Cost Price'] > 0){
+                        return (float)$supplier['Supplier Cost Price'];
+                    }
+                }
+                // If we are here then no suppliers are marked as the main supplier - get average cost
+                foreach($item['Suppliers'] as $supplier){
+                    $count = 0;
+                    $total = 0;
+                    if((float)$supplier['Supplier Cost Price'] > 0){
+                        $total+= (float)$supplier['Supplier Cost Price'];
+                        $count++;
+                    }
+                    $average = $total/$count;
+                    if($average > 0){
+                        return $average;
+                    }
+                }
+            }
             return $price;
         }else{
             return $cheapest;
