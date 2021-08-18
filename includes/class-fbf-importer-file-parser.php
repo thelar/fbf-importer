@@ -75,9 +75,11 @@ class Fbf_Importer_File_Parser {
             'c9' => 'Tyre Size',
             'c10' => 'Tyre Profile',
             'n2' => 'List on eBay',
+            'l1' => 'Three Peaks',
             'l3' => 'Tyre XL',
             'l4' => 'Tyre White Lettering',
             'l5' => 'Tyre Runflat',
+            'l6' => 'Mud Snow',
             'l8' => '360 Degree Photo',
             'l9' => 'Wheel TUV',
             'l10' => 'Include in Price Match',
@@ -238,7 +240,9 @@ class Fbf_Importer_File_Parser {
                         'EAN' => [
                             'slug' => 'ean',
                             'scope' => 'local'
-                        ]
+                        ],
+                        'Three Peaks' => 'three-peaks',
+                        'Mud Snow' => 'mud-snow',
                     ];
                     //White lettering?
                     if($item['Tyre White Lettering'] == 'True'){
