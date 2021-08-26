@@ -108,13 +108,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[7]['mapping_array'] = array('0', '1', '4', '17');
         $supplier_array[7]['delimiter'] = ",";
 
-        $supplier_array[8]['name'] = "tyrespot";
+        /*$supplier_array[8]['name'] = "tyrespot";
         $supplier_array[8]['read_filename'] = "4x4TYR03.csv";
         $supplier_array[8]['write_filename'] = "tyrespot";
         $supplier_array[8]['cell_1a'] = "TYRESPOT";
         $supplier_array[8]['data_start_row'] = "2";
         $supplier_array[8]['mapping_array'] = array('1', '2', '38', '40');
-        $supplier_array[8]['delimiter'] = ",";
+        $supplier_array[8]['delimiter'] = ",";*/
 
         /*$supplier_array[9]['name'] = "vandeban";
         $supplier_array[9]['read_filename'] = "565921.csv";
