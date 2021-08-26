@@ -240,13 +240,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[17]['mapping_array'] = array('0', '0', '13', '10');
         $supplier_array[17]['delimiter'] = ",";
 
-        $supplier_array[17]['name'] = "BICKERS";
-        $supplier_array[17]['read_filename'] = "trade_prices.csv";
-        $supplier_array[17]['write_filename'] = "bickers";
-        $supplier_array[17]['cell_1a'] = "BICKERS";
-        $supplier_array[17]['data_start_row'] = "1";
-        $supplier_array[17]['mapping_array'] = array('0', '0', '3', '2');
-        $supplier_array[17]['delimiter'] = ",";
+        $supplier_array[18]['name'] = "BICKERS";
+        $supplier_array[18]['read_filename'] = "trade_prices.csv";
+        $supplier_array[18]['write_filename'] = "bickers";
+        $supplier_array[18]['cell_1a'] = "BICKERS";
+        $supplier_array[18]['data_start_row'] = "1";
+        $supplier_array[18]['mapping_array'] = array('0', '0', '3', '2');
+        $supplier_array[18]['delimiter'] = ",";
 
 
 
