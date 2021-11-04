@@ -28,51 +28,58 @@ class Fbf_Importer_Free_Stock
     public function run()
     {
         $files = array_diff(scandir($this->filepath, SCANDIR_SORT_DESCENDING), array('.', '..'));
-        if(!empty($files)){
-            $newest_file = $files[0];
+
+        foreach($files as $cfile){
+            if (is_file($this->filepath.$cfile) && filectime($this->filepath.$cfile) > $latest_ctime){
+                $latest_ctime = filectime($this->filepath.$cfile);
+                $latest_filename = $cfile;
+                $newest_file = $this->filepath . $latest_filename;
+            }
         }
 
-        $xl = $this->filepath . $newest_file;
+        if(!is_null($newest_file)){
+            $xl = $this->filepath . $newest_file;
 
-        $inputFileType = IOFactory::identify($this->filepath . $newest_file);
-        $spreadsheet = IOFactory::load( $this->filepath . $newest_file );
-        $worksheet = $spreadsheet->getActiveSheet();
-        $rows = $worksheet->toArray();
-        $update_count = 0;
+            $inputFileType = IOFactory::identify($this->filepath . $newest_file);
+            $spreadsheet = IOFactory::load( $this->filepath . $newest_file );
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+            $update_count = 0;
 
-        if(!empty($rows)){
-            foreach($rows as $sk => $sv){
-                if($sk > 0){
-                    $sku = $sv[0];
-                    $free_stock = $sv[1];
-                    $fbf_stock = $sv[2];
-                    if($fbf_stock > 0){
-                        if ($product_id = wc_get_product_id_by_sku($sku)) {
-                            $update_free_stock = update_post_meta($product_id, '_free_stock', $free_stock);
-                            $update_fbf_stock = update_post_meta($product_id, '_fbf_stock', $fbf_stock);
-                            $update_stock_time = update_post_meta($product_id, '_fbf_stock_time', time());
-                            $update_count+= 1;
+            if(!empty($rows)){
+                foreach($rows as $sk => $sv){
+                    if($sk > 0){
+                        $sku = $sv[0];
+                        $free_stock = $sv[1];
+                        $fbf_stock = $sv[2];
+                        if($fbf_stock > 0){
+                            if ($product_id = wc_get_product_id_by_sku($sku)) {
+                                $update_free_stock = update_post_meta($product_id, '_free_stock', $free_stock);
+                                $update_fbf_stock = update_post_meta($product_id, '_fbf_stock', $fbf_stock);
+                                $update_stock_time = update_post_meta($product_id, '_fbf_stock_time', time());
+                                $update_count+= 1;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        //Delete files other than newest
-        foreach($files as $file){
-            if($file!==$newest_file){
-                //unlink file here
-                unlink($this->filepath . $file);
+            //Delete files other than newest
+            foreach($files as $file){
+                if($file!==$newest_file){
+                    //unlink file here
+                    unlink($this->filepath . $file);
+                }
             }
-        }
 
-        header('Content-Type: application/json');
-        echo json_encode([
-            'status' => 'success',
-            'files' => $files,
-            'newest' => $newest_file,
-            'updated' => $update_count
-        ]);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status' => 'success',
+                'files' => $files,
+                'newest' => $newest_file,
+                'updated' => $update_count
+            ]);
+        }
     }
 
     public function tyre_availability()
@@ -80,11 +87,16 @@ class Fbf_Importer_Free_Stock
         $files = array_diff(scandir($this->tyre_availability_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
         $updates = 0;
         $log = [];
-        if(!empty($files)){
-            $newest_file = $files[0];
+
+        foreach($files as $cfile){
+            if (is_file($this->tyre_availability_fp.$cfile) && filectime($this->tyre_availability_fp.$cfile) > $latest_ctime){
+                $latest_ctime = filectime($this->tyre_availability_fp.$cfile);
+                $latest_filename = $cfile;
+                $newest_file = $this->tyre_availability_fp . $latest_filename;
+            }
         }
 
-        if($newest_file){
+        if(!is_null($newest_file)){
             $xl = $this->tyre_availability_fp . $newest_file;
             $inputFileType = IOFactory::identify($this->tyre_availability_fp . $newest_file);
             $spreadsheet = IOFactory::load( $this->tyre_availability_fp . $newest_file );
@@ -139,11 +151,17 @@ class Fbf_Importer_Free_Stock
         $files = array_diff(scandir($this->shortnames_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
         $updates = 0;
         $log = [];
-        if(!empty($files)){
-            $newest_file = $files[0];
+
+        foreach($files as $cfile){
+            if (is_file($this->shortnames_fp.$cfile) && filectime($this->shortnames_fp.$cfile) > $latest_ctime){
+                $latest_ctime = filectime($this->shortnames_fp.$cfile);
+                $latest_filename = $cfile;
+                $newest_file = $this->shortnames_fp . $latest_filename;
+            }
         }
 
-        if($newest_file) {
+
+        if(!is_null($newest_file)) {
             $xl = $this->shortnames_fp . $newest_file;
             $inputFileType = IOFactory::identify($this->shortnames_fp . $newest_file);
             $spreadsheet = IOFactory::load($this->shortnames_fp . $newest_file);
