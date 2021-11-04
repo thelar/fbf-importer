@@ -33,7 +33,7 @@ class Fbf_Importer_Free_Stock
             if (is_file($this->filepath.$cfile) && filectime($this->filepath.$cfile) > $latest_ctime){
                 $latest_ctime = filectime($this->filepath.$cfile);
                 $latest_filename = $cfile;
-                $newest_file = $this->filepath . $latest_filename;
+                $newest_file = $latest_filename;
             }
         }
 
@@ -92,7 +92,7 @@ class Fbf_Importer_Free_Stock
             if (is_file($this->tyre_availability_fp.$cfile) && filectime($this->tyre_availability_fp.$cfile) > $latest_ctime){
                 $latest_ctime = filectime($this->tyre_availability_fp.$cfile);
                 $latest_filename = $cfile;
-                $newest_file = $this->tyre_availability_fp . $latest_filename;
+                $newest_file = $latest_filename;
             }
         }
 
@@ -156,7 +156,7 @@ class Fbf_Importer_Free_Stock
             if (is_file($this->shortnames_fp.$cfile) && filectime($this->shortnames_fp.$cfile) > $latest_ctime){
                 $latest_ctime = filectime($this->shortnames_fp.$cfile);
                 $latest_filename = $cfile;
-                $newest_file = $this->shortnames_fp . $latest_filename;
+                $newest_file = $latest_filename;
             }
         }
 
