@@ -18,7 +18,6 @@ class Fbf_Importer_Product_Image
         }else{
             $this->image_filepath = ABSPATH . '../../supplier/' . self::$source_image_dir . '/' . $this->image_name;
         }
-
     }
     public function process($product_action){
         if($this->source_image_exists()){
@@ -27,6 +26,7 @@ class Fbf_Importer_Product_Image
 
                 if($attach_id = $this->is_image_in_media_library()){
                     $this->return_data['info'][] = 'New product and ' . basename($this->image_filepath) . ' exists with identical filesize';
+                    $this->return_data['attach_id'] = $attach_id;
                     set_post_thumbnail( $this->product_id, $attach_id );
                 }else{
                     $this->return_data['info'][] = 'New product and image does not exist in media library';
@@ -38,6 +38,7 @@ class Fbf_Importer_Product_Image
 
                     if($attach_id = $this->is_image_in_media_library()){
                         $this->return_data['info'][] = 'Existing product and ' . $this->image_filepath . ' exists in media library with identical filesize';
+                        $this->return_data['attach_id'] = $attach_id;
                         set_post_thumbnail( $this->product_id, $attach_id );
                     }else{
                         $this->return_data['info'][] = 'Existing product and image does not exist in media library';
@@ -120,6 +121,7 @@ class Fbf_Importer_Product_Image
                 set_post_thumbnail( $parent_post_id, $attachment_id );
                 add_post_meta($attachment_id, '_fbf_imagename', $filename);
                 $this->return_data['info'][] = $filename . ' added to media library';
+                $this->return_data['attach_id'] = $attachment_id;
             }else{
                 $this->return_data['errors'][] = 'wp_insert_attachement error';
             }

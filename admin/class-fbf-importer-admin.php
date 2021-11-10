@@ -382,6 +382,9 @@ class Fbf_Importer_Admin {
         if(isset($info->image_info)){
             $status.= $this->get_image_info($info->image_info);
         }
+        if(isset($info->gallery_info)){
+            $status.= $this->get_image_gallery_info($info->image_info);
+        }
         return $status;
     }
 
@@ -389,6 +392,11 @@ class Fbf_Importer_Admin {
     {
         $string = implode(', ', $info);
         return ', PRODUCT IMAGE: ' . $string;
+    }
+
+    private function get_image_gallery_info($info)
+    {
+        return ', PRODUCT IMAGE GALLERY: ' . $info;
     }
 
     private function print_stock_import_status($stock_status)
