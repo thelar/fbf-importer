@@ -488,6 +488,17 @@ class Fbf_Importer_Admin {
     }
 
     /**
+     * Remove Variable Products - White Lettering
+     */
+    public function fbf_importer_remove_variations()
+    {
+        echo 'remove variable products here';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-remove-variable-products.php';
+        $engine = new Fbf_Importer_Remove_Variable_Products($this->plugin_name);
+        $engine->run();
+    }
+
+    /**
      * Perform the data clean
      *
      * @return boolean

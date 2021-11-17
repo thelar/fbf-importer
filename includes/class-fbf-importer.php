@@ -171,6 +171,7 @@ class Fbf_Importer {
         $this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
         $this->loader->add_action( 'admin_post_fbf_importer_run_import', $plugin_admin, 'fbf_importer_run_import' );
         $this->loader->add_action( 'admin_post_fbf_importer_process_stock', $plugin_admin, 'fbf_importer_process_stock' );
+        $this->loader->add_action( 'admin_post_fbf_importer_remove_variations', $plugin_admin, 'fbf_importer_remove_variations' );
         $this->loader->add_action( 'admin_notices', $plugin_admin, 'fbf_importer_admin_notices');
 	}
 
