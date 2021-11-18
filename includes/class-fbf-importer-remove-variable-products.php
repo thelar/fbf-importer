@@ -13,6 +13,7 @@ class Fbf_Importer_Remove_Variable_Products
     public $stock;
     public $stock_num;
     private $mapping;
+    private $variable_products = [];
 
     public function __construct($plugin_name)
     {
@@ -143,9 +144,81 @@ class Fbf_Importer_Remove_Variable_Products
         return $item;
     }
 
+    private function get_variable_products()
+    {
+        foreach($this->stock as $item){
+            $sku = (string)$item['Product Code'];
+            if ($product_id = wc_get_product_id_by_sku($sku)) {
+                $product = wc_get_product($product_id);
+
+                if($product && $product->is_type('variable')){
+                    $this->variable_products[] = $product_id;
+                }
+            }
+        }
+    }
+
     public function run()
     {
         $this->build_stock_array();
-        echo 'Remove variable products running';
+        $this->get_variable_products();
+
+        $results = [];
+
+        if(!empty($this->variable_products)){
+            // Delete them here
+            foreach($this->variable_products as $del_id){
+                $results[$del_id] = $this->wh_deleteProduct($del_id, true);
+            }
+        }
+
+        var_dump($results);
+    }
+
+    /**
+     * Method to delete Woo Product - https://stackoverflow.com/questions/46874020/delete-a-product-by-id-using-php-in-woocommerce
+     *
+     * @param int $id the product ID.
+     * @param bool $force true to permanently delete product, false to move to trash.
+     * @return \WP_Error|boolean
+     */
+    public function wh_deleteProduct($id, $force = false)
+    {
+        $product = wc_get_product($id);
+
+        if(empty($product))
+            return new WP_Error(999, sprintf(__('No %s is associated with #%d', 'woocommerce'), 'product', $id));
+
+        // If we're forcing, then delete permanently.
+        if($force){
+            if ($product->is_type('variable')){
+                foreach ($product->get_children() as $child_id){
+                    $child = wc_get_product($child_id);
+                    $child->delete(true);
+                }
+            }elseif ($product->is_type('grouped')){
+                foreach ($product->get_children() as $child_id){
+                    $child = wc_get_product($child_id);
+                    $child->set_parent_id(0);
+                    $child->save();
+                }
+            }
+
+            $product->delete(true);
+            $result = $product->get_id() > 0 ? false : true;
+        }else{
+            $product->delete();
+            $result = 'trash' === $product->get_status();
+        }
+
+        if(!$result){
+            return new WP_Error(999, sprintf(__('This %s cannot be deleted', 'woocommerce'), 'product'));
+        }
+
+        // Delete parent product transients.
+        if ($parent_id = wp_get_post_parent_id($id)){
+            wc_delete_product_transients($parent_id);
+        }
+        return true;
     }
 }
