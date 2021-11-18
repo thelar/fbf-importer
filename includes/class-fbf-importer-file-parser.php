@@ -22,6 +22,7 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
+        'duplicate_white_lettering_items',
         'import_stock',
         'update_ebay_packages',
         'rotate_stock_files',
@@ -208,9 +209,10 @@ class Fbf_Importer_File_Parser {
             ];
             if (isset($item['Wheel Tyre Accessory'])) {
                 if ($item['Wheel Tyre Accessory'] == 'Tyre') {
-                    //Its a Tyre
+                    //It's a Tyre
+                    $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
                     array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Quality', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
-                    $name = sprintf('%s/%s/%s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+                    $name = sprintf('%s/%s/%s %s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '', $white_lettering == 'True' ? 'White Lettering':'', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
                     $attrs = [
                         'Load/Speed Rating' => 'load-speed-rating',
                         'Brand Name' => 'brand-name',
@@ -244,10 +246,6 @@ class Fbf_Importer_File_Parser {
                         'Three Peaks' => 'three-peaks',
                         'Mud Snow' => 'mud-snow',
                     ];
-                    //White lettering?
-                    if($item['Tyre White Lettering'] == 'True'){
-                        $is_variable = true;
-                    }
                 } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
                     //It's a Wheel
                     array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
@@ -302,13 +300,7 @@ class Fbf_Importer_File_Parser {
                     if ($product_id = wc_get_product_id_by_sku($sku)) {
                         //Check if we need to update the product
                         $status['action'] = 'Update';
-                        if($is_variable){
-                            $product = new WC_Product_Variable($product_id);
-                        }else{
-                            $product = new WC_Product($product_id);
-                        }
-
-
+                        $product = new WC_Product($product_id);
 
                         //Delete the product id from $all_products so that it doesn't get set to invisible
                         $key = array_search($product->get_id(), $products_to_hide);
@@ -318,11 +310,7 @@ class Fbf_Importer_File_Parser {
                     } else {
                         //Create the product
                         $status['action'] = 'Create';
-                        if($is_variable){
-                            $product = new WC_Product_Variable();
-                        }else{
-                            $product = new WC_Product();
-                        }
+                        $product = new WC_Product();
                     }
 
                     $product->set_name($name);
@@ -335,19 +323,8 @@ class Fbf_Importer_File_Parser {
                     $product->set_catalog_visibility('visible');
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
-                    if($is_variable){
-                        $ch = $product->get_children();
-                        $product->set_price(round((string)$item['RSP Exc Vat'], 2));
-                        if(is_array($ch)){
-                            foreach($ch as $ch_i){
-                                update_post_meta($ch_i, '_price', round((string)$item['RSP Exc Vat'], 2));
-
-                                update_post_meta($ch_i, '_regular_price', round((string)$item['RSP Exc Vat'], 2));
-                            }
-                        }
-                    }else{
-                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
-                    }
+                    //Price
+                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
 
                     //Category
@@ -400,22 +377,6 @@ class Fbf_Importer_File_Parser {
                                 $status['errors'][] = $e->getMessage();
                             }
                         }
-                    }
-
-                    //White lettering
-                    if($is_variable){
-                        //Here if we need to add white lettering option basically
-                        $variable_attribute = new WC_Product_Attribute();
-                        $variable_attribute->set_id(0);
-                        $variable_attribute->set_name('lettering');
-                        $variable_attribute->set_options([
-                            'Black Lettering',
-                            'White Lettering'
-                        ]);
-                        $variable_attribute->set_position(0);
-                        $variable_attribute->set_variation(1);
-
-                        $new_attrs['lettering'] = $variable_attribute;
                     }
 
                     if (!empty($new_attrs) && !in_array(false, $new_attrs)) {
@@ -533,48 +494,6 @@ class Fbf_Importer_File_Parser {
                     if (!$product_id = $product->save()) {
                         $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
                     } else {
-
-                        //White lettering available
-                        if($is_variable){
-                            //Does the product have any children (variants)
-                            $children = $product->get_children();
-                            $white_lettering_attrs = [];
-                            if(is_array($children)){
-                                foreach($children as $child){
-                                    $var = new WC_Product_Variation($child);
-                                    $var_attrs = $var->get_variation_attributes();
-                                    if(array_key_exists('attribute_lettering', $var_attrs)){
-                                        $white_lettering_attrs[] = $var_attrs['attribute_lettering'];
-                                    }
-                                }
-                            }
-
-                            if(!in_array('White Lettering', $white_lettering_attrs)){
-                                $variation_yes = new WC_Product_Variation();
-                                $variation_yes->set_regular_price((string)$item['RSP Exc Vat']);
-                                $variation_yes->set_parent_id($product_id);
-                                $variation_yes->set_attributes(array(
-                                    'lettering' => 'White Lettering', // -> removed 'pa_' prefix
-                                ));
-                                $variation_yes->save();
-                            }
-
-                            if(!in_array('Black Lettering', $white_lettering_attrs)){
-                                $variation_no = new WC_Product_Variation();
-                                $variation_no->set_regular_price((string)$item['RSP Exc Vat']);
-                                $variation_no->set_parent_id($product_id);
-                                $variation_no->set_attributes(array(
-                                    'lettering' => 'Black Lettering', // -> removed 'pa_' prefix
-                                ));
-                                $variation_no->save();
-                            }
-
-                            $default_attrs = [
-                                'lettering' => 'Black Lettering'
-                            ];
-                            update_post_meta($product_id, '_default_attributes', $default_attrs);
-                        }
-
                         //Store the stockist array for lead times
                         update_post_meta($product_id, '_stockist_lead_times', $this->get_supplier_lead_times($product, $item));
 
@@ -667,8 +586,6 @@ class Fbf_Importer_File_Parser {
                             ];
                         }
                     }
-
-
 
                 } else {
                     //Data is not valid
@@ -787,6 +704,56 @@ class Fbf_Importer_File_Parser {
             $this->min_stock = get_option('fbf_rsp_generator_min_stock');
             $this->flat_fee = get_option('fbf_rsp_generator_flat_fee');
         }
+    }
+
+    /**
+     * Loops through all stock items looking for white lettering flag and duplicates the item. SKU is appended with '_white' as is the image reference. White lettering flag is reset to false on original item and set to true on duplicated item
+     */
+    private function duplicate_white_lettering_items()
+    {
+        // Loop through stock items
+        $white_lettering_items = [];
+        $i = 0;
+        foreach($this->stock as $item){
+            if($item['Tyre White Lettering'] == 'True'){
+                $white_lettering_item = $item;
+                $this->stock[$i]['Tyre White Lettering'] = 'False';
+
+                $image_name = $item['Image name'] ?? null;
+                if(!is_null($image_name)){
+                    $image_ref = strrpos((string) $image_name, '.');
+                    $new_img = substr_replace((string) $image_name, '_white', $image_ref, 0);
+                }
+
+
+                $white_lettering_items[] = [
+                    'index' => $i,
+                    'item' => $white_lettering_item,
+                    'sku' => $item['Product Code'],
+                    'sku_white' => $item['Product Code'] . '_white',
+                    'image' => $image_name,
+                    'image_white' => $new_img,
+                ];
+
+            }
+            $i++;
+        }
+
+        // Merge back together
+        $x = 0;
+        foreach($white_lettering_items as $insert_item){
+
+            $new_item = $this->stock[$insert_item['index']];
+            $new_item['Product Code'] = $insert_item['sku_white'];
+            $new_item['Image name'] = $insert_item['image_white'];
+            $new_item['Tyre White Lettering'] = 'True';
+
+            //$this->stock[$insert_item['index']]['Product Code'] = &$insert_item['sku'];
+            //$this->stock[$insert_item['index']]['Image name'] = $insert_item['image'];
+            array_splice($this->stock, $insert_item['index'] + $x, 0, [$new_item]);
+            $x++;
+        }
+        $this->stock_num = count($this->stock);
     }
 
     public static function fbf_importer_file_parser_read_xml()
@@ -1179,10 +1146,12 @@ class Fbf_Importer_File_Parser {
                 $has_data = !empty($data);
 
                 if($has_data||$is_zero){
-                    if($map_key != 'Suppliers' && $map_key != 'PurchaseOrders'){
+                    if($map_key != 'Suppliers' && $map_key != 'PurchaseOrders' && $map_key != 'VariantCode' && $map_key != 'c8' && $map_key != 'l4'){
                         $item[$map_label] = $node->{$map_key};
                     }else{
-                        if($map_key == 'Suppliers'){
+                        if($map_key == 'VariantCode' || $map_key == 'c8' || $map_key == 'l4'){
+                            $item[$map_label] = (string) $node->{$map_key};
+                        }else if($map_key == 'Suppliers'){
                             //parse suppliers here
                             $suppliers = $node->xpath('Suppliers/Supplier');
                             $supplier_mapping = $this->mapping[$map_key];
