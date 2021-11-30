@@ -120,6 +120,7 @@ class Fbf_Importer_Free_Stock
                                 } catch (Exception $e) {
                                     $log[] = [
                                         'id' => $product_id,
+                                        'row' => $ri,
                                         'error' => $e->getMessage()
                                     ];
                                 }
