@@ -1,6 +1,7 @@
 <?php
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Calculation\Functions;
 
 class Fbf_Importer_Free_Stock
 {
@@ -87,6 +88,7 @@ class Fbf_Importer_Free_Stock
         $files = array_diff(scandir($this->tyre_availability_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
         $updates = 0;
         $log = [];
+        $latest_ctime = 0;
 
         foreach($files as $cfile){
             if (is_file($this->tyre_availability_fp.$cfile) && filectime($this->tyre_availability_fp.$cfile) > $latest_ctime){
@@ -98,6 +100,7 @@ class Fbf_Importer_Free_Stock
 
         if(!is_null($newest_file)){
             $xl = $this->tyre_availability_fp . $newest_file;
+            Functions::setReturnDateType(Functions::RETURNDATE_PHP_OBJECT);
             $inputFileType = IOFactory::identify($this->tyre_availability_fp . $newest_file);
             $spreadsheet = IOFactory::load( $this->tyre_availability_fp . $newest_file );
             $worksheet = $spreadsheet->getActiveSheet();
@@ -118,7 +121,10 @@ class Fbf_Importer_Free_Stock
                                 try {
                                     $date = new DateTime($row[10]);
                                 } catch (Exception $e) {
-                                    exit(1);
+                                    $log[] = [
+                                        'id' => $product_id,
+                                        'error' => $e->getMessage()
+                                    ];
                                 }
 
                                 // This corresponds to similar for wheels in import script - line 443
