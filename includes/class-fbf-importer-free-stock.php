@@ -118,7 +118,10 @@ class Fbf_Importer_Free_Stock
                                 try {
                                     $date = new DateTime($row[10]);
                                 } catch (Exception $e) {
-                                    exit(1);
+                                    $log[] = [
+                                        'id' => $product_id,
+                                        'error' => $e->getMessage()
+                                    ];
                                 }
 
                                 // This corresponds to similar for wheels in import script - line 443
