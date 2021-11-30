@@ -118,7 +118,12 @@ class Fbf_Importer_Free_Stock
                                 try {
                                     $date = new DateTime($row[10]);
                                 } catch (Exception $e) {
-                                    exit(1);
+                                    $log[] = [
+                                        'id' => $product_id,
+                                        'row' => $ri,
+                                        'error' => $e->getMessage(),
+                                        'sku' => $row[$col]
+                                    ];
                                 }
 
                                 // This corresponds to similar for wheels in import script - line 443
@@ -126,10 +131,13 @@ class Fbf_Importer_Free_Stock
                                 $updates++;
                                 $log[] = [
                                     'id' => $product_id,
-                                    'date' => $date->format('Y-m-d')
+                                    'date' => $date->format('Y-m-d'),
+                                    'row' => $ri,
+                                    'sku' => $row[$col]
                                 ];
                             }
                         }
+                        break; // break out of foreach
                     }
                 }
             }
