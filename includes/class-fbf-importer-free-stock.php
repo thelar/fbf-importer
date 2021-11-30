@@ -121,7 +121,8 @@ class Fbf_Importer_Free_Stock
                                     $log[] = [
                                         'id' => $product_id,
                                         'row' => $ri,
-                                        'error' => $e->getMessage()
+                                        'error' => $e->getMessage(),
+                                        'sku' => $row[$col]
                                     ];
                                 }
 
@@ -130,7 +131,9 @@ class Fbf_Importer_Free_Stock
                                 $updates++;
                                 $log[] = [
                                     'id' => $product_id,
-                                    'date' => $date->format('Y-m-d')
+                                    'date' => $date->format('Y-m-d'),
+                                    'row' => $ri,
+                                    'sku' => $row[$col]
                                 ];
                             }
                         }
