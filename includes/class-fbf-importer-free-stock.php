@@ -134,6 +134,7 @@ class Fbf_Importer_Free_Stock
                                 ];
                             }
                         }
+                        break; // break out of foreach
                     }
                 }
             }
