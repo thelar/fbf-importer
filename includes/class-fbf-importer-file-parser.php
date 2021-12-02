@@ -267,7 +267,15 @@ class Fbf_Importer_File_Parser {
                 } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
                     //It's a Wheel
                     array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
-                    $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '', isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
+
+                    if(isset($item['Model Name'])){
+                        $model_title = (string) $item['Model Name'];
+                        $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel'], '', $model_title);
+                    }else{
+                        $model_title = '';
+                    }
+
+                    $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
