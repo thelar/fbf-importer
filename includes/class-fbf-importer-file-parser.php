@@ -94,6 +94,7 @@ class Fbf_Importer_File_Parser {
             'm8' => 'EC Label Wet Grip',
             'm9' => 'Tyre Label Noise',
             'm10' => 'Wheel PCD',
+            'n1' => 'Ebay Price',
             'n3' => 'Centre Bore',
             'Length' => 'Length CM',
             'Width' => 'Width CM',
@@ -409,7 +410,14 @@ class Fbf_Importer_File_Parser {
                         $product->set_attributes($new_attrs);
                     }
 
-
+                    //Ebay price
+                    if (isset($item['Ebay Price'])){
+                        if((float) $item['Ebay Price'] > 0){
+                            update_post_meta($product_id, '_ebay_price', (float) $item['Ebay Price']);
+                        }else{
+                            delete_post_meta($product_id, '_ebay_price');
+                        }
+                    }
 
                     //Weight and dimensions
                     if (isset($item['Weight KG'])) {
