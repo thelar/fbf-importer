@@ -647,7 +647,7 @@ class Fbf_Importer_File_Parser {
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        foreach($products_to_hide as $hide_id){
+        /*foreach($products_to_hide as $hide_id){
             $status = [];
             $status['action'] = 'Hide';
             $product_to_hide = new WC_Product($hide_id);
@@ -661,7 +661,7 @@ class Fbf_Importer_File_Parser {
                 $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
             }
             $stock_status[$sku] = $status;
-        }
+        }*/
         $this->info[$this->stage]['stock_status'] = $stock_status;
     }
 
