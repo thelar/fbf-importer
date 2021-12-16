@@ -548,16 +548,16 @@ class Fbf_Importer_File_Parser {
                                     $status['image_info'] = $main_image_result['info'];
                                 }
 
-                                $image_gallery_result = $image_gallery->gallery_process($status['action']);
+                                //$image_gallery_result = $image_gallery->gallery_process($status['action']);
 
                                 /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
                                 $image_import = $image_handler->process($status['action']);*/
-                                if (isset($image_gallery_result['errors'])) {
+                                /*if (isset($image_gallery_result['errors'])) {
                                     $status['errors'] = $image_gallery_result['errors'];
                                 } else {
                                     $status['gallery_info'] = $image_gallery_result['gallery_info'];
                                     $status['gallery_image_info'] = $image_gallery_result['gallery_image_info'];
-                                }
+                                }*/
                             }
                         }
 
