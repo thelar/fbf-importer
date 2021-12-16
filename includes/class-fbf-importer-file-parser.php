@@ -627,6 +627,17 @@ class Fbf_Importer_File_Parser {
                     $status['errors'] = $data_valid;
                 }
                 $stock_status[$sku] = $status;
+
+                ob_start();
+                print('<pre>');
+                print_r($status);
+                print('</pre>');
+                $email = ob_get_clean();
+
+                $headers = "MIME-Version: 1.0\r\n";
+                $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                wp_mail('kevin@code-mill.co.uk', 'Import status:' . $sku, $email, $headers);
+
             } else {
                 $status['errors'][] = 'Category is not set';
             }
