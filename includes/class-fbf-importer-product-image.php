@@ -8,6 +8,7 @@ class Fbf_Importer_Product_Image
     private $image_filepath;
     private static $source_image_dir = 'images';
     private $return_data = [];
+    private $filesizes = [];
 
     public function __construct($product_id, $image)
     {
@@ -47,7 +48,7 @@ class Fbf_Importer_Product_Image
 
                 }else{
                     if($this->images_differ()){
-                        $this->return_data['info'][] = 'Source image and product image do not match';
+                        $this->return_data['info'][] = sprintf('Source image and product image do not match - src_filesize: %s, attach_filesize: %s', $this->filesizes['src_filesize'], $this->filesizes['attach_filesize']);
                         if($this->delete_attachment()){
                             $this->product_add_image();
                         }else{
@@ -155,6 +156,11 @@ class Fbf_Importer_Product_Image
         $attach_id = get_post_thumbnail_id($this->product_id);
         $attach_title = get_post_meta($attach_id, '_fbf_imagename', true);
         $attach_filesize = filesize(get_attached_file($attach_id, true));
+
+        $this->filesizes = [
+            'attach_filesize' => $attach_filesize,
+            'src_filesize' => $src_filesize
+        ];
 
         if($src_filesize!=$attach_filesize||$src_name!=$attach_title){
             return true;
