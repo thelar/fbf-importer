@@ -194,454 +194,456 @@ class Fbf_Importer_File_Parser {
 
 
         foreach ($this->stock as $item) {
-            $sku = (string)$item['Product Code'];
-            $is_variable = false;
+            if($counter < 1){
+                $sku = (string)$item['Product Code'];
+                $is_variable = false;
 
-            $status = [];
+                $status = [];
 
-            //VALIDATION - First check the necessary data is present:
-            $mandatory = [
-                'Brand Name',
-                'Model Name',
-                'Wheel Tyre Accessory',
-                'List on eBay',
-                'Include in Price Match',
-                //'EAN' - doesn't seem to be present on all items
-            ];
-            if (isset($item['Wheel Tyre Accessory'])) {
-                if ($item['Wheel Tyre Accessory'] == 'Tyre') {
-                    //It's a Tyre
-                    $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
-                    array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Quality', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
+                //VALIDATION - First check the necessary data is present:
+                $mandatory = [
+                    'Brand Name',
+                    'Model Name',
+                    'Wheel Tyre Accessory',
+                    'List on eBay',
+                    'Include in Price Match',
+                    //'EAN' - doesn't seem to be present on all items
+                ];
+                if (isset($item['Wheel Tyre Accessory'])) {
+                    if ($item['Wheel Tyre Accessory'] == 'Tyre') {
+                        //It's a Tyre
+                        $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
+                        array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Quality', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
 
-                    // Remove the word Tyres from the brand name if it's there
-                    if(isset($item['Brand Name'])){
-                        $brand_title = str_ireplace(' tyres', '', (string) $item['Brand Name']);
-                    }else{
-                        $brand_title = '';
-                    }
-
-                    // Search for Tyre type in Model name and remove if found
-                    if(isset($item['Tyre Type'])){
-                        $model_title = (string) $item['Model Name'];
-                        $type_search = ' ' . strtolower((string)$item['Tyre Type']);
-                        $model_title = str_ireplace($type_search, '', $model_title);
-                    }else{
-                        $model_title = '';
-                    }
-
-                    $name = sprintf('%s/%s/%s %s %s %s %s %s Tyre', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', $brand_title, $model_title, isset($item['Tyre Type']) ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
-
-                    $attrs = [
-                        'Load/Speed Rating' => 'load-speed-rating',
-                        'Brand Name' => 'brand-name',
-                        'Model Name' => 'model-name',
-                        'Tyre Type' => 'tyre-type',
-                        'Tyre Quality' => 'tyre-quality',
-                        'Tyre Vehicle Specific' => 'tyre-vehicle-specific',
-                        'Tyre Width' => 'tyre-width',
-                        'Tyre Size' => 'tyre-size',
-                        'Tyre Profile' => 'tyre-profile',
-                        'List on eBay' => [
-                            'slug' => 'list-on-ebay',
-                            'scope' => 'global',
-                            'mapping' => [
-                                '0.0000' => 'False',
-                                '1.0000' => 'True'
-                            ]
-                        ],
-                        'Tyre XL' => 'tyre-xl',
-                        'Tyre White Lettering' => 'tyre-white-lettering',
-                        'Tyre Runflat' => 'tyre-runflat',
-                        '360 Degree Photo' => '360-degree-photo',
-                        'Include in Price Match' => 'include-in-price-match',
-                        'EC Label Fuel' => 'ec-label-fuel',
-                        'EC Label Wet Grip' => 'ec-label-wet-grip',
-                        'Tyre Label Noise' => 'tyre-label-noise',
-                        'EAN' => [
-                            'slug' => 'ean',
-                            'scope' => 'local'
-                        ],
-                        'Three Peaks' => 'three-peaks',
-                        'Mud Snow' => 'mud-snow',
-                    ];
-                } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
-                    //It's a Wheel
-                    array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
-
-                    if(isset($item['Model Name'])){
-                        $model_title = (string) $item['Model Name'];
-                        $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel'], '', $model_title);
-                    }else{
-                        $model_title = '';
-                    }
-
-                    $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
-                    $attrs = [
-                        'Brand Name' => 'brand-name',
-                        'Model Name' => 'model-name',
-                        'List on eBay' => [
-                            'slug' => 'list-on-ebay',
-                            'scope' => 'global',
-                            'mapping' => [
-                                '0.0000' => 'False',
-                                '1.0000' => 'True'
-                            ]
-                        ],
-                        'Wheel TUV' => 'wheel-tuv',
-                        'Include in Price Match' => 'include-in-price-match',
-                        'Wheel Size' => 'wheel-size',
-                        'Wheel Width' => 'wheel-width',
-                        'Wheel Colour' => 'wheel-colour',
-                        'Wheel Load Rating' => 'wheel-load-rating',
-                        'Wheel Offset' => 'wheel-offset',
-                        'Wheel PCD' => 'wheel-pcd',
-                        'Centre Bore' => 'centre-bore',
-                        'EAN' => [
-                            'slug' => 'ean',
-                            'scope' => 'local'
-                        ]
-                    ];
-                } else {
-                    //It's an Accessory
-                    $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
-                    $attrs = [
-                        'Brand Name' => 'brand-name',
-                        'Model Name' => 'model-name',
-                        'List on eBay' => [
-                            'slug' => 'list-on-ebay',
-                            'scope' => 'global',
-                            'mapping' => [
-                                '0.0000' => 'False',
-                                '1.0000' => 'True'
-                            ]
-                        ]
-                    ];
-                }
-                $data_valid = $this->validate($item, $mandatory);
-                if ($data_valid === true) {
-                    //Data is valid
-                    $status['data_valid'] = true;
-
-                    //Does the product exist?
-                    if ($product_id = wc_get_product_id_by_sku($sku)) {
-                        //Check if we need to update the product
-                        $status['action'] = 'Update';
-                        $product = new WC_Product($product_id);
-
-                        //Delete the product id from $all_products so that it doesn't get set to invisible
-                        $key = array_search($product->get_id(), $products_to_hide);
-                        if ($key !== false) {
-                            unset($products_to_hide[$key]);
+                        // Remove the word Tyres from the brand name if it's there
+                        if(isset($item['Brand Name'])){
+                            $brand_title = str_ireplace(' tyres', '', (string) $item['Brand Name']);
+                        }else{
+                            $brand_title = '';
                         }
+
+                        // Search for Tyre type in Model name and remove if found
+                        if(isset($item['Tyre Type'])){
+                            $model_title = (string) $item['Model Name'];
+                            $type_search = ' ' . strtolower((string)$item['Tyre Type']);
+                            $model_title = str_ireplace($type_search, '', $model_title);
+                        }else{
+                            $model_title = '';
+                        }
+
+                        $name = sprintf('%s/%s/%s %s %s %s %s %s Tyre', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', $brand_title, $model_title, isset($item['Tyre Type']) ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+
+                        $attrs = [
+                            'Load/Speed Rating' => 'load-speed-rating',
+                            'Brand Name' => 'brand-name',
+                            'Model Name' => 'model-name',
+                            'Tyre Type' => 'tyre-type',
+                            'Tyre Quality' => 'tyre-quality',
+                            'Tyre Vehicle Specific' => 'tyre-vehicle-specific',
+                            'Tyre Width' => 'tyre-width',
+                            'Tyre Size' => 'tyre-size',
+                            'Tyre Profile' => 'tyre-profile',
+                            'List on eBay' => [
+                                'slug' => 'list-on-ebay',
+                                'scope' => 'global',
+                                'mapping' => [
+                                    '0.0000' => 'False',
+                                    '1.0000' => 'True'
+                                ]
+                            ],
+                            'Tyre XL' => 'tyre-xl',
+                            'Tyre White Lettering' => 'tyre-white-lettering',
+                            'Tyre Runflat' => 'tyre-runflat',
+                            '360 Degree Photo' => '360-degree-photo',
+                            'Include in Price Match' => 'include-in-price-match',
+                            'EC Label Fuel' => 'ec-label-fuel',
+                            'EC Label Wet Grip' => 'ec-label-wet-grip',
+                            'Tyre Label Noise' => 'tyre-label-noise',
+                            'EAN' => [
+                                'slug' => 'ean',
+                                'scope' => 'local'
+                            ],
+                            'Three Peaks' => 'three-peaks',
+                            'Mud Snow' => 'mud-snow',
+                        ];
+                    } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
+                        //It's a Wheel
+                        array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
+
+                        if(isset($item['Model Name'])){
+                            $model_title = (string) $item['Model Name'];
+                            $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel'], '', $model_title);
+                        }else{
+                            $model_title = '';
+                        }
+
+                        $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
+                        $attrs = [
+                            'Brand Name' => 'brand-name',
+                            'Model Name' => 'model-name',
+                            'List on eBay' => [
+                                'slug' => 'list-on-ebay',
+                                'scope' => 'global',
+                                'mapping' => [
+                                    '0.0000' => 'False',
+                                    '1.0000' => 'True'
+                                ]
+                            ],
+                            'Wheel TUV' => 'wheel-tuv',
+                            'Include in Price Match' => 'include-in-price-match',
+                            'Wheel Size' => 'wheel-size',
+                            'Wheel Width' => 'wheel-width',
+                            'Wheel Colour' => 'wheel-colour',
+                            'Wheel Load Rating' => 'wheel-load-rating',
+                            'Wheel Offset' => 'wheel-offset',
+                            'Wheel PCD' => 'wheel-pcd',
+                            'Centre Bore' => 'centre-bore',
+                            'EAN' => [
+                                'slug' => 'ean',
+                                'scope' => 'local'
+                            ]
+                        ];
                     } else {
-                        //Create the product
-                        $status['action'] = 'Create';
-                        $product = new WC_Product();
+                        //It's an Accessory
+                        $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
+                        $attrs = [
+                            'Brand Name' => 'brand-name',
+                            'Model Name' => 'model-name',
+                            'List on eBay' => [
+                                'slug' => 'list-on-ebay',
+                                'scope' => 'global',
+                                'mapping' => [
+                                    '0.0000' => 'False',
+                                    '1.0000' => 'True'
+                                ]
+                            ]
+                        ];
                     }
+                    $data_valid = $this->validate($item, $mandatory);
+                    if ($data_valid === true) {
+                        //Data is valid
+                        $status['data_valid'] = true;
 
-                    $product->set_name($name);
-                    $this->add_to_yoast_seo($product_id, '', $name, '');
+                        //Does the product exist?
+                        if ($product_id = wc_get_product_id_by_sku($sku)) {
+                            //Check if we need to update the product
+                            $status['action'] = 'Update';
+                            $product = new WC_Product($product_id);
 
-                    //Set the title in the post meta - this is for eBay Package searches and other searches where we need to filter by both SKU and Title
-                    update_post_meta($product->get_id(), '_fbf_product_title', $name);
+                            //Delete the product id from $all_products so that it doesn't get set to invisible
+                            $key = array_search($product->get_id(), $products_to_hide);
+                            if ($key !== false) {
+                                unset($products_to_hide[$key]);
+                            }
+                        } else {
+                            //Create the product
+                            $status['action'] = 'Create';
+                            $product = new WC_Product();
+                        }
 
-                    $product->set_sku($sku);
-                    $product->set_catalog_visibility('visible');
-                    //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                        $product->set_name($name);
+                        $this->add_to_yoast_seo($product_id, '', $name, '');
 
-                    //Price
-                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                        //Set the title in the post meta - this is for eBay Package searches and other searches where we need to filter by both SKU and Title
+                        update_post_meta($product->get_id(), '_fbf_product_title', $name);
+
+                        $product->set_sku($sku);
+                        $product->set_catalog_visibility('visible');
+                        //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+
+                        //Price
+                        $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
 
-                    //Category
-                    if ($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])) {
-                        $product->set_category_ids([$pc_id]);
-                    } else {
-                        $status['errors'][] = 'Error setting product category';
-                    }
+                        //Category
+                        if ($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])) {
+                            $product->set_category_ids([$pc_id]);
+                        } else {
+                            $status['errors'][] = 'Error setting product category';
+                        }
 
-                    //Attributes
-                    $wc_attrs = $product->get_attributes();
-                    $new_attrs = [];
-                    foreach ($attrs as $ak => $av) {
-                        if (isset($item[$ak])) {
-                            try {
-                                //If it's a tyre and has a key of 'Load/Speed Rating' need to split it out into Load and Speed
-                                if($ak==='Load/Speed Rating'){
-                                    preg_match('/[a-zA-Z]+/i', $item[$ak], $matches, PREG_OFFSET_CAPTURE);
-                                    if(count($matches)===1){
-                                        $pos = $matches[0][1];
-                                        $load = substr($item[$ak], 0, $pos);
-                                        $speed = substr($item[$ak], $pos);
+                        //Attributes
+                        $wc_attrs = $product->get_attributes();
+                        $new_attrs = [];
+                        foreach ($attrs as $ak => $av) {
+                            if (isset($item[$ak])) {
+                                try {
+                                    //If it's a tyre and has a key of 'Load/Speed Rating' need to split it out into Load and Speed
+                                    if($ak==='Load/Speed Rating'){
+                                        preg_match('/[a-zA-Z]+/i', $item[$ak], $matches, PREG_OFFSET_CAPTURE);
+                                        if(count($matches)===1){
+                                            $pos = $matches[0][1];
+                                            $load = substr($item[$ak], 0, $pos);
+                                            $speed = substr($item[$ak], $pos);
 
-                                        $new_load_attr = $this->check_attribute($product, 'tyre-load', $load, $wc_attrs);
-                                        $new_attrs['pa_tyre-load'] = $new_load_attr;
-                                        $new_speed_attr = $this->check_attribute($product, 'tyre-speed', $speed, $wc_attrs);
-                                        $new_attrs['pa_tyre-speed'] = $new_speed_attr;
+                                            $new_load_attr = $this->check_attribute($product, 'tyre-load', $load, $wc_attrs);
+                                            $new_attrs['pa_tyre-load'] = $new_load_attr;
+                                            $new_speed_attr = $this->check_attribute($product, 'tyre-speed', $speed, $wc_attrs);
+                                            $new_attrs['pa_tyre-speed'] = $new_speed_attr;
 
+                                        }
                                     }
-                                }
 
-                                //If it's a tyre and has a key of 'Tyre Size' then we need to add a further attribute for size label which is a combination of {tyre_width}/{tyre_profile}/{tyre_size}
-                                if($ak==='Tyre Size'){
-                                    $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$item['Tyre Profile'], (string)$item['Tyre Size']);
-                                    $new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
-                                    $new_attrs['pa_tyre-size-label'] = $new_size_attr;
-                                }
+                                    //If it's a tyre and has a key of 'Tyre Size' then we need to add a further attribute for size label which is a combination of {tyre_width}/{tyre_profile}/{tyre_size}
+                                    if($ak==='Tyre Size'){
+                                        $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$item['Tyre Profile'], (string)$item['Tyre Size']);
+                                        $new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
+                                        $new_attrs['pa_tyre-size-label'] = $new_size_attr;
+                                    }
 
-                                $new_attr = $this->check_attribute($product, $av, $item[$ak], $wc_attrs);
-                                if ($new_attr) {
-                                    if (is_array($av)) {
-                                        $new_attrs['pa_' . $av['slug']] = $new_attr;
+                                    $new_attr = $this->check_attribute($product, $av, $item[$ak], $wc_attrs);
+                                    if ($new_attr) {
+                                        if (is_array($av)) {
+                                            $new_attrs['pa_' . $av['slug']] = $new_attr;
+                                        } else {
+                                            $new_attrs['pa_' . $av] = $new_attr;
+                                        }
                                     } else {
-                                        $new_attrs['pa_' . $av] = $new_attr;
+                                        $status['errors'][] = 'Check attribute returned false for ' . $av;
                                     }
-                                } else {
-                                    $status['errors'][] = 'Check attribute returned false for ' . $av;
+                                } catch (Exception $e) {
+                                    $status['errors'][] = $e->getMessage();
                                 }
-                            } catch (Exception $e) {
-                                $status['errors'][] = $e->getMessage();
                             }
                         }
-                    }
 
-                    if (!empty($new_attrs) && !in_array(false, $new_attrs)) {
-                        $product->set_attributes($new_attrs);
-                    }
-
-                    //Ebay price
-                    if (isset($item['Ebay Price'])){
-                        if((float) $item['Ebay Price'] > 0){
-                            update_post_meta($product_id, '_ebay_price', (float) $item['Ebay Price']);
-                        }else{
-                            delete_post_meta($product_id, '_ebay_price');
+                        if (!empty($new_attrs) && !in_array(false, $new_attrs)) {
+                            $product->set_attributes($new_attrs);
                         }
-                    }
 
-                    //Weight and dimensions
-                    if (isset($item['Weight KG'])) {
-                        $product->set_weight((string)$item['Weight KG']);
-                    }
-                    if (isset($item['Length CM'])) {
-                        $product->set_length((string)$item['Length CM']);
-                    }
-                    if (isset($item['Width CM'])) {
-                        $product->set_width((string)$item['Width CM']);
-                    }
-                    if (isset($item['Depth CM'])) {
-                        $product->set_height((string)$item['Depth CM']);
-                    }
-
-                    //Stock level
-                    $initial_stock = $product->get_stock_quantity();
-                    $this->set_stock($product, $item);
-
-                    $cat = $item['Wheel Tyre Accessory'];
-
-                    //Set the back in stock date for everything - this is needed because we need to show it on low stock items as well as out of stock
-                    $back_in_stock = $this->get_back_in_stock_date($product, $item);
-                    if($back_in_stock && ((string)$cat=='Steel Wheel'||(string)$cat=='Alloy Wheel')){
-                        $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
-                    }else{
-                        $product->update_meta_data('_expected_back_in_stock_date', false);
-                    }
-
-                    //Dan request 1 Mar 2021 - need to exclude Steel wheels from 3 month rule
-                    //Dan request 22 Jul 2021 - now need to exclude Alloy wheels too
-                    if((string)$cat=='Steel Wheel' || (string)$cat=='Alloy Wheel'){
-                        $product->set_backorders('notify');
-                        $product->update_meta_data('_went_out_of_stock_on', '');
-
-                        // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
-                        if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
-                            $product->update_meta_data('_back_in_stock_date', time());
-                        }
-                    }else{
-                        if($product->get_stock_quantity()<=0){
-                            // Here if there isn't stock
-                            $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
-
-                            // Only set the out of stock date if it's currently empty
-                            if(empty($went_out_of_stock_on)){
-                                $product->update_meta_data('_went_out_of_stock_on', time());
-                            }
-
-                            // Set backordering based on when the product went out of stock - if it's been out of stock for
-                            // more than 3 months, no backordering
-                            $now = new DateTime('now');
-                            $stock_date = new DateTime();
-                            $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
-
-                            // Mod 25 Aug 2021 - diff'ing months only works if in same calendar year - check years first!!
-                            $years = 0;
-                            // Check whether product went out of stock 3 or more months ago (6 months for Tyres - requested by Dan 29th March 21)
-                            if((string)$cat=='Tyre'){
-                                $months = 6;
+                        //Ebay price
+                        if (isset($item['Ebay Price'])){
+                            if((float) $item['Ebay Price'] > 0){
+                                update_post_meta($product_id, '_ebay_price', (float) $item['Ebay Price']);
                             }else{
-                                $months = 3;
+                                delete_post_meta($product_id, '_ebay_price');
                             }
-                            if($stock_date->diff($now)->y === $years){
-                                if($stock_date->diff($now)->m >= $months){
-                                    $product->set_backorders('no');
-                                }else{
-                                    $product->set_backorders('notify');
-                                }
-                            }else{
-                                $product->set_backorders('no');
-                            }
+                        }
 
+                        //Weight and dimensions
+                        if (isset($item['Weight KG'])) {
+                            $product->set_weight((string)$item['Weight KG']);
+                        }
+                        if (isset($item['Length CM'])) {
+                            $product->set_length((string)$item['Length CM']);
+                        }
+                        if (isset($item['Width CM'])) {
+                            $product->set_width((string)$item['Width CM']);
+                        }
+                        if (isset($item['Depth CM'])) {
+                            $product->set_height((string)$item['Depth CM']);
+                        }
+
+                        //Stock level
+                        $initial_stock = $product->get_stock_quantity();
+                        $this->set_stock($product, $item);
+
+                        $cat = $item['Wheel Tyre Accessory'];
+
+                        //Set the back in stock date for everything - this is needed because we need to show it on low stock items as well as out of stock
+                        $back_in_stock = $this->get_back_in_stock_date($product, $item);
+                        if($back_in_stock && ((string)$cat=='Steel Wheel'||(string)$cat=='Alloy Wheel')){
+                            $product->update_meta_data('_expected_back_in_stock_date', $back_in_stock);
                         }else{
-                            // Here if there is stock
-                            $product->update_meta_data('_went_out_of_stock_on', '');
+                            $product->update_meta_data('_expected_back_in_stock_date', false);
+                        }
+
+                        //Dan request 1 Mar 2021 - need to exclude Steel wheels from 3 month rule
+                        //Dan request 22 Jul 2021 - now need to exclude Alloy wheels too
+                        if((string)$cat=='Steel Wheel' || (string)$cat=='Alloy Wheel'){
                             $product->set_backorders('notify');
+                            $product->update_meta_data('_went_out_of_stock_on', '');
 
                             // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
                             if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
                                 $product->update_meta_data('_back_in_stock_date', time());
                             }
-                        }
-                    }
-
-
-                    // Add tyre shipping class to tyres
-                    if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('tyre')){
-                        if ($item['Wheel Tyre Accessory'] == 'Tyre'){
-                            $product->set_shipping_class_id($shipping_class_id);
-                        }
-                    }
-
-                    // Add spacer shipping class to spacers
-                    if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('spacer')) {
-                        $match = preg_match('/^TTSPACE.*$/i', $sku); //If the SKU begins with TTSPACE
-                        if ($match === 1) {
-                            $product->set_shipping_class_id($shipping_class_id);
-                        }
-                    }
-
-                    /*if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
-                        $product->set_backorders('notify');
-                    }else{
-                        $product->set_backorders('no');
-                    }*/
-
-                    if (!$product_id = $product->save()) {
-                        $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
-                    } else {
-                        //Store the stockist array for lead times
-                        update_post_meta($product_id, '_stockist_lead_times', $this->get_supplier_lead_times($product, $item));
-
-                        //Product saved - handle the product image
-                        //include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
-
-                        include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-gallery.php';
-
-                        if (isset($item['Image name'])) {
-                            $image_gallery = new Fbf_Importer_Product_Gallery($product_id, (string)$item['Image name'], $this->plugin_name);
-
-                            $main_image_result = $image_gallery->process($status['action']);
-
-                            if (isset($main_image_result['errors'])) {
-                                $status['errors'] = $main_image_result['errors'];
-                            } else {
-                                $status['image_info'] = $main_image_result['info'];
-                            }
-
-                            $image_gallery_result = $image_gallery->gallery_process($status['action']);
-
-                            /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
-                            $image_import = $image_handler->process($status['action']);*/
-                            if (isset($image_gallery_result['errors'])) {
-                                $status['errors'] = $image_gallery_result['errors'];
-                            } else {
-                                $status['gallery_info'] = $image_gallery_result['gallery_info'];
-                                $status['gallery_image_info'] = $image_gallery_result['gallery_image_info'];
-                            }
-                        }
-                    }
-
-                    // Add meta for profit margin
-                    $cost = $this->get_cost($product, $item, $this->min_stock);
-                    if(!empty($cost)){
-                        if($item['Wheel Tyre Accessory'] != 'Accessories'){
-                            $delivery_cost = $this->flat_fee;
                         }else{
-                            $delivery_cost = 0;
-                        }
-                        if($cost['code'] > 1){
-                            $status['errors'][] = 'Profit margin error code ' . $cost['code'] . ': ' . $cost['msg'];
-                            /*if($cost['code'] === 2){
-                                update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
-                            }*/
-                        }else{
-                            $status['margin'] = 'Profit margin set to: ' . $cost['cost'];
-                            update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
-                        }
-                    }else{
-                        $status['errors'][] = 'Profit margin error code 0: $cost was empty';
-                    }
+                            if($product->get_stock_quantity()<=0){
+                                // Here if there isn't stock
+                                $went_out_of_stock_on = $product->get_meta('_went_out_of_stock_on');
 
-                    /*    update_post_meta($product_id, '_item_cost', $cost);
-                    } catch (Throwable $e) {
-                        $status['errors'][] = $e->getMessage();
-                    }*/
-
-                    //RSP calculation
-                    if ($item['Wheel Tyre Accessory'] == 'Tyre') {
-                        if((string)$item['Include in Price Match']=='True'){
-                            // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
-
-                            if($is_variable){
-                                if(isset($children[0]) && wc_get_product($children[0])!==false){
-                                    $reg_price = wc_get_product($children[0])->get_regular_price();
-                                }else{
-                                    $reg_price = $product->get_price();
+                                // Only set the out of stock date if it's currently empty
+                                if(empty($went_out_of_stock_on)){
+                                    $product->update_meta_data('_went_out_of_stock_on', time());
                                 }
-                                $rsp_price = round($this->get_rsp($item, $product_id, (float)$reg_price) * 1.2, 2);
+
+                                // Set backordering based on when the product went out of stock - if it's been out of stock for
+                                // more than 3 months, no backordering
+                                $now = new DateTime('now');
+                                $stock_date = new DateTime();
+                                $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
+
+                                // Mod 25 Aug 2021 - diff'ing months only works if in same calendar year - check years first!!
+                                $years = 0;
+                                // Check whether product went out of stock 3 or more months ago (6 months for Tyres - requested by Dan 29th March 21)
+                                if((string)$cat=='Tyre'){
+                                    $months = 6;
+                                }else{
+                                    $months = 3;
+                                }
+                                if($stock_date->diff($now)->y === $years){
+                                    if($stock_date->diff($now)->m >= $months){
+                                        $product->set_backorders('no');
+                                    }else{
+                                        $product->set_backorders('notify');
+                                    }
+                                }else{
+                                    $product->set_backorders('no');
+                                }
+
                             }else{
-                                $rsp_price = round($this->get_rsp($item, $product_id, (float)$product->get_regular_price()) * 1.2, 2);
+                                // Here if there is stock
+                                $product->update_meta_data('_went_out_of_stock_on', '');
+                                $product->set_backorders('notify');
+
+                                // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
+                                if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
+                                    $product->update_meta_data('_back_in_stock_date', time());
+                                }
                             }
-                        }else{
-                            $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
                         }
 
-                        //Handle zero here - throw a warning and don't add to RSP
-                        if($rsp_price!==(float)0){
-                            $this->rsp[] = [
-                                'Variant_Code' => $sku,
-                                'RSP_Inc' => $rsp_price
-                            ];
-                        }else{
-                            $status['errors'][] = 'RSP was calculated as zero';
-                            //Just set the RSP to the PriceExcVat in the stock file
-                            $this->rsp[] = [
-                                'Variant_Code' => $sku,
-                                'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2)
-                            ];
+
+                        // Add tyre shipping class to tyres
+                        if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('tyre')){
+                            if ($item['Wheel Tyre Accessory'] == 'Tyre'){
+                                $product->set_shipping_class_id($shipping_class_id);
+                            }
                         }
+
+                        // Add spacer shipping class to spacers
+                        if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('spacer')) {
+                            $match = preg_match('/^TTSPACE.*$/i', $sku); //If the SKU begins with TTSPACE
+                            if ($match === 1) {
+                                $product->set_shipping_class_id($shipping_class_id);
+                            }
+                        }
+
+                        /*if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
+                            $product->set_backorders('notify');
+                        }else{
+                            $product->set_backorders('no');
+                        }*/
+
+                        if (!$product_id = $product->save()) {
+                            $status['errors'][] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                        } else {
+                            //Store the stockist array for lead times
+                            update_post_meta($product_id, '_stockist_lead_times', $this->get_supplier_lead_times($product, $item));
+
+                            //Product saved - handle the product image
+                            //include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
+
+                            include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-gallery.php';
+
+                            if (isset($item['Image name'])) {
+                                $image_gallery = new Fbf_Importer_Product_Gallery($product_id, (string)$item['Image name'], $this->plugin_name);
+
+                                $main_image_result = $image_gallery->process($status['action']);
+
+                                if (isset($main_image_result['errors'])) {
+                                    $status['errors'] = $main_image_result['errors'];
+                                } else {
+                                    $status['image_info'] = $main_image_result['info'];
+                                }
+
+                                $image_gallery_result = $image_gallery->gallery_process($status['action']);
+
+                                /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
+                                $image_import = $image_handler->process($status['action']);*/
+                                if (isset($image_gallery_result['errors'])) {
+                                    $status['errors'] = $image_gallery_result['errors'];
+                                } else {
+                                    $status['gallery_info'] = $image_gallery_result['gallery_info'];
+                                    $status['gallery_image_info'] = $image_gallery_result['gallery_image_info'];
+                                }
+                            }
+                        }
+
+                        // Add meta for profit margin
+                        $cost = $this->get_cost($product, $item, $this->min_stock);
+                        if(!empty($cost)){
+                            if($item['Wheel Tyre Accessory'] != 'Accessories'){
+                                $delivery_cost = $this->flat_fee;
+                            }else{
+                                $delivery_cost = 0;
+                            }
+                            if($cost['code'] > 1){
+                                $status['errors'][] = 'Profit margin error code ' . $cost['code'] . ': ' . $cost['msg'];
+                                /*if($cost['code'] === 2){
+                                    update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
+                                }*/
+                            }else{
+                                $status['margin'] = 'Profit margin set to: ' . $cost['cost'];
+                                update_post_meta($product_id, '_item_cost', $cost['cost'] + $delivery_cost);
+                            }
+                        }else{
+                            $status['errors'][] = 'Profit margin error code 0: $cost was empty';
+                        }
+
+                        /*    update_post_meta($product_id, '_item_cost', $cost);
+                        } catch (Throwable $e) {
+                            $status['errors'][] = $e->getMessage();
+                        }*/
+
+                        //RSP calculation
+                        if ($item['Wheel Tyre Accessory'] == 'Tyre') {
+                            if((string)$item['Include in Price Match']=='True'){
+                                // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
+
+                                if($is_variable){
+                                    if(isset($children[0]) && wc_get_product($children[0])!==false){
+                                        $reg_price = wc_get_product($children[0])->get_regular_price();
+                                    }else{
+                                        $reg_price = $product->get_price();
+                                    }
+                                    $rsp_price = round($this->get_rsp($item, $product_id, (float)$reg_price) * 1.2, 2);
+                                }else{
+                                    $rsp_price = round($this->get_rsp($item, $product_id, (float)$product->get_regular_price()) * 1.2, 2);
+                                }
+                            }else{
+                                $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
+                            }
+
+                            //Handle zero here - throw a warning and don't add to RSP
+                            if($rsp_price!==(float)0){
+                                $this->rsp[] = [
+                                    'Variant_Code' => $sku,
+                                    'RSP_Inc' => $rsp_price
+                                ];
+                            }else{
+                                $status['errors'][] = 'RSP was calculated as zero';
+                                //Just set the RSP to the PriceExcVat in the stock file
+                                $this->rsp[] = [
+                                    'Variant_Code' => $sku,
+                                    'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2)
+                                ];
+                            }
+                        }
+
+                    } else {
+                        //Data is not valid
+                        $status['data_valid'] = false;
+                        $status['errors'] = $data_valid;
                     }
+                    $stock_status[$sku] = $status;
+
+                    ob_start();
+                    print('<pre>');
+                    print_r($status);
+                    print('</pre>');
+                    $email = ob_get_clean();
+
+                    $headers = "MIME-Version: 1.0\r\n";
+                    $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                    wp_mail('kevin@code-mill.co.uk', 'Import status:' . $sku, $email, $headers);
 
                 } else {
-                    //Data is not valid
-                    $status['data_valid'] = false;
-                    $status['errors'] = $data_valid;
+                    $status['errors'][] = 'Category is not set';
                 }
-                $stock_status[$sku] = $status;
-
-                ob_start();
-                print('<pre>');
-                print_r($status);
-                print('</pre>');
-                $email = ob_get_clean();
-
-                $headers = "MIME-Version: 1.0\r\n";
-                $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                wp_mail('kevin@code-mill.co.uk', 'Import status:' . $sku, $email, $headers);
-
-            } else {
-                $status['errors'][] = 'Category is not set';
+                $counter++;
             }
-            $counter++;
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
