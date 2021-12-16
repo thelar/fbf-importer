@@ -396,7 +396,8 @@ class Fbf_Importer_Admin {
 
     private function get_image_gallery_info($info)
     {
-        return ', PRODUCT IMAGE GALLERY: ' . $info;
+        $info_str = '[' . implode(', ', $info) . ']';
+        return ', PRODUCT IMAGE GALLERY: ' . $info_str;
     }
 
     private function print_stock_import_status($stock_status)
