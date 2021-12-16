@@ -383,7 +383,7 @@ class Fbf_Importer_Admin {
             $status.= $this->get_image_info($info->image_info);
         }
         if(isset($info->gallery_info)){
-            $status.= $this->get_image_gallery_info($info->image_info);
+            $status.= $this->get_image_gallery_info($info->gallery_info);
         }
         return $status;
     }
