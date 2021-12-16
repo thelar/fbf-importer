@@ -556,7 +556,11 @@ class Fbf_Importer_File_Parser {
                                     $status['errors'] = $image_gallery_result['errors'];
                                 } else {
                                     $status['gallery_info'] = $image_gallery_result['gallery_info'];
-                                    $status['gallery_image_info'] = '[' . implode(',' , $image_gallery_result['gallery_image_info']) . ']';
+                                    $s = [];
+                                    foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
+                                        $s[] = $gal_item_info[0];
+                                    }
+                                    $status['gallery_image_info'] = '[' . implode(',' , $s) . ']';
                                 }
                             }
                         }
