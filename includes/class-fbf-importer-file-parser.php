@@ -24,6 +24,7 @@ class Fbf_Importer_File_Parser {
         'get_rsp_rules',
         'duplicate_white_lettering_items',
         'import_stock',
+        'import_stock_white',
         'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
@@ -31,6 +32,8 @@ class Fbf_Importer_File_Parser {
     ];
     private $stage;
     public $stock;
+    public $stock_white = [];
+    private $stock_white_changes = [];
     public $stock_num;
     private $mapping;
     private $rsp_rules;
@@ -141,6 +144,7 @@ class Fbf_Importer_File_Parser {
 //            $this->errors[$this->stage] = [$this->filepath . ' - is not valid XML'];
 //        }
     }
+
     private function build_stock_array()
     {
         $this->xml->open($this->filepath);
@@ -174,7 +178,15 @@ class Fbf_Importer_File_Parser {
         return $suppliers_a;
     }
 
-    private function import_stock()
+    private function import_stock(){
+        $this->import_stock_list($this->stock);
+    }
+
+    private function import_stock_white(){
+        $this->import_stock_list($this->stock_white, true);
+    }
+
+    private function import_stock_list($list, $is_white=false)
     {
         $stock_status = [];
         $products_to_hide = get_posts([
@@ -193,8 +205,14 @@ class Fbf_Importer_File_Parser {
         $counter = 0;
 
 
-        foreach ($this->stock as $item) {
+        foreach ($list as $item) {
             $sku = (string)$item['Product Code'];
+
+            if($is_white){
+                $orig_sku = $sku;
+                $sku = $this->stock_white_changes[$sku]['sku_white'];
+            }
+
             $is_variable = false;
 
             $status = [];
@@ -537,7 +555,13 @@ class Fbf_Importer_File_Parser {
                         include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-gallery.php';
 
                         if (isset($item['Image name'])) {
-                            $image_gallery = new Fbf_Importer_Product_Gallery($product_id, (string)$item['Image name'], $this->plugin_name);
+                            if($is_white){
+                                $image_name = $this->stock_white_changes[$orig_sku]['image_white'];
+                            }else{
+                                $image_name = (string)$item['Image name'];
+                            }
+
+                            $image_gallery = new Fbf_Importer_Product_Gallery($product_id, $image_name, $this->plugin_name);
 
                             $main_image_result = $image_gallery->process($status['action']);
 
@@ -649,20 +673,22 @@ class Fbf_Importer_File_Parser {
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        foreach($products_to_hide as $hide_id){
-            $status = [];
-            $status['action'] = 'Hide';
-            $product_to_hide = new WC_Product($hide_id);
-            $sku = $product_to_hide->get_sku();
-            $name = $product_to_hide->get_title();
+        if(!$is_white){
+            foreach($products_to_hide as $hide_id){
+                $status = [];
+                $status['action'] = 'Hide';
+                $product_to_hide = new WC_Product($hide_id);
+                $sku = $product_to_hide->get_sku();
+                $name = $product_to_hide->get_title();
 
-            $product_to_hide->set_catalog_visibility('hidden');
-            $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
-            $product_to_hide->set_backorders('no');
-            if(!$product_to_hide->save()){
-                $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                $product_to_hide->set_catalog_visibility('hidden');
+                $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
+                $product_to_hide->set_backorders('no');
+                if(!$product_to_hide->save()){
+                    $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                }
+                $stock_status[$sku] = $status;
             }
-            $stock_status[$sku] = $status;
         }
         $this->info[$this->stage]['stock_status'] = $stock_status;
     }
@@ -765,7 +791,8 @@ class Fbf_Importer_File_Parser {
         $i = 0;
         foreach($this->stock as $item){
             if($item['Tyre White Lettering'] == 'True'){
-                $white_lettering_item = $item;
+                $this->stock_white[] = $item;
+
                 $this->stock[$i]['Tyre White Lettering'] = 'False';
 
                 $image_name = $item['Image name'] ?? null;
@@ -775,9 +802,8 @@ class Fbf_Importer_File_Parser {
                 }
 
 
-                $white_lettering_items[] = [
+                $this->stock_white_changes[$item['Product Code']] = [
                     'index' => $i,
-                    'item' => $white_lettering_item,
                     'sku' => $item['Product Code'],
                     'sku_white' => $item['Product Code'] . '_white',
                     'image' => $image_name,
@@ -789,7 +815,7 @@ class Fbf_Importer_File_Parser {
         }
 
         // Merge back together
-        $x = 0;
+        /*$x = 0;
         foreach($white_lettering_items as $insert_item){
 
             $new_item = $this->stock[$insert_item['index']];
@@ -802,7 +828,7 @@ class Fbf_Importer_File_Parser {
             array_splice($this->stock, $insert_item['index'] + $x, 0, [$new_item]);
             $x++;
         }
-        $this->stock_num = count($this->stock);
+        $this->stock_num = count($this->stock);*/
     }
 
     public static function fbf_importer_file_parser_read_xml()
