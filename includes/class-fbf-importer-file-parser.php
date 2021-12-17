@@ -559,7 +559,7 @@ class Fbf_Importer_File_Parser {
                                 foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
                                     $s[] = $gal_item_info[0];
                                 }
-                                $status['gallery_image_info'] = '[' . implode(',' , $s) . ']';
+                                $status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
                             }
                         }
                     }

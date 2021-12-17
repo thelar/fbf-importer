@@ -26,7 +26,7 @@ class Fbf_Importer_Product_Gallery_Image
                 $this->return_data['info'][] = basename($this->image_filepath) . ' exists with identical filesize';
                 $this->return_data['attach_id'] = $attach_id;
             }else{
-                $this->return_data['info'][] = 'Image exist in media library with different filesize - update';
+                $this->return_data['info'][] = basename($this->image_filepath) . ' exists in media library with different filesize - update';
                 $this->product_add_image();
             }
         }else{
