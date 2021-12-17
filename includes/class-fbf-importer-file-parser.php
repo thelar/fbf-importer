@@ -771,7 +771,7 @@ class Fbf_Importer_File_Parser {
                 $image_name = $item['Image name'] ?? null;
                 if(!is_null($image_name)){
                     $image_ref = strrpos((string) $image_name, '.');
-                    $new_img = substr_replace((string) $image_name, '_white', $image_ref, 0);
+                    $new_img = substr_replace((string) $image_name, '_White', $image_ref, 0);
                 }
 
 
