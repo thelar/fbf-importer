@@ -1393,6 +1393,16 @@ class Fbf_Importer_File_Parser {
             $this->info[$stage]['End time'] = $stage_end;
             $this->info[$stage]['Execution time'] = $exec_time;
 
+            ob_start();
+            print('<pre>');
+            print_r($this->info[$stage]);
+            print('</pre>');
+            $email = ob_get_clean();
+
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+            wp_mail('kevin@code-mill.co.uk', 'Import stage report: ' . $stage, $email, $headers);
+
             if($this->hasErrors($stage)){ //Any errors at any stage will break the run script immediately
                 $this->log_info($start, false, $auto);
                 if(!$auto){
