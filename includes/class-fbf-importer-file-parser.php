@@ -580,8 +580,10 @@ class Fbf_Importer_File_Parser {
                             } else {
                                 $status['gallery_info'] = $image_gallery_result['gallery_info'];
                                 $s = [];
-                                foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
-                                    $s[] = $gal_item_info[0];
+                                if(!empty($image_gallery_result['gallery_image_info'])){
+                                    foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
+                                        $s[] = $gal_item_info[0];
+                                    }
                                 }
                                 $status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
                             }
