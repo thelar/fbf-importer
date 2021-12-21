@@ -1408,6 +1408,7 @@ class Fbf_Importer_File_Parser {
             if($this->hasErrors($stage)){ //Any errors at any stage will break the run script immediately
                 $this->log_info($start, false, $auto);
                 if(!$auto){
+                    wp_mail('kevin@code-mill.co.uk', 'import script errors', $stage, $headers);
                     $this->redirect_to_settings();
                 }
                 break;
