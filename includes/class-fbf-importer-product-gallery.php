@@ -49,8 +49,8 @@ class Fbf_Importer_Product_Gallery
             $gallery_image_handler = new Fbf_Importer_Product_Gallery_Image($this->product_id, basename($gallery_image));
             $gallery_image_import = $gallery_image_handler->process();
 
-            if (isset($main_image_import['errors'])) {
-                $response['errors'][] = $main_image_import['errors'];
+            if (isset($gallery_image_import['errors'])) {
+                $response['errors'][] = $gallery_image_import['errors'];
             } else {
                 $response['gallery_image_info'][] = $gallery_image_import['info'];
                 $gallery_ids[] = $gallery_image_import['attach_id'];

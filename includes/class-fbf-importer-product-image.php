@@ -26,7 +26,7 @@ class Fbf_Importer_Product_Image
             if($product_action=='Create'){
 
                 if($attach_id = $this->is_image_in_media_library()){
-                    $this->return_data['info'][] = 'New product and ' . basename($this->image_filepath) . ' exists with identical filesize';
+                    $this->return_data['info'][] = 'New product and image exists with identical filesize';
                     $this->return_data['attach_id'] = $attach_id;
                     set_post_thumbnail( $this->product_id, $attach_id );
                 }else{
@@ -38,7 +38,7 @@ class Fbf_Importer_Product_Image
                 if(!$this->product_has_image()){
 
                     if($attach_id = $this->is_image_in_media_library()){
-                        $this->return_data['info'][] = 'Existing product and ' . basename($this->image_filepath) . ' exists in media library with identical filesize';
+                        $this->return_data['info'][] = 'Existing product and image exists in media library with identical filesize';
                         $this->return_data['attach_id'] = $attach_id;
                         set_post_thumbnail( $this->product_id, $attach_id );
                     }else{
@@ -60,7 +60,7 @@ class Fbf_Importer_Product_Image
                 }
             }
         }else{
-            $this->return_data['errors'][] = 'Source image: ' . $this->image_name . ' does not exist';
+            $this->return_data['errors'][] = 'Source image does not exist';
         }
         return $this->return_data;
     }

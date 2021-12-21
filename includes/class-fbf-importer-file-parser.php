@@ -585,7 +585,7 @@ class Fbf_Importer_File_Parser {
                                         $s[] = $gal_item_info[0];
                                     }
                                 }
-                                $status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
+                                //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
                             }
                         }
                     }
