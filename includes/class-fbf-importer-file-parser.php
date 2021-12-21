@@ -1401,6 +1401,8 @@ class Fbf_Importer_File_Parser {
             print('</pre>');
             print("\n Memory Consumption is   ");
             print(round(memory_get_usage()/1048576,2).''.' MB');
+            print("\n Peak memory is   ");
+            print(round(memory_get_peak_usage()/1048576,2).''.' MB');
             $email = ob_get_clean();
 
             $headers = "MIME-Version: 1.0\r\n";
