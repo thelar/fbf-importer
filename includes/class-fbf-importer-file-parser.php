@@ -23,8 +23,8 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
+        'import_stock_white',
         'import_stock',
-        //'import_stock_white',
         'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
@@ -349,8 +349,21 @@ class Fbf_Importer_File_Parser {
 
                         //Delete the product id from $all_products so that it doesn't get set to invisible
                         $key = array_search($product->get_id(), $products_to_hide);
+
                         if ($key !== false) {
                             unset($products_to_hide[$key]);
+                        }
+
+                        // Delete equivalent white lettering product if there is one
+                        if(array_key_exists($sku, $this->stock_white_changes)){
+                            $sku_white = (string)$item['Product Code'] . '_white';
+                            if($product_white_id = wc_get_product_id_by_sku($sku_white)){
+                                $product_white = new WC_Product($product_white_id);
+                                $key_white = array_search($product_white->get_id(), $products_to_hide);
+                                if ($key_white !== false) {
+                                    unset($products_to_hide[$key_white]);
+                                }
+                            }
                         }
                     } else {
                         //Create the product
@@ -675,7 +688,7 @@ class Fbf_Importer_File_Parser {
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        /*if(!$is_white){
+        if(!$is_white){
             foreach($products_to_hide as $hide_id){
                 $status = [];
                 $status['action'] = 'Hide';
@@ -691,7 +704,7 @@ class Fbf_Importer_File_Parser {
                 }
                 $stock_status[$sku] = $status;
             }
-        }*/
+        }
         $this->info[$this->stage]['stock_status'] = $stock_status;
     }
 
