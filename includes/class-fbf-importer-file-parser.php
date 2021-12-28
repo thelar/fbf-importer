@@ -24,7 +24,7 @@ class Fbf_Importer_File_Parser {
         'get_rsp_rules',
         'duplicate_white_lettering_items',
         'import_stock',
-        'import_stock_white',
+        //'import_stock_white',
         'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
@@ -675,7 +675,7 @@ class Fbf_Importer_File_Parser {
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        if(!$is_white){
+        /*if(!$is_white){
             foreach($products_to_hide as $hide_id){
                 $status = [];
                 $status['action'] = 'Hide';
@@ -691,7 +691,7 @@ class Fbf_Importer_File_Parser {
                 }
                 $stock_status[$sku] = $status;
             }
-        }
+        }*/
         $this->info[$this->stage]['stock_status'] = $stock_status;
     }
 
