@@ -709,8 +709,9 @@ class Fbf_Importer_File_Parser {
         $this->info[$this->stage]['stock_status'] = $stock_status;
     }
 
-    private function update_ebay_packages()
+    public function update_ebay_packages()
     {
+        $updates = [];
         $packages = get_posts([
             'post_type' => 'product',
             'posts_per_page' => -1,
@@ -729,8 +730,12 @@ class Fbf_Importer_File_Parser {
         if(is_plugin_active('fbf-ebay-packages/fbf-ebay-packages.php')){
             foreach($packages as $package){
                 $update = Fbf_Ebay_Packages_Admin::update_package($package);
+                if(!is_null($update)){
+                    $updates[$package] = $update;
+                }
             }
         }
+        return $updates;
     }
 
     private function rotate_stock_files()

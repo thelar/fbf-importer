@@ -531,4 +531,14 @@ class Fbf_Importer_Admin {
         relevanssi_build_index(false, false);
         //mail('kevin@code-mill.co.uk', '4x4 Index', 'Indexing done');
     }
+
+    public function fbf_update_ebay_packages()
+    {
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
+        $importer = new Fbf_Importer_File_Parser($this->plugin_name);
+        $files = $importer->update_ebay_packages();
+
+        header('Content-Type: application/json');
+        echo json_encode($files);
+    }
 }
