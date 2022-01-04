@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
         'rotate_stock_files',
@@ -289,7 +289,7 @@ class Fbf_Importer_File_Parser {
 
                     if(isset($item['Model Name'])){
                         $model_title = (string) $item['Model Name'];
-                        $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel'], '', $model_title);
+                        $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel', ' High X', 'High X'], '', $model_title);
                     }else{
                         $model_title = '';
                     }
