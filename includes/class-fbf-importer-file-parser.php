@@ -26,9 +26,9 @@ class Fbf_Importer_File_Parser {
         //'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
-        'rotate_stock_files',
-        'write_rsp_xml',
-        'collate_suppliers'
+        //'rotate_stock_files',
+        //'write_rsp_xml',
+        //'collate_suppliers'
     ];
     private $stage;
     public $stock;
