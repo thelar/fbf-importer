@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        //'import_stock_white',
+        'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
         'rotate_stock_files',
@@ -580,6 +580,15 @@ class Fbf_Importer_File_Parser {
 
                             if (isset($main_image_result['errors'])) {
                                 $status['errors'] = $main_image_result['errors'];
+
+                                // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images
+                                // do this by adding the id back to the $products_to_hide array in same position as $key
+                                if(isset($key)){
+                                    $products_to_hide[$key] = $product->get_id();
+                                }else{
+                                    $products_to_hide[] = $product->get_id();
+                                }
+
                             } else {
                                 $status['image_info'] = $main_image_result['info'];
                             }
