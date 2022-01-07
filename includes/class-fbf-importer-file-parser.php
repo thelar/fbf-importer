@@ -22,13 +22,13 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
-        //'duplicate_white_lettering_items',
-        //'import_stock_white',
+        'duplicate_white_lettering_items',
+        'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
-        //'rotate_stock_files',
-        //'write_rsp_xml',
-        //'collate_suppliers'
+        'rotate_stock_files',
+        'write_rsp_xml',
+        'collate_suppliers'
     ];
     private $stage;
     public $stock;
