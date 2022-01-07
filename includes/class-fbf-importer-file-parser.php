@@ -581,7 +581,7 @@ class Fbf_Importer_File_Parser {
                             if (isset($main_image_result['errors'])) {
                                 $status['errors'] = $main_image_result['errors'];
 
-                                // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images
+                                // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images)
                                 // do this by adding the id back to the $products_to_hide array in same position as $key
                                 if(isset($key)){
                                     $products_to_hide[$key] = $product->get_id();
@@ -608,6 +608,13 @@ class Fbf_Importer_File_Parser {
                                     }
                                 }
                                 //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
+                            }
+                        }else{
+                            // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)
+                            if(isset($key)){
+                                $products_to_hide[$key] = $product->get_id();
+                            }else{
+                                $products_to_hide[] = $product->get_id();
                             }
                         }
                     }
