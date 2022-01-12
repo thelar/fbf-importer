@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
         'rotate_stock_files',
@@ -608,6 +608,12 @@ class Fbf_Importer_File_Parser {
                                     }
                                 }
                                 //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
+                            }
+
+                            // ebay images
+                            $ebay_images = $image_gallery->ebay_process($status['action']);
+                            if(!empty($ebay_images)){
+                                add_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
                             }
                         }else{
                             // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)

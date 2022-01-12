@@ -4,6 +4,8 @@ class Fbf_Importer_Product_Gallery
 {
     private $product_id;
     private $image_name;
+    private $ebay_image_name;
+    private $ebay_gallery_images;
     private $image_base;
     private $plugin_name;
     private $base_image_filepath;
@@ -18,6 +20,7 @@ class Fbf_Importer_Product_Gallery
         $this->image_name = $image;
         $this->plugin_name = $plugin_name;
         $this->image_base = pathinfo($this->image_name, PATHINFO_FILENAME);
+        $this->image_ext = pathinfo($this->image_name, PATHINFO_EXTENSION);
         if(function_exists('get_home_path')){
             $this->base_image_filepath = get_home_path() . '../supplier/' . self::$source_image_dir . '/';
         }else{
@@ -29,6 +32,12 @@ class Fbf_Importer_Product_Gallery
 
         // Get all of the images for the gallery
         $this->gallery_images = glob($this->base_image_filepath . $this->image_base . '_[0-9]*.{jpg,gif,png}', GLOB_BRACE);
+
+        // Ebay main image
+        $this->ebay_image_name = $this->base_image_filepath . $this->image_base . '_ebay' . '.' . $this->image_ext;
+
+        // Get all of the images for eBay
+        $this->ebay_gallery_images = glob($this->base_image_filepath . $this->image_base . '_ebay_[0-9]*.{jpg,gif,png}', GLOB_BRACE);
     }
 
     public function process($action)
@@ -68,5 +77,27 @@ class Fbf_Importer_Product_Gallery
             }
         }
         return $response;
+    }
+
+    public function ebay_process($action)
+    {
+        $ebay_images = [];
+        $ebay_attach_ids = [];
+        if(!empty($this->ebay_image_name)){
+            $ebay_images[] = $this->ebay_image_name;
+        }
+        if(!empty($this->ebay_gallery_images)){
+            foreach($this->ebay_gallery_images as $image){
+                $ebay_images[] = $image;
+            }
+        }
+        if(!empty($ebay_images)){
+            foreach($ebay_images as $image){
+                $ebay_image_handler = new Fbf_Importer_Product_Gallery_Image($this->product_id, basename($image));
+                $upload = $ebay_image_handler->process_ebay();
+                $ebay_attach_ids[] = $upload['attach_id'];
+            }
+        }
+        return $ebay_attach_ids;
     }
 }
