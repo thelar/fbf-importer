@@ -249,6 +249,7 @@ class Fbf_Importer_File_Parser {
                     }
 
                     $name = sprintf('%s/%s/%s %s %s %s %s %s Tyre', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', $brand_title, $model_title, isset($item['Tyre Type']) ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+                    $name_gpf = sprintf('%s/%s/%s %s %s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', (string) $item['Brand Name'] , $model_title, isset($item['Tyre Type']) ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
 
                     $attrs = [
                         'Load/Speed Rating' => 'load-speed-rating',
@@ -373,6 +374,11 @@ class Fbf_Importer_File_Parser {
 
                     $product->set_name($name);
                     $this->add_to_yoast_seo($product_id, '', $name, '');
+
+                    //Set GPF title if set
+                    if (isset($name_gpf)){
+                        update_post_meta($product->get_id(), '_fbf_gpf_product_title', $name_gpf);
+                    }
 
                     //Set the title in the post meta - this is for eBay Package searches and other searches where we need to filter by both SKU and Title
                     update_post_meta($product->get_id(), '_fbf_product_title', $name);
