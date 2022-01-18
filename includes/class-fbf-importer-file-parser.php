@@ -248,8 +248,11 @@ class Fbf_Importer_File_Parser {
                         $model_title = '';
                     }
 
-                    $name = sprintf('%s/%s/%s %s %s %s %s %s Tyre', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', $brand_title, $model_title, isset($item['Tyre Type']) ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
-                    $name_gpf = sprintf('%s/%s/%s %s %s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', (string) $item['Brand Name'] , $model_title, isset($item['Tyre Type']) ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+                    $name = sprintf('%s/%s/%s %s %s %s %s %s Tyre', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', $brand_title, $model_title,  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+                    $name_gpf = sprintf('%s/%s/%s %s %s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', (string) $item['Brand Name'] , $model_title, isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+
+                    $name = str_ireplace(['   ', '  '], ' ', $name);
+                    $name_gpf = str_ireplace(['   ', '  '], ' ', $name_gpf);
 
                     $attrs = [
                         'Load/Speed Rating' => 'load-speed-rating',
