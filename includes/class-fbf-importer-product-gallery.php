@@ -34,7 +34,9 @@ class Fbf_Importer_Product_Gallery
         $this->gallery_images = glob($this->base_image_filepath . $this->image_base . '_[0-9]*.{jpg,gif,png}', GLOB_BRACE);
 
         // Ebay main image
-        $this->ebay_image_name = $this->base_image_filepath . $this->image_base . '_ebay' . '.' . $this->image_ext;
+        if(file_exists($this->base_image_filepath . $this->image_base . '_ebay' . '.' . $this->image_ext)){
+            $this->ebay_image_name = $this->base_image_filepath . $this->image_base . '_ebay' . '.' . $this->image_ext;
+        }
 
         // Get all of the images for eBay
         $this->ebay_gallery_images = glob($this->base_image_filepath . $this->image_base . '_ebay_[0-9]*.{jpg,gif,png}', GLOB_BRACE);
