@@ -622,7 +622,7 @@ class Fbf_Importer_File_Parser {
                             // ebay images
                             $ebay_images = $image_gallery->ebay_process($status['action']);
                             if(!empty($ebay_images)){
-                                add_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
+                                update_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
                             }else{
                                 delete_post_meta($product_id, '_fbf_ebay_images');
                             }
