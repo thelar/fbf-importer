@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
         'rotate_stock_files',
@@ -722,7 +722,7 @@ class Fbf_Importer_File_Parser {
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        if(!$is_white){
+        /*if(!$is_white){
             foreach($products_to_hide as $hide_id){
                 $status = [];
                 $status['action'] = 'Hide';
@@ -738,7 +738,7 @@ class Fbf_Importer_File_Parser {
                 }
                 $stock_status[$sku] = $status;
             }
-        }
+        }*/ // Comment out till figure out what is going on with Urban sku's
         $this->info[$this->stage]['stock_status'] = $stock_status;
     }
 
