@@ -776,11 +776,12 @@ class Fbf_Importer_File_Parser {
 
 
         $test_product = wc_get_product_id_by_sku('100-1006');
-        if($test_product){
+        $test_product_wc = wc_get_product($test_product);
+        if($test_product_wc){
             ob_start();
-            printf('<p>sku 100-1006 visibility: %s</p>', $test_product->get_catalog_visibility());
-            printf('<p>sku 100-1006 stock: %s</p>', $test_product->get_stock_quantity());
-            printf('<p>sku 100-1006 backorders: %s</p>', $test_product->get_backorders());
+            printf('<p>sku 100-1006 visibility: %s</p>', $test_product_wc->get_catalog_visibility());
+            printf('<p>sku 100-1006 stock: %s</p>', $test_product_wc->get_stock_quantity());
+            printf('<p>sku 100-1006 backorders: %s</p>', $test_product_wc->get_backorders());
             $email = ob_get_clean();
 
             $headers = "MIME-Version: 1.0\r\n";
@@ -809,11 +810,11 @@ class Fbf_Importer_File_Parser {
         } // Comment out till figure out what is going on with Urban sku's
         $this->info[$this->stage]['stock_status'] = $stock_status;
 
-        if($test_product){
+        if($test_product_wc){
             ob_start();
-            printf('<p>sku 100-1006 visibility: %s</p>', $test_product->get_catalog_visibility());
-            printf('<p>sku 100-1006 stock: %s</p>', $test_product->get_stock_quantity());
-            printf('<p>sku 100-1006 backorders: %s</p>', $test_product->get_backorders());
+            printf('<p>sku 100-1006 visibility: %s</p>', $test_product_wc->get_catalog_visibility());
+            printf('<p>sku 100-1006 stock: %s</p>', $test_product_wc->get_stock_quantity());
+            printf('<p>sku 100-1006 backorders: %s</p>', $test_product_wc->get_backorders());
             $email = ob_get_clean();
 
             $headers = "MIME-Version: 1.0\r\n";
