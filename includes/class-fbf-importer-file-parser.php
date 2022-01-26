@@ -347,6 +347,22 @@ class Fbf_Importer_File_Parser {
 
                     //Does the product exist?
                     if ($product_id = wc_get_product_id_by_sku($sku)) {
+
+                        if($sku==='100-1006'){
+                            ob_start();
+                            print('<p>sku 100-1006</p>');
+                            printf('<p>id: %s</p>', $product_id);
+                            print('<p>All products to hide:</p>');
+                            print('<pre>');
+                            print_r($products_to_hide);
+                            print('</pre>');
+                            $email = ob_get_clean();
+
+                            $headers = "MIME-Version: 1.0\r\n";
+                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006', $email, $headers);
+                        }
+
                         //Check if we need to update the product
                         $status['action'] = 'Update';
                         $product = new WC_Product($product_id);
@@ -720,6 +736,17 @@ class Fbf_Importer_File_Parser {
             }
             $counter++;
         }
+
+        ob_start();
+        print('<p>Products to hide:</p>');
+        print('<pre>');
+        print_r($products_to_hide);
+        print('</pre>');
+        $email = ob_get_clean();
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        wp_mail('kevin@code-mill.co.uk', 'Import - products to hide', $email, $headers);
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
         /*if(!$is_white){
@@ -1459,7 +1486,7 @@ class Fbf_Importer_File_Parser {
 
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            wp_mail('kevin@code-mill.co.uk', 'Import stage report: ' . $stage, $email, $headers);
+            //wp_mail('kevin@code-mill.co.uk', 'Import stage report: ' . $stage, $email, $headers);
 
             if($this->hasErrors($stage)){ //Any errors at any stage will break the run script immediately
                 $this->log_info($start, false, $auto);
