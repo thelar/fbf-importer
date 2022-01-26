@@ -774,8 +774,20 @@ class Fbf_Importer_File_Parser {
         $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
         wp_mail('kevin@code-mill.co.uk', 'Import - products to hide', $email, $headers);
 
+
+        $test_product = wc_get_product_id_by_sku('100-1006');
+        ob_start();
+        printf('<p>sku 100-1006 visibility: %s</p>', $test_product->get_catalog_visibility());
+        printf('<p>sku 100-1006 stock: %s</p>', $test_product->get_stock_quantity());
+        printf('<p>sku 100-1006 backorders: %s</p>', $test_product->get_backorders());
+        $email = ob_get_clean();
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status before hide', $email, $headers);
+
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        /*if(!$is_white){
+        if(!$is_white){
             foreach($products_to_hide as $hide_id){
                 $status = [];
                 $status['action'] = 'Hide';
@@ -791,8 +803,18 @@ class Fbf_Importer_File_Parser {
                 }
                 $stock_status[$sku] = $status;
             }
-        }*/ // Comment out till figure out what is going on with Urban sku's
+        } // Comment out till figure out what is going on with Urban sku's
         $this->info[$this->stage]['stock_status'] = $stock_status;
+
+        ob_start();
+        printf('<p>sku 100-1006 visibility: %s</p>', $test_product->get_catalog_visibility());
+        printf('<p>sku 100-1006 stock: %s</p>', $test_product->get_stock_quantity());
+        printf('<p>sku 100-1006 backorders: %s</p>', $test_product->get_backorders());
+        $email = ob_get_clean();
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+        wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status after hide', $email, $headers);
     }
 
     public function update_ebay_packages()
