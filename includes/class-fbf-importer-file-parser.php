@@ -370,8 +370,34 @@ class Fbf_Importer_File_Parser {
                         //Delete the product id from $all_products so that it doesn't get set to invisible
                         $key = array_search($product->get_id(), $products_to_hide);
 
+                        if($sku==='100-1006'){
+                            ob_start();
+                            print('<p>Key:</p>');
+                            print('<pre>');
+                            print_r($key);
+                            print('</pre>');
+                            $email = ob_get_clean();
+
+                            $headers = "MIME-Version: 1.0\r\n";
+                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
+                        }
+
                         if ($key !== false) {
                             unset($products_to_hide[$key]);
+                        }
+
+                        if($sku==='100-1006'){
+                            ob_start();
+                            print('<p>New list:</p>');
+                            print('<pre>');
+                            print_r($products_to_hide);
+                            print('</pre>');
+                            $email = ob_get_clean();
+
+                            $headers = "MIME-Version: 1.0\r\n";
+                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
                         }
 
                         // Delete equivalent white lettering product if there is one
