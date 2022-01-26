@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        //'import_stock_white',
+        'import_stock_white',
         'import_stock',
         //'update_ebay_packages',
         'rotate_stock_files',
@@ -360,7 +360,7 @@ class Fbf_Importer_File_Parser {
 
                             $headers = "MIME-Version: 1.0\r\n";
                             $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006', $email, $headers);
+                            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006', $email, $headers);
                         }
 
                         //Check if we need to update the product
@@ -380,7 +380,7 @@ class Fbf_Importer_File_Parser {
 
                             $headers = "MIME-Version: 1.0\r\n";
                             $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
+                            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
                         }
 
                         if ($key !== false) {
@@ -397,7 +397,7 @@ class Fbf_Importer_File_Parser {
 
                             $headers = "MIME-Version: 1.0\r\n";
                             $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
+                            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
                         }
 
                         // Delete equivalent white lettering product if there is one
@@ -772,7 +772,7 @@ class Fbf_Importer_File_Parser {
 
         $headers = "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-        wp_mail('kevin@code-mill.co.uk', 'Import - products to hide', $email, $headers);
+        //wp_mail('kevin@code-mill.co.uk', 'Import - products to hide', $email, $headers);
 
 
         $test_product = wc_get_product_id_by_sku('100-1006');
@@ -786,7 +786,7 @@ class Fbf_Importer_File_Parser {
 
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status before hide', $email, $headers);
+            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status before hide', $email, $headers);
         }
 
 
@@ -819,7 +819,7 @@ class Fbf_Importer_File_Parser {
 
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status after hide', $email, $headers);
+            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status after hide', $email, $headers);
         }
 
     }
