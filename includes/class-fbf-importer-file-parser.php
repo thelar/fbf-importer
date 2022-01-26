@@ -25,7 +25,7 @@ class Fbf_Importer_File_Parser {
         'duplicate_white_lettering_items',
         'import_stock_white',
         'import_stock',
-        //'update_ebay_packages',
+        'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
         'collate_suppliers'
