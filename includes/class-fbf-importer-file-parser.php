@@ -347,22 +347,6 @@ class Fbf_Importer_File_Parser {
 
                     //Does the product exist?
                     if ($product_id = wc_get_product_id_by_sku($sku)) {
-
-                        if($sku==='100-1006'){
-                            ob_start();
-                            print('<p>sku 100-1006</p>');
-                            printf('<p>id: %s</p>', $product_id);
-                            print('<p>All products to hide:</p>');
-                            print('<pre>');
-                            print_r($products_to_hide);
-                            print('</pre>');
-                            $email = ob_get_clean();
-
-                            $headers = "MIME-Version: 1.0\r\n";
-                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006', $email, $headers);
-                        }
-
                         //Check if we need to update the product
                         $status['action'] = 'Update';
                         $product = new WC_Product($product_id);
@@ -370,34 +354,8 @@ class Fbf_Importer_File_Parser {
                         //Delete the product id from $all_products so that it doesn't get set to invisible
                         $key = array_search($product->get_id(), $products_to_hide);
 
-                        if($sku==='100-1006'){
-                            ob_start();
-                            print('<p>Key:</p>');
-                            print('<pre>');
-                            print_r($key);
-                            print('</pre>');
-                            $email = ob_get_clean();
-
-                            $headers = "MIME-Version: 1.0\r\n";
-                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
-                        }
-
                         if ($key !== false) {
                             unset($products_to_hide[$key]);
-                        }
-
-                        if($sku==='100-1006'){
-                            ob_start();
-                            print('<p>New list:</p>');
-                            print('<pre>');
-                            print_r($products_to_hide);
-                            print('</pre>');
-                            $email = ob_get_clean();
-
-                            $headers = "MIME-Version: 1.0\r\n";
-                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 2', $email, $headers);
                         }
 
                         // Delete equivalent white lettering product if there is one
@@ -747,48 +705,11 @@ class Fbf_Importer_File_Parser {
                 }
                 $stock_status[$sku] = $status;
 
-                /*ob_start();
-                print('<pre>');
-                print_r($status);
-                print('</pre>');
-                $email = ob_get_clean();
-
-                $headers = "MIME-Version: 1.0\r\n";
-                $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                wp_mail('kevin@code-mill.co.uk', 'Import status:' . $sku, $email, $headers);*/
-
             } else {
                 $status['errors'][] = 'Category is not set';
             }
             $counter++;
         }
-
-        ob_start();
-        print('<p>Products to hide:</p>');
-        print('<pre>');
-        print_r($products_to_hide);
-        print('</pre>');
-        $email = ob_get_clean();
-
-        $headers = "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-        //wp_mail('kevin@code-mill.co.uk', 'Import - products to hide', $email, $headers);
-
-
-        $test_product = wc_get_product_id_by_sku('100-1006');
-        $test_product_wc = wc_get_product($test_product);
-        if($test_product_wc){
-            ob_start();
-            printf('<p>sku 100-1006 visibility: %s</p>', $test_product_wc->get_catalog_visibility());
-            printf('<p>sku 100-1006 stock: %s</p>', $test_product_wc->get_stock_quantity());
-            printf('<p>sku 100-1006 backorders: %s</p>', $test_product_wc->get_backorders());
-            $email = ob_get_clean();
-
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status before hide', $email, $headers);
-        }
-
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
         if(!$is_white){
@@ -809,19 +730,6 @@ class Fbf_Importer_File_Parser {
             }
         } // Comment out till figure out what is going on with Urban sku's
         $this->info[$this->stage]['stock_status'] = $stock_status;
-
-        if($test_product_wc){
-            ob_start();
-            printf('<p>sku 100-1006 visibility: %s</p>', $test_product_wc->get_catalog_visibility());
-            printf('<p>sku 100-1006 stock: %s</p>', $test_product_wc->get_stock_quantity());
-            printf('<p>sku 100-1006 backorders: %s</p>', $test_product_wc->get_backorders());
-            $email = ob_get_clean();
-
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            //wp_mail('kevin@code-mill.co.uk', 'SKU 100-1006 status after hide', $email, $headers);
-        }
-
     }
 
     public function update_ebay_packages()
