@@ -1535,4 +1535,46 @@ class Fbf_Importer_File_Parser {
         }
         return $ret;
     }
+
+    public function image_report()
+    {
+        $this->stages = [
+            'file_exists',
+            'file_valid',
+            'build_stock_array',
+        ];
+        foreach($this->stages as $stage) {
+            $this->stage = $stage;
+            $this->{$stage}();
+        }
+
+        $list = $this->stock;
+        $missing_images = [];
+        foreach($list as $stock_item){
+            if(isset($stock_item['Image name'])) {
+                if ($stock_item['Image name']) {
+                    include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
+                    $image_handler = new Fbf_Importer_Product_Image(999999, (string)$stock_item['Image name']);
+                    $image_exists = $image_handler->source_image_exists();
+                    if (!$image_exists) {
+                        if (!in_array($stock_item['Image name'], $missing_images))
+                            $missing_images[] = $stock_item['Image name'];
+                    }
+                }
+            }
+        }
+
+        if(!empty($missing_images)){
+            $data = [];
+            foreach($missing_images as $missing_image){
+                $data[] = [
+                    $missing_image
+                ];
+            }
+
+            return $data;
+        }else{
+            return false;
+        }
+    }
 }

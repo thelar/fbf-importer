@@ -70,7 +70,7 @@ class Fbf_Importer_Product_Image
      *
      * @return bool
      */
-    private function source_image_exists()
+    public function source_image_exists()
     {
         if(file_exists($this->image_filepath)){
             return true;
