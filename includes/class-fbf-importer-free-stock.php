@@ -110,13 +110,13 @@ class Fbf_Importer_Free_Stock
 
                     if($product_id = wc_get_product_id_by_sku($row[$col])){
                         $product = wc_get_product($product_id);
-                        $pc = (int)$row[9];
+                        $pc = (int)$row[10];
                         if($pc===0){
 
-                            if(!empty($row[10])){
+                            if(!empty($row[11])){
                                 //Date
                                 try {
-                                    $date = new DateTime($row[10]);
+                                    $date = DateTime::createFromFormat('d/m/Y', $row[11]);
                                 } catch (Exception $e) {
                                     $log[] = [
                                         'id' => $product_id,
