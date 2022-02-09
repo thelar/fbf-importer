@@ -667,14 +667,16 @@ class Fbf_Importer_File_Parser {
                         if((string)$item['Include in Price Match']=='True'){
                             // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
                             $rsp_price = round($this->get_rsp($item, $product_id, (float)$product->get_regular_price()) * 1.2, 2);
+                            if($product_id=='299196'){
+                                ob_start();
+                                print($product_id . ': ' .$rsp_price);
+                                $email = ob_get_clean();
 
-                            ob_start();
-                            print($product_id . ': ' .$rsp_price);
-                            $email = ob_get_clean();
+                                $headers = "MIME-Version: 1.0\r\n";
+                                $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                                wp_mail('kevin@code-mill.co.uk', 'RSP price: ' . $product_id, $email, $headers);
+                            }
 
-                            $headers = "MIME-Version: 1.0\r\n";
-                            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                            wp_mail('kevin@code-mill.co.uk', 'RSP price: ' . $product_id, $email, $headers);
 
                         }else{
                             $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
@@ -890,6 +892,16 @@ class Fbf_Importer_File_Parser {
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
 
+        if($product_id=='299196'){
+            ob_start();
+            print('Supplier price: ' .$s_price);
+            $email = ob_get_clean();
+
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+            wp_mail('kevin@code-mill.co.uk', 'Supplier price: ' . $product_id, $email, $headers);
+        }
+
         if($s_price === (float)0){
             return $s_price; //Return with zero so we can catch error
         }
@@ -905,6 +917,17 @@ class Fbf_Importer_File_Parser {
                 }
             }
         }
+
+        if($product_id=='299196'){
+            ob_start();
+            print('Percentage: ' .$pc);
+            $email = ob_get_clean();
+
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+            wp_mail('kevin@code-mill.co.uk', 'Rule percentage: ' . $product_id, $email, $headers);
+        }
+
         if($pc){
             return (($pc/100) * $s_price) + $s_price + $this->flat_fee;
         }else{
