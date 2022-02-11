@@ -116,7 +116,7 @@ class Fbf_Importer_Free_Stock
                             if(!empty($row[11])){
                                 //Date
                                 try {
-                                    $date = DateTime::createFromFormat('d/m/Y', $row[11]);
+                                    $date = DateTime::createFromFormat('m/d/Y', $row[11]);
                                 } catch (Exception $e) {
                                     $log[] = [
                                         'id' => $product_id,
