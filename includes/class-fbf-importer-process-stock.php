@@ -155,7 +155,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[12]['write_filename'] = "wheelwright";
         $supplier_array[12]['cell_1a'] = "WHEELWRI";
         $supplier_array[12]['data_start_row'] = "1";
-        $supplier_array[12]['mapping_array'] = array('0', '0', '11', '2');
+        $supplier_array[12]['mapping_array'] = array('0', '0', '18', '14');
         $supplier_array[12]['delimiter'] = ",";
 
         //$supplier_array[13]['name'] = "Reifen";
