@@ -79,6 +79,7 @@ class Fbf_Importer {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 
+
 	}
 
 	/**
