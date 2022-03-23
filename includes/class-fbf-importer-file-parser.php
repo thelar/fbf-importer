@@ -207,6 +207,7 @@ class Fbf_Importer_File_Parser {
 
         foreach ($list as $item) {
             $sku = (string)$item['Product Code'];
+            $name_gpf = null; // need to set to null for looping
 
             if($is_white){
                 $orig_sku = $sku;
@@ -381,6 +382,8 @@ class Fbf_Importer_File_Parser {
                     //Set GPF title if set
                     if (isset($name_gpf)){
                         update_post_meta($product->get_id(), '_fbf_gpf_product_title', $name_gpf);
+                    }else{
+                        delete_post_meta($product->get_id(), '_fbf_gpf_product_title');
                     }
 
                     //Set the title in the post meta - this is for eBay Package searches and other searches where we need to filter by both SKU and Title
