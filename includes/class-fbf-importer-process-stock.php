@@ -142,13 +142,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[10]['mapping_array'] = array('0', '0', '2', '1');
         $supplier_array[10]['delimiter'] = ",";*/
 
-        $supplier_array[11]['name'] = "WOLFRACE";
+        /*$supplier_array[11]['name'] = "WOLFRACE";
         $supplier_array[11]['read_filename'] = "wolfrace_trade_gold.csv";
         $supplier_array[11]['write_filename'] = "wolfrace";
         $supplier_array[11]['cell_1a'] = "WOLFR";
         $supplier_array[11]['data_start_row'] = "1";
         $supplier_array[11]['mapping_array'] = array('3', '3', '20', '2');
-        $supplier_array[11]['delimiter'] = ",";
+        $supplier_array[11]['delimiter'] = ",";*/
 
         $supplier_array[12]['name'] = "wheelwright";
         $supplier_array[12]['read_filename'] = "wheelwright.csv";
