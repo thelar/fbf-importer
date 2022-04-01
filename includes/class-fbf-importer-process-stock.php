@@ -27,7 +27,7 @@ class Fbf_Importer_Stock_Processor
         );*/
 
 
-        file_put_contents(self::UPLOAD_LOCATION . 'wolfrace/wolfrace.csv', fopen("http://www.wolfrace.com/?dealer-tools=download-stock", 'r'));
+        //file_put_contents(self::UPLOAD_LOCATION . 'wolfrace/wolfrace.csv', fopen("http://www.wolfrace.com/?dealer-tools=download-stock", 'r'));
         file_put_contents(self::UPLOAD_LOCATION . 'wheelwright/wheelwright.csv', fopen("http://www.wheelwright.co.uk/index.php?dealer-tools=download-stock", 'r'));
 
 
@@ -198,13 +198,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[15]['mapping_array'] = array('2', '21', '19', '20');
         $supplier_array[15]['delimiter'] = ";";*/
 
-        $supplier_array[16]['name'] = "etb";
+        /*$supplier_array[16]['name'] = "etb";
         $supplier_array[16]['read_filename'] = "ZTG005.CSV";
         $supplier_array[16]['write_filename'] = "etb";
         $supplier_array[16]['cell_1a'] = "ETBWORCE";
         $supplier_array[16]['data_start_row'] = "1";
         $supplier_array[16]['mapping_array'] = array('1', '2', '39', '41');
-        $supplier_array[16]['delimiter'] = ",";
+        $supplier_array[16]['delimiter'] = ",";*/
 
         // $supplier_array[16]['name'] = "etb";
         // $supplier_array[16]['read_filename'] = "ZTG005.csv";
@@ -232,21 +232,21 @@ class Fbf_Importer_Stock_Processor
         //$supplier_array[15]['mapping_array'] = array('0', '0', '2', '1');
         //$supplier_array[15]['delimiter'] = ",";
 
-        $supplier_array[17]['name'] = "COMPAUTO";
+        /*$supplier_array[17]['name'] = "COMPAUTO";
         $supplier_array[17]['read_filename'] = "stock.csv";
         $supplier_array[17]['write_filename'] = "compauto";
         $supplier_array[17]['cell_1a'] = "COMPAUTO";
         $supplier_array[17]['data_start_row'] = "1";
         $supplier_array[17]['mapping_array'] = array('0', '0', '13', '10');
-        $supplier_array[17]['delimiter'] = ",";
+        $supplier_array[17]['delimiter'] = ",";*/
 
-        $supplier_array[18]['name'] = "BICKERS";
+        /*$supplier_array[18]['name'] = "BICKERS";
         $supplier_array[18]['read_filename'] = "trade_prices.csv";
         $supplier_array[18]['write_filename'] = "bickers";
         $supplier_array[18]['cell_1a'] = "BICKERS";
         $supplier_array[18]['data_start_row'] = "1";
         $supplier_array[18]['mapping_array'] = array('0', '0', '3', '2');
-        $supplier_array[18]['delimiter'] = ",";
+        $supplier_array[18]['delimiter'] = ",";*/
 
 
 
