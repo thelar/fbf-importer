@@ -5,6 +5,9 @@ class Fbf_Importer_Stock_Processor
 {
     private $plugin_name;
     private $errors = [];
+    private $filters = [
+        'STAPLETONS',
+    ];
     const STOCK_FEED_LOCATION = ABSPATH . '../../supplier/stock/';
     const UPLOAD_LOCATION = ABSPATH . '../../supplier/stock/Upload/';
     public function __construct($plugin_name)
@@ -273,70 +276,75 @@ class Fbf_Importer_Stock_Processor
 
             if (($handle = fopen(self::STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['read_filename'], "r")) !== FALSE) {
                 while (($data = fgetcsv($handle, 1000, $supplier_data['delimiter'])) !== FALSE) {
+                    $filter = false; // Initially don't filter
 
                     if($row >= (int)$supplier_data['data_start_row']) {
                         $num = count($data);
 
-                        for ($i=0, $n=sizeof($data_columns_array); $i<$n; $i++) {
-                            $write_array[$row][$data_columns_array[$i]] = $data[$supplier_data['mapping_array'][$i]];
+                        if(in_array($supplier_data['name'], $this->filters)){
+                            $filter = $this->filter_data($supplier_data['name'], $data);
+                        }
+                        if($filter===false){
+                            for ($i=0, $n=sizeof($data_columns_array); $i<$n; $i++) {
+                                $write_array[$row][$data_columns_array[$i]] = $data[$supplier_data['mapping_array'][$i]];
+
+                                if ($supplier_id == 13) {
+                                    $write_array[$row][$data_columns_array[$i]] = str_replace("£","",$data[$supplier_data['mapping_array'][$i]]);
+                                }
+                                else {
+                                    $write_array[$row][$data_columns_array[$i]] = $data[$supplier_data['mapping_array'][$i]];
+                                }
+
+                            }
+
+                            //Supplier Part No. = A
+                            //IP Code = C
+                            //Cost = E
+                            //Qty = F
+                            //What we are saying is that when we create this file IF column C = BLANK then we populate with Column A instead
+                            if($write_array[$row][$data_columns_array[1]] == '' || $write_array[$row][$data_columns_array[1]] == ' ') {
+                                $write_array[$row][$data_columns_array[1]] = $write_array[$row][$data_columns_array[0]];
+                            }
+
+                            if($write_array[$row][$data_columns_array[3]] == '>  20') {
+                                $write_array[$row][$data_columns_array[3]] = 50;
+                            }
+
+                            if($supplier_id == 12) {
+
+                                if(strlen($write_array[$row][$data_columns_array[0]]) == 4) {
+                                    $write_array[$row][$data_columns_array[0]] = 'WW'.$write_array[$row][$data_columns_array[0]];
+                                }
+
+                                if(strlen($write_array[$row][$data_columns_array[1]]) == 4) {
+                                    $write_array[$row][$data_columns_array[1]] = 'WW'.$write_array[$row][$data_columns_array[1]];
+                                }
+
+                            }
 
                             if ($supplier_id == 13) {
-                                $write_array[$row][$data_columns_array[$i]] = str_replace("£","",$data[$supplier_data['mapping_array'][$i]]);
-                            }
-                            else {
-                                $write_array[$row][$data_columns_array[$i]] = $data[$supplier_data['mapping_array'][$i]];
+                                $write_array[$row][$data_columns_array[2]] =  str_replace("£","",$write_array[$row][$data_columns_array[2]]);
                             }
 
-                        }
-
-                        //Supplier Part No. = A
-                        //IP Code = C
-                        //Cost = E
-                        //Qty = F
-                        //What we are saying is that when we create this file IF column C = BLANK then we populate with Column A instead
-                        if($write_array[$row][$data_columns_array[1]] == '' || $write_array[$row][$data_columns_array[1]] == ' ') {
-                            $write_array[$row][$data_columns_array[1]] = $write_array[$row][$data_columns_array[0]];
-                        }
-
-                        if($write_array[$row][$data_columns_array[3]] == '>  20') {
-                            $write_array[$row][$data_columns_array[3]] = 50;
-                        }
-
-                        if($supplier_id == 12) {
-
-                            if(strlen($write_array[$row][$data_columns_array[0]]) == 4) {
-                                $write_array[$row][$data_columns_array[0]] = 'WW'.$write_array[$row][$data_columns_array[0]];
+                            if($supplier_id == 4) {
+                                $write_array[$row][$data_columns_array[2]] = str_replace(",",".",$write_array[$row][$data_columns_array[2]]);
                             }
 
-                            if(strlen($write_array[$row][$data_columns_array[1]]) == 4) {
-                                $write_array[$row][$data_columns_array[1]] = 'WW'.$write_array[$row][$data_columns_array[1]];
-                            }
-
-                        }
-
-                        if ($supplier_id == 13) {
-                            $write_array[$row][$data_columns_array[2]] =  str_replace("£","",$write_array[$row][$data_columns_array[2]]);
-                        }
-
-                        if($supplier_id == 4) {
+                            //if($supplier_id == 6) {
                             $write_array[$row][$data_columns_array[2]] = str_replace(",",".",$write_array[$row][$data_columns_array[2]]);
+                            //}
+
+                            //no price
+                            //if($supplier_id == 15) {
+                            //	$write_array[$row][$data_columns_array[3]] = '0';
+                            //}
+
+                            //if($supplier_id == 15) {
+                            //	if($write_array[$row][$data_columns_array[1]] == '' || $write_array[$row][$data_columns_array[1]] == ' ') {
+                            //	$write_array[$row][$data_columns_array[1]] = $write_array[$row][$data_columns_array[0]];
+                            //	}
+                            //}
                         }
-
-                        //if($supplier_id == 6) {
-                        $write_array[$row][$data_columns_array[2]] = str_replace(",",".",$write_array[$row][$data_columns_array[2]]);
-                        //}
-
-                        //no price
-                        //if($supplier_id == 15) {
-                        //	$write_array[$row][$data_columns_array[3]] = '0';
-                        //}
-
-                        //if($supplier_id == 15) {
-                        //	if($write_array[$row][$data_columns_array[1]] == '' || $write_array[$row][$data_columns_array[1]] == ' ') {
-                        //	$write_array[$row][$data_columns_array[1]] = $write_array[$row][$data_columns_array[0]];
-                        //	}
-                        //}
-
                     }
                     $row++;
                 }
@@ -459,5 +467,16 @@ class Fbf_Importer_Stock_Processor
     private function get_success()
     {
         return urlencode('<strong>Success</strong> - all supplier stock files processed' );
+    }
+
+    private function filter_data($supplier_name, $data)
+    {
+        $name = $supplier_name;
+        if($supplier_name==='STAPLETONS'){
+            if(str_contains(strtolower($data[2]), 'maxxis')){
+                return false;
+            }
+        }
+        return true;
     }
 }
