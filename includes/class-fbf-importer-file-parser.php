@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'update_ebay_packages',
         'rotate_stock_files',
@@ -302,7 +302,6 @@ class Fbf_Importer_File_Parser {
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
-                        'Accessory Type' => 'accessory-type',
                         'List on eBay' => [
                             'slug' => 'list-on-ebay',
                             'scope' => 'global',
@@ -331,6 +330,7 @@ class Fbf_Importer_File_Parser {
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
+                        'Accessory Type' => 'accessory-type',
                         'List on eBay' => [
                             'slug' => 'list-on-ebay',
                             'scope' => 'global',
