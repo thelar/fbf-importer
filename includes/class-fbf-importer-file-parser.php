@@ -72,7 +72,7 @@ class Fbf_Importer_File_Parser {
             'c2' => 'Brand Name',
             'c3' => 'Model Name',
             'c4' => 'Tyre Type',
-            'c5' => 'Tyre Quality',
+            'c5' => 'Accessory Type',
             'c6' => 'Tyre Vehicle Specific',
             'c7' => 'Tyre Width',
             'c8' => 'Image name',
@@ -231,7 +231,7 @@ class Fbf_Importer_File_Parser {
                 if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                     //It's a Tyre
                     $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
-                    array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Quality', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
+                    array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
 
                     // Remove the word Tyres from the brand name if it's there
                     if(isset($item['Brand Name'])){
@@ -260,7 +260,6 @@ class Fbf_Importer_File_Parser {
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
                         'Tyre Type' => 'tyre-type',
-                        'Tyre Quality' => 'tyre-quality',
                         'Tyre Vehicle Specific' => 'tyre-vehicle-specific',
                         'Tyre Width' => 'tyre-width',
                         'Tyre Size' => 'tyre-size',
@@ -303,6 +302,7 @@ class Fbf_Importer_File_Parser {
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
+                        'Accessory Type' => 'accessory-type',
                         'List on eBay' => [
                             'slug' => 'list-on-ebay',
                             'scope' => 'global',
