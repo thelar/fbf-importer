@@ -55,13 +55,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[0]['mapping_array'] = array('1', '2', '39', '41');
         $supplier_array[0]['delimiter'] = ",";
 
-        $supplier_array[1]['name'] = "BOND";
+        /*$supplier_array[1]['name'] = "BOND";
         $supplier_array[1]['read_filename'] = "bond.csv";
         $supplier_array[1]['write_filename'] = "bond";
         $supplier_array[1]['cell_1a'] = "BONDINTE";
         $supplier_array[1]['data_start_row'] = "1";
         $supplier_array[1]['mapping_array'] = array('0', '1', '24', '23');
-        $supplier_array[1]['delimiter'] = ",";
+        $supplier_array[1]['delimiter'] = ",";*/
 
         $supplier_array[2]['name'] = "STAPLETONS";
         $supplier_array[2]['read_filename'] = "EXP48419S.CSV";
@@ -71,13 +71,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[2]['mapping_array'] = array('0', '16', '13', '15');
         $supplier_array[2]['delimiter'] = ",";
 
-        $supplier_array[3]['name'] = "MALVERN";
+        /*$supplier_array[3]['name'] = "MALVERN";
         $supplier_array[3]['read_filename'] = "cooper.xls";
         $supplier_array[3]['write_filename'] = "malvern";
         $supplier_array[3]['cell_1a'] = "MALVERN";
         $supplier_array[3]['data_start_row'] = "3";
         $supplier_array[3]['mapping_array'] = array('0', '1', '3', '6');
-        $supplier_array[3]['delimiter'] = ",";
+        $supplier_array[3]['delimiter'] = ",";*/
 
         /*$supplier_array[4]['name'] = "DELDO";
         $supplier_array[4]['read_filename'] = "deldo47545.csv"; //"TOPGEAR.csv";
