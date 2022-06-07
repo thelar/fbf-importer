@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'update_ebay_packages',
         'rotate_stock_files',
@@ -249,8 +249,8 @@ class Fbf_Importer_File_Parser {
                         $model_title = '';
                     }
 
-                    $name = sprintf('%s/%s/%s %s %s %s %s %s Tyre', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', $brand_title, $model_title,  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
-                    $name_gpf = sprintf('%s/%s/%s %s %s %s %s %s', isset($item['Tyre Width']) ? $item['Tyre Width'] : '', isset($item['Tyre Profile']) ? $item['Tyre Profile'] : '', isset($item['Tyre Size']) ? $item['Tyre Size'] : '', (string) $item['Brand Name'] , $model_title, isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', isset($item['Load/Speed Rating']) ? $item['Load/Speed Rating'] : '');
+                    $name = sprintf('%s/%s/%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $item['Tyre Profile'] ?? '', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
+                    $name_gpf = sprintf('%s/%s/%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile'] ?? '', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
 
                     $name = str_ireplace(['   ', '  '], ' ', $name);
                     $name_gpf = str_ireplace(['   ', '  '], ' ', $name_gpf);
