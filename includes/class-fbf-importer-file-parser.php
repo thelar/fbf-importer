@@ -84,6 +84,7 @@ class Fbf_Importer_File_Parser {
             'l4' => 'Tyre White Lettering',
             'l5' => 'Tyre Runflat',
             'l6' => 'Mud Snow',
+            'l7' => 'Fit On Drive',
             'l8' => '360 Degree Photo',
             'l9' => 'Wheel TUV',
             'l10' => 'Include in Price Match',
@@ -286,6 +287,7 @@ class Fbf_Importer_File_Parser {
                         ],
                         'Three Peaks' => 'three-peaks',
                         'Mud Snow' => 'mud-snow',
+                        'Fit On Drive' => 'fit-on-drive',
                     ];
                 } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
                     //It's a Wheel
