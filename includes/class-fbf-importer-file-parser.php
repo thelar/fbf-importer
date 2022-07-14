@@ -1457,6 +1457,14 @@ class Fbf_Importer_File_Parser {
         $dt->setTimezone($tz);
         $start = $dt->getTimestamp();
 
+        // For automatic imports we add timestamp to auto_imports option array - this is then checked hourly to see if it ran
+        if($auto){
+            $auto_imports = get_option('fbf_importer_auto_imports', []);
+            $import_start = time();
+            $auto_imports[] = $import_start;
+            update_option('fbf_importer_auto_imports', $auto_imports);
+        }
+
         //Loop through $this->stages executing each in turn and fail and return if any errors occur
         foreach($this->stages as $stage){
             $stage_start = microtime(true);
@@ -1469,24 +1477,9 @@ class Fbf_Importer_File_Parser {
             $this->info[$stage]['End time'] = $stage_end;
             $this->info[$stage]['Execution time'] = $exec_time;
 
-            ob_start();
-            print('<pre>');
-            print_r($this->info[$stage]);
-            print('</pre>');
-            print("\n Memory Consumption is   ");
-            print(round(memory_get_usage()/1048576,2).''.' MB');
-            print("\n Peak memory is   ");
-            print(round(memory_get_peak_usage()/1048576,2).''.' MB');
-            $email = ob_get_clean();
-
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            //wp_mail('kevin@code-mill.co.uk', 'Import stage report: ' . $stage, $email, $headers);
-
             if($this->hasErrors($stage)){ //Any errors at any stage will break the run script immediately
                 $this->log_info($start, false, $auto);
                 if(!$auto){
-                    wp_mail('kevin@code-mill.co.uk', 'import script errors', $stage, $headers);
                     $this->redirect_to_settings();
                 }
                 break;
@@ -1499,6 +1492,12 @@ class Fbf_Importer_File_Parser {
         if(!$auto){
             $this->redirect_to_settings();
         }else{
+            // Remove this import from auto_imports array
+            $auto_imports = get_option('fbf_importer_auto_imports');
+            if (($key = array_search($import_start, $auto_imports)) !== false) {
+                unset($auto_imports[$key]);
+            }
+            update_option('fbf_importer_auto_imports', $auto_imports);
             return true;
         }
     }

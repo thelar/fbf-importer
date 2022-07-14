@@ -197,10 +197,25 @@ class Fbf_Importer_Admin {
         // do here what needs to be done automatically as per your schedule
         // in this example we're sending an email
 
-        //TODO: run the import here and make result available for the email
-        //if(date('G')==='7'){
-        //$this->fbf_importer_run_import(true); //Run at 7AM
-        //}
+        $current_time = time();
+        $timeout = 1 * HOUR_IN_SECONDS;
+        $auto_imports = get_option('fbf_importer_auto_imports', []);
+        if(!empty($auto_imports)){
+            foreach($auto_imports as $import_time){
+                if($import_time + $timeout > $current_time){
+                    $headers = "MIME-Version: 1.0\r\n";
+                    $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
+                    $email = '<h1>Stock Import error</h1>';
+                    $email.= sprintf('<p>An error was detected - an automatic import started at <strong>%s</strong> but it has not completed by <strong>%s</strong></p>', date('H:i:s', $import_time), date('H:i:s', $current_time));
+                    if($mail = wp_mail('kevin@code-mill.co.uk', 'Stock Import Error', $email, $headers)){
+                        if (($key = array_search($import_time, $auto_imports)) !== false) {
+                            unset($auto_imports[$key]);
+                        }
+                    }
+                }
+            }
+            update_option('fbf_importer_auto_imports', $auto_imports);
+        }
 
         // components for our email
         $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
@@ -208,7 +223,7 @@ class Fbf_Importer_Admin {
         $message = 'This is a test mail sent by WordPress automatically as per your hourly schedule.';
 
         // let's send it
-        mail($recepients, $subject, $message);
+        wp_mail($recepients, $subject, $message);
     }
 
     /**
@@ -460,13 +475,7 @@ class Fbf_Importer_Admin {
     {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
         $importer = new Fbf_Importer_File_Parser($this->plugin_name);
-        if($importer->run($auto)===true){ //Returns true if automatic (cron)
-            //Importer was successful
-            //mail('kevin@code-mill.co.uk', '4x4 Import', 'Import done');
-        }else{
-            //Importer failed TODO: report the errors
-            var_dump($importer->errors);
-        }
+        $importer->run($auto);
     }
     /**
      * Perform the free stock update
