@@ -597,10 +597,12 @@ class Fbf_Importer_File_Parser {
 
                                 // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images)
                                 // do this by adding the id back to the $products_to_hide array in same position as $key
-                                if(isset($key)){
-                                    $products_to_hide[$key] = $product->get_id();
-                                }else{
-                                    $products_to_hide[] = $product->get_id();
+                                if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
+                                    if(isset($key)){
+                                        $products_to_hide[$key] = $product->get_id();
+                                    }else{
+                                        $products_to_hide[] = $product->get_id();
+                                    }
                                 }
 
                             } else {

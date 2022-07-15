@@ -216,14 +216,6 @@ class Fbf_Importer_Admin {
             }
             update_option('fbf_importer_auto_imports', $auto_imports);
         }
-
-        // components for our email
-        $recepients = get_option($this->option_name . '_email', get_bloginfo('admin_email'));
-        $subject = 'Hello from your Cron Job';
-        $message = 'This is a test mail sent by WordPress automatically as per your hourly schedule.';
-
-        // let's send it
-        wp_mail($recepients, $subject, $message);
     }
 
     /**
