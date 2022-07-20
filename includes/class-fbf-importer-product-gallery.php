@@ -55,6 +55,7 @@ class Fbf_Importer_Product_Gallery
     {
         // Gallery
         $gallery_ids = [];
+        $gallery_sort = [];
         $response = [];
         foreach($this->gallery_images as $gallery_image){
             $gallery_image_handler = new Fbf_Importer_Product_Gallery_Image($this->product_id, basename($gallery_image));
@@ -65,11 +66,13 @@ class Fbf_Importer_Product_Gallery
             } else {
                 $response['gallery_image_info'][] = $gallery_image_import['info'];
                 $gallery_ids[] = $gallery_image_import['attach_id'];
+                $gallery_sort[$gallery_image_import['attach_id']] = pathinfo($gallery_image, PATHINFO_FILENAME);
             }
         }
 
         if(sizeof($gallery_ids) > 0){
-            $update_gallery = update_post_meta($this->product_id, '_product_image_gallery', implode(',', $gallery_ids));
+            asort($gallery_sort, SORT_NATURAL);
+            $update_gallery = update_post_meta($this->product_id, '_product_image_gallery', implode(',', array_keys($gallery_sort)));
             if($update_gallery===true){
                 $response['gallery_info'] = 'Gallery updated';
             }else if($update_gallery===false){
