@@ -23,7 +23,7 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'duplicate_white_lettering_items',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'update_ebay_packages',
         'rotate_stock_files',
@@ -1377,6 +1377,13 @@ class Fbf_Importer_File_Parser {
     {
         global $wpdb;
 
+        if(strpos($term_value, '|')!==false){
+            // Multiple values
+            $term_values = explode('|', $term_value);
+
+
+        }
+
         if(is_array($attribute_value)){
             $attribute = $attribute_value['slug'];
             if(isset($attribute_value['mapping'])){
@@ -1389,25 +1396,52 @@ class Fbf_Importer_File_Parser {
             $term = $term_value;
         }
 
-        //Get the term
-        if($existing_term = get_term_by('name', $term, 'pa_' . $attribute)){
-            //Term exists
-            $term_id = $existing_term->term_id;
-            //Only need to check if term is on product if the term already exists
-            if(!$this->product_has_attribute_term($product, $attribute, $term_id)){
-                $wc_attribute = $this->product_set_attribute($product, $attribute, $term_id);
-            }else{
-                $wc_attribute = $wc_attributes['pa_' . $attribute];
+        if(isset($term_values)&&!empty($term_values)){
+            $term_ids = [];
+            foreach($term_values as $term_value){
+                if($existing_term = get_term_by('name', $term_value, 'pa_' . $attribute)){
+                    $term_ids[] = $existing_term->term_id;
+                }else{
+                    //Assume global scope!
+                    $insert = wp_insert_term($term, 'pa_' . $attribute);
+                    $term_ids[] = $insert['term_id'];
+                }
+            }
+            if(!empty($term_ids)){
+                $product_has_terms = true;
+                foreach($term_ids as $term_id_m){
+                    if(!$this->product_has_attribute_term($product, $attribute, $term_id_m)){
+                        $product_has_terms = false; // break out of loop
+                        break;
+                    }
+                }
+                if(!$product_has_terms){
+                    $wc_attribute = $this->product_set_attribute($product, $attribute, $term_ids);
+                }else{
+                    $wc_attribute = $wc_attributes['pa_' . $attribute];
+                }
             }
         }else{
-            //Only create a term if scope is global
-            if(is_array($attribute_value)&&$attribute_value['scope']=='local'){
-                $wc_attribute = $this->product_set_local_attribute($product, $attribute, $term);
+            //Get the term
+            if($existing_term = get_term_by('name', $term, 'pa_' . $attribute)){
+                //Term exists
+                $term_id = $existing_term->term_id;
+                //Only need to check if term is on product if the term already exists
+                if(!$this->product_has_attribute_term($product, $attribute, $term_id)){
+                    $wc_attribute = $this->product_set_attribute($product, $attribute, $term_id);
+                }else{
+                    $wc_attribute = $wc_attributes['pa_' . $attribute];
+                }
             }else{
-                //Assume global scope!
-                $insert = wp_insert_term($term, 'pa_' . $attribute);
-                $term_id = $insert['term_id'];
-                $wc_attribute = $this->product_set_attribute($product, $attribute, $term_id);
+                //Only create a term if scope is global
+                if(is_array($attribute_value)&&$attribute_value['scope']=='local'){
+                    $wc_attribute = $this->product_set_local_attribute($product, $attribute, $term);
+                }else{
+                    //Assume global scope!
+                    $insert = wp_insert_term($term, 'pa_' . $attribute);
+                    $term_id = $insert['term_id'];
+                    $wc_attribute = $this->product_set_attribute($product, $attribute, $term_id);
+                }
             }
         }
 
@@ -1424,6 +1458,11 @@ class Fbf_Importer_File_Parser {
         }
     }
 
+    private function product_has_attribute_terms(WC_Product $product, $attribute, Array $term_ids)
+    {
+
+    }
+
     private function product_set_attribute(WC_Product $product, $attribute, $term_id)
     {
         global $wpdb;
@@ -1435,7 +1474,11 @@ class Fbf_Importer_File_Parser {
             $product_attribute = new WC_Product_Attribute();
             $product_attribute->set_id($attribute_id);
             $product_attribute->set_name('pa_' . $attribute);
-            $product_attribute->set_options([$term_id]);
+            if(is_array($term_id)){
+                $product_attribute->set_options($term_id);
+            }else{
+                $product_attribute->set_options([$term_id]);
+            }
             return $product_attribute;
         }else{
             return false;
