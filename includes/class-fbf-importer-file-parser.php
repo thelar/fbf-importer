@@ -22,9 +22,11 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
+        'setup_products_to_hide',
         'duplicate_white_lettering_items',
         'import_stock_white',
         'import_stock',
+        'hide_products',
         'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
@@ -46,6 +48,7 @@ class Fbf_Importer_File_Parser {
     private static $sku_file = 'sku_xml.xml';
     private $save_stock_files_to = 'imported_stock';
     private $days_to_keep = 7;
+    private $products_to_hide;
 
     public function __construct($plugin_name)
     {
@@ -179,18 +182,9 @@ class Fbf_Importer_File_Parser {
         return $suppliers_a;
     }
 
-    private function import_stock(){
-        $this->import_stock_list($this->stock);
-    }
-
-    private function import_stock_white(){
-        $this->import_stock_list($this->stock_white, true);
-    }
-
-    private function import_stock_list($list, $is_white=false)
+    private function setup_products_to_hide()
     {
-        $stock_status = [];
-        $products_to_hide = get_posts([
+        $this->products_to_hide = get_posts([
             'post_type' => 'product',
             'posts_per_page' => -1,
             'fields' => 'ids',
@@ -203,6 +197,34 @@ class Fbf_Importer_File_Parser {
                 ]
             ]
         ]);
+    }
+
+    private function import_stock()
+    {
+        $this->import_stock_list($this->stock);
+    }
+
+    private function import_stock_white()
+    {
+        $this->import_stock_list($this->stock_white, true);
+    }
+
+    private function import_stock_list($list, $is_white=false)
+    {
+        $stock_status = [];
+        /*$products_to_hide = get_posts([
+            'post_type' => 'product',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [ //Added to exclude packages
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => ['package'],
+                    'operator' => 'NOT IN'
+                ]
+            ]
+        ]);*/
         $counter = 0;
 
 
@@ -355,10 +377,10 @@ class Fbf_Importer_File_Parser {
                         $product = new WC_Product($product_id);
 
                         //Delete the product id from $all_products so that it doesn't get set to invisible
-                        $key = array_search($product->get_id(), $products_to_hide);
+                        $key = array_search($product->get_id(), $this->products_to_hide);
 
                         if ($key !== false) {
-                            unset($products_to_hide[$key]);
+                            unset($this->products_to_hide[$key]);
                         }
 
                         // Delete equivalent white lettering product if there is one
@@ -366,9 +388,9 @@ class Fbf_Importer_File_Parser {
                             $sku_white = (string)$item['Product Code'] . '_white';
                             if($product_white_id = wc_get_product_id_by_sku($sku_white)){
                                 $product_white = new WC_Product($product_white_id);
-                                $key_white = array_search($product_white->get_id(), $products_to_hide);
+                                $key_white = array_search($product_white->get_id(), $this->products_to_hide);
                                 if ($key_white !== false) {
-                                    unset($products_to_hide[$key_white]);
+                                    unset($this->products_to_hide[$key_white]);
                                 }
                             }
                         }
@@ -597,13 +619,17 @@ class Fbf_Importer_File_Parser {
 
                                 // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images)
                                 // do this by adding the id back to the $products_to_hide array in same position as $key
-                                if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
+                                //if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
                                     if(isset($key)){
-                                        $products_to_hide[$key] = $product->get_id();
+                                        if($is_white){
+                                            $this->products_to_hide[$key_white] = $product->get_id();
+                                        }else{
+                                            $this->products_to_hide[$key] = $product->get_id();
+                                        }
                                     }else{
-                                        $products_to_hide[] = $product->get_id();
+                                        $this->products_to_hide[] = $product->get_id();
                                     }
-                                }
+                                //}
 
                             } else {
                                 $status['image_info'] = $main_image_result['info'];
@@ -636,9 +662,13 @@ class Fbf_Importer_File_Parser {
                         }else{
                             // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)
                             if(isset($key)){
-                                $products_to_hide[$key] = $product->get_id();
+                                if($is_white){
+                                    $this->products_to_hide[$key_white] = $product->get_id();
+                                }else{
+                                    $this->products_to_hide[$key] = $product->get_id();
+                                }
                             }else{
-                                $products_to_hide[] = $product->get_id();
+                                $this->products_to_hide[] = $product->get_id();
                             }
                         }
                     }
@@ -725,7 +755,7 @@ class Fbf_Importer_File_Parser {
         }
 
         //Loop through the remaining $products_to_hide and set visibility to hidden
-        if(!$is_white){
+        /*if(!$is_white){
             foreach($products_to_hide as $hide_id){
                 $status = [];
                 $status['action'] = 'Hide';
@@ -741,8 +771,28 @@ class Fbf_Importer_File_Parser {
                 }
                 $stock_status[$sku] = $status;
             }
-        } // Comment out till figure out what is going on with Urban sku's
-        $this->info[$this->stage]['stock_status'] = $stock_status;
+        } // Comment out till figure out what is going on with Urban sku's*/
+        $this->info['import_stock']['stock_status'] = $stock_status;
+    }
+
+    private function hide_products()
+    {
+        foreach($this->products_to_hide as $hide_id){
+            $status = [];
+            $status['action'] = 'Hide';
+            $product_to_hide = new WC_Product($hide_id);
+            $sku = $product_to_hide->get_sku();
+            $name = $product_to_hide->get_title();
+
+            $product_to_hide->set_catalog_visibility('hidden');
+            $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
+            $product_to_hide->set_backorders('no');
+            if(!$product_to_hide->save()){
+                $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+            }
+            //$stock_status[$sku] = $status;
+            $this->info['import_stock']['stock_status'][$sku] = $status;
+        }
     }
 
     public function update_ebay_packages()
