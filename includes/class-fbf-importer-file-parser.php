@@ -24,7 +24,7 @@ class Fbf_Importer_File_Parser {
         'get_rsp_rules',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'hide_products',
         'update_ebay_packages',
@@ -278,8 +278,8 @@ class Fbf_Importer_File_Parser {
                         $model_title = '';
                     }
 
-                    $name = sprintf('%s/%s/%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $item['Tyre Profile'] ?? '', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
-                    $name_gpf = sprintf('%s/%s/%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile'] ?? '', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
+                    $name = sprintf('%s/%s%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'/':'', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
+                    $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'/':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
 
                     $name = str_ireplace(['   ', '  '], ' ', $name);
                     $name_gpf = str_ireplace(['   ', '  '], ' ', $name_gpf);
@@ -627,11 +627,11 @@ class Fbf_Importer_File_Parser {
                                 // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images)
                                 // do this by adding the id back to the $products_to_hide array in same position as $key
                                 //if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
-                                    if(isset($key)){
+                                    /*if(isset($key)){
                                         $this->products_to_hide[$key] = $product->get_id();
                                     }else{
                                         $this->products_to_hide[] = $product->get_id();
-                                    }
+                                    }*/
                                 //}
 
                             } else {
@@ -664,11 +664,11 @@ class Fbf_Importer_File_Parser {
                             }
                         }else{
                             // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)
-                            if(isset($key)){
+                            /*if(isset($key)){
                                 $this->products_to_hide[$key] = $product->get_id();
                             }else{
                                 $this->products_to_hide[] = $product->get_id();
-                            }
+                            }*/
                         }
                     }
 
