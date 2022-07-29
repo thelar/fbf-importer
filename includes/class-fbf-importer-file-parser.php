@@ -22,8 +22,8 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
-        'setup_products_to_hide',
         'duplicate_white_lettering_items',
+        'setup_products_to_hide',
         'import_stock_white',
         'import_stock',
         'hide_products',
@@ -201,11 +201,17 @@ class Fbf_Importer_File_Parser {
 
     private function import_stock()
     {
+        if(!is_array($this->info['import_stock']['stock_status'])){
+            $this->info['import_stock']['stock_status'] = [];
+        }
         $this->import_stock_list($this->stock);
     }
 
     private function import_stock_white()
     {
+        if(!is_array($this->info['import_stock']['stock_status'])){
+            $this->info['import_stock']['stock_status'] = [];
+        }
         $this->import_stock_list($this->stock_white, true);
     }
 
@@ -251,7 +257,7 @@ class Fbf_Importer_File_Parser {
                 //'EAN' - doesn't seem to be present on all items
             ];
             if (isset($item['Wheel Tyre Accessory'])) {
-                if ($item['Wheel Tyre Accessory'] == 'Tyre') {
+                if ($item['Wheel Tyre Accessory'] == 'Tyre'||$item['Wheel Tyre Accessory'] == 'tyre') {
                     //It's a Tyre
                     $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
                     array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
@@ -384,7 +390,7 @@ class Fbf_Importer_File_Parser {
                         }
 
                         // Delete equivalent white lettering product if there is one
-                        if(array_key_exists($sku, $this->stock_white_changes)){
+                        /*if(array_key_exists($sku, $this->stock_white_changes)){
                             $sku_white = (string)$item['Product Code'] . '_white';
                             if($product_white_id = wc_get_product_id_by_sku($sku_white)){
                                 $product_white = new WC_Product($product_white_id);
@@ -393,7 +399,7 @@ class Fbf_Importer_File_Parser {
                                     unset($this->products_to_hide[$key_white]);
                                 }
                             }
-                        }
+                        }*/
                     } else {
                         //Create the product
                         $status['action'] = 'Create';
@@ -422,7 +428,8 @@ class Fbf_Importer_File_Parser {
 
 
                     //Category
-                    if ($pc_id = $this->get_product_category($product, $item['Wheel Tyre Accessory'])) {
+                    //Correct the misuse of word tyre - DAN!!!!
+                    if ($pc_id = $this->get_product_category($product, ucfirst($item['Wheel Tyre Accessory']))) {
                         $product->set_category_ids([$pc_id]);
                     } else {
                         $status['errors'][] = 'Error setting product category';
@@ -621,11 +628,7 @@ class Fbf_Importer_File_Parser {
                                 // do this by adding the id back to the $products_to_hide array in same position as $key
                                 //if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
                                     if(isset($key)){
-                                        if($is_white){
-                                            $this->products_to_hide[$key_white] = $product->get_id();
-                                        }else{
-                                            $this->products_to_hide[$key] = $product->get_id();
-                                        }
+                                        $this->products_to_hide[$key] = $product->get_id();
                                     }else{
                                         $this->products_to_hide[] = $product->get_id();
                                     }
@@ -662,11 +665,7 @@ class Fbf_Importer_File_Parser {
                         }else{
                             // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)
                             if(isset($key)){
-                                if($is_white){
-                                    $this->products_to_hide[$key_white] = $product->get_id();
-                                }else{
-                                    $this->products_to_hide[$key] = $product->get_id();
-                                }
+                                $this->products_to_hide[$key] = $product->get_id();
                             }else{
                                 $this->products_to_hide[] = $product->get_id();
                             }
@@ -772,7 +771,13 @@ class Fbf_Importer_File_Parser {
                 $stock_status[$sku] = $status;
             }
         } // Comment out till figure out what is going on with Urban sku's*/
-        $this->info['import_stock']['stock_status'] = $stock_status;
+        /*if(!is_array($this->info['import_stock']['stock_status'])){
+            $this->info['import_stock']['stock_status'] = $stock_status;
+        }else{
+            $this->info['import_stock']['stock_status'] = array_merge($this->info['import_stock']['stock_status'], $stock_status);
+        }*/
+        $this->info['import_stock']['stock_status']+= $stock_status;
+
     }
 
     private function hide_products()
