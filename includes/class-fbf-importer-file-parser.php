@@ -1494,8 +1494,10 @@ class Fbf_Importer_File_Parser {
                 }else{
                     //Assume global scope!
                     $insert = wp_insert_term($term, 'pa_' . $attribute);
-                    $term_id = $insert['term_id'];
-                    $wc_attribute = $this->product_set_attribute($product, $attribute, $term_id);
+                    if(!is_wp_error($insert)){
+                        $term_id = $insert['term_id'];
+                        $wc_attribute = $this->product_set_attribute($product, $attribute, $term_id);
+                    }
                 }
             }
         }
