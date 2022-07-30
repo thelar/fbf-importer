@@ -27,6 +27,7 @@ class Fbf_Importer_File_Parser {
         'import_stock_white',
         'import_stock',
         'hide_products',
+        'hide_products_without_images',
         'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
@@ -797,6 +798,48 @@ class Fbf_Importer_File_Parser {
             }
             //$stock_status[$sku] = $status;
             $this->info['import_stock']['stock_status'][$sku] = $status;
+        }
+    }
+
+    private function hide_products_without_images()
+    {
+        $all = get_posts([
+            'post_type' => 'product',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [ //Added to exclude packages
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => ['package'],
+                    'operator' => 'NOT IN'
+                ],
+                [
+                    'taxonomy'  => 'product_visibility',
+                    'field'     => 'name',
+                    'terms'     => ['exclude-from-catalog'],
+                    'operator'  => 'NOT IN',
+                ]
+            ]
+        ]);
+
+        foreach($all as $pid){
+            $sku = get_post_meta($pid, '_sku', true);
+            $status = [];
+            $status['action'] = 'Hide';
+            if(get_post_thumbnail_id($pid)===0){
+                // No thumbnail ID - hide the product
+                $product_to_hide = new WC_Product($pid);
+                $name = $product_to_hide->get_title();
+
+                $product_to_hide->set_catalog_visibility('hidden');
+                $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
+                $product_to_hide->set_backorders('no');
+                if(!$product_to_hide->save()){
+                    $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                }
+                $this->info['import_stock']['stock_status'][$sku] = $status;
+            }
         }
     }
 
