@@ -1502,7 +1502,9 @@ class Fbf_Importer_File_Parser {
                 }else{
                     //Assume global scope!
                     $insert = wp_insert_term($term, 'pa_' . $attribute);
-                    $term_ids[] = $insert['term_id'];
+                    if(!is_wp_error($insert)){
+                        $term_ids[] = $insert['term_id'];
+                    }
                 }
             }
             if(!empty($term_ids)){
