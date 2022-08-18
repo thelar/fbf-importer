@@ -24,7 +24,7 @@ class Fbf_Importer_File_Parser {
         'get_rsp_rules',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        // 'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
@@ -449,6 +449,12 @@ class Fbf_Importer_File_Parser {
                                         $pos = $matches[0][1];
                                         $load = substr($item[$ak], 0, $pos);
                                         $speed = substr($item[$ak], $pos);
+
+                                        // If load contains a slash split it and take highest value as load
+                                        if(strpos($load, '/')!==false){
+                                            $loads = explode('/', $load);
+                                            $load = max($loads);
+                                        }
 
                                         $new_load_attr = $this->check_attribute($product, 'tyre-load', $load, $wc_attrs);
                                         $new_attrs['pa_tyre-load'] = $new_load_attr;
