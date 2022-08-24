@@ -198,7 +198,7 @@ class Fbf_Importer_Admin {
         // in this example we're sending an email
 
         $current_time = time();
-        $timeout = 1 * HOUR_IN_SECONDS;
+        $timeout = 2 * HOUR_IN_SECONDS;
         $auto_imports = get_option('fbf_importer_auto_imports', []);
         if(!empty($auto_imports)){
             foreach($auto_imports as $import_time){
