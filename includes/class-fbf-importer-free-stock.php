@@ -87,6 +87,7 @@ class Fbf_Importer_Free_Stock
         $files = array_diff(scandir($this->tyre_availability_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
         $updates = 0;
         $log = [];
+        $latest_ctime = 0;
 
         foreach($files as $cfile){
             if (is_file($this->tyre_availability_fp.$cfile) && filectime($this->tyre_availability_fp.$cfile) > $latest_ctime){
@@ -105,39 +106,36 @@ class Fbf_Importer_Free_Stock
 
             foreach($rows as $ri => $row){
                 $test_cols = [0, 2, 3];
-                foreach($test_cols as $ci => $col){
-                    //echo $row[$col];
+                $sku_col = 1;
 
-                    if($product_id = wc_get_product_id_by_sku($row[$col])){
-                        $product = wc_get_product($product_id);
-                        $pc = (int)$row[10];
-                        if($pc===0){
+                if($product_id = wc_get_product_id_by_sku($row[$sku_col])){
+                    $product = wc_get_product($product_id);
+                    $pc = (int)$row[10];
+                    if($pc===0){
 
-                            if(!empty($row[11])){
-                                //Date
-                                try {
-                                    $date = DateTime::createFromFormat('m/d/Y', $row[11]);
-                                } catch (Exception $e) {
-                                    $log[] = [
-                                        'id' => $product_id,
-                                        'row' => $ri,
-                                        'error' => $e->getMessage(),
-                                        'sku' => $row[$col]
-                                    ];
-                                }
-
-                                // This corresponds to similar for wheels in import script - line 443
-                                update_post_meta($product_id, '_expected_back_in_stock_date', $date->format('Y-m-d'));
-                                $updates++;
+                        if(!empty($row[11])){
+                            //Date
+                            try {
+                                $date = DateTime::createFromFormat('m/d/Y', $row[11]);
+                            } catch (Exception $e) {
                                 $log[] = [
                                     'id' => $product_id,
-                                    'date' => $date->format('Y-m-d'),
                                     'row' => $ri,
-                                    'sku' => $row[$col]
+                                    'error' => $e->getMessage(),
+                                    'sku' => $row[$sku_col]
                                 ];
                             }
+
+                            // This corresponds to similar for wheels in import script - line 443
+                            update_post_meta($product_id, '_expected_back_in_stock_date', $date->format('Y-m-d'));
+                            $updates++;
+                            $log[] = [
+                                'id' => $product_id,
+                                'date' => $date->format('Y-m-d'),
+                                'row' => $ri,
+                                'sku' => $row[$sku_col]
+                            ];
                         }
-                        break; // break out of foreach
                     }
                 }
             }
