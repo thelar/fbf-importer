@@ -538,6 +538,19 @@ class Fbf_Importer_File_Parser {
                         if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
                             $product->update_meta_data('_back_in_stock_date', time());
                         }
+
+                        // For non house brands (Wheels), if there is no stock, hide it!
+                        $house_wheel_brands = [
+                            'Challenger',
+                            'DV8',
+                            'Tuff Torque'
+                        ];
+                        if(!in_array((string)$item['Brand Name'], $house_wheel_brands)){
+                            if($product->get_stock_quantity()<=0){
+                                $product->set_backorders('no');
+                                $product->set_catalog_visibility('hidden');
+                            }
+                        }
                     }else{
                         if($product->get_stock_quantity()<=0){
                             // Here if there isn't stock
@@ -571,6 +584,8 @@ class Fbf_Importer_File_Parser {
                             }else{
                                 $product->set_backorders('no');
                             }
+
+
 
                         }else{
                             // Here if there is stock
