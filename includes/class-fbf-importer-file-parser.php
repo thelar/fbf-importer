@@ -27,7 +27,7 @@ class Fbf_Importer_File_Parser {
         'import_stock_white',
         'import_stock',
         'hide_products',
-        //'hide_products_without_images',
+        'hide_products_without_images',
         'update_ebay_packages',
         'rotate_stock_files',
         'write_rsp_xml',
@@ -832,7 +832,7 @@ class Fbf_Importer_File_Parser {
                 [
                     'taxonomy' => 'product_cat',
                     'field' => 'slug',
-                    'terms' => ['package'],
+                    'terms' => ['package', 'tyre'],
                     'operator' => 'NOT IN'
                 ],
                 [
