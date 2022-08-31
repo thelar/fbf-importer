@@ -24,7 +24,7 @@ class Fbf_Importer_File_Parser {
         'get_rsp_rules',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
@@ -543,7 +543,10 @@ class Fbf_Importer_File_Parser {
                         $house_wheel_brands = [
                             'Challenger',
                             'DV8',
-                            'Tuff Torque'
+                            'DV8 Works',
+                            'OEM Style',
+                            'Tuff Torque',
+                            'VBS'
                         ];
                         if(!in_array((string)$item['Brand Name'], $house_wheel_brands)){
                             if($product->get_stock_quantity()<=0){
