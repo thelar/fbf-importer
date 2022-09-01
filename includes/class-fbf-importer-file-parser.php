@@ -24,7 +24,7 @@ class Fbf_Importer_File_Parser {
         'get_rsp_rules',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        //'import_stock_white',
+        'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
