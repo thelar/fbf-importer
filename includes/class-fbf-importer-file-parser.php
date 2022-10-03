@@ -740,8 +740,10 @@ class Fbf_Importer_File_Parser {
                             }else{
                                 $rsp_price = round($rsp['price'], 2);
                             }
+                            $rsp_price_match = $rsp['price_match'];
                         }else{
                             $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
+                            $rsp_price_match = false;
                         }
 
                         //Handle zero here - throw a warning and don't add to RSP
@@ -749,14 +751,16 @@ class Fbf_Importer_File_Parser {
                             if($rsp_price!==(float)0){
                                 $this->rsp[] = [
                                     'Variant_Code' => $sku,
-                                    'RSP_Inc' => $rsp_price
+                                    'RSP_Inc' => $rsp_price,
+                                    'Price_Match' => $rsp_price_match
                                 ];
                             }else{
                                 $status['errors'][] = 'RSP was calculated as zero';
                                 //Just set the RSP to the PriceExcVat in the stock file
                                 $this->rsp[] = [
                                     'Variant_Code' => $sku,
-                                    'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2)
+                                    'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2),
+                                    'Price_Match' => $rsp_price_match
                                 ];
                             }
                         }
