@@ -931,8 +931,10 @@ class Fbf_Importer_File_Parser {
             $variant = $xml->createElement("Variant");
             $variant_code = $xml->createElement("Variant_Code", $node['Variant_Code']);
             $RSP_Inc = $xml->createElement("RSP_Inc", $node['RSP_Inc']);
+            $price_match = $xml->createElement("Price_Match", $node['Price_Match']);
             $variant->appendChild($variant_code);
             $variant->appendChild($RSP_Inc);
+            $variant->appendChild($price_match);
             $root->appendChild($variant);
         }
         if(function_exists('get_home_path')){
