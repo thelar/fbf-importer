@@ -116,7 +116,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[8]['write_filename'] = "tyrespot";
         $supplier_array[8]['cell_1a'] = "TYRESPOT";
         $supplier_array[8]['data_start_row'] = "2";
-        $supplier_array[8]['mapping_array'] = array('1', '2', '38', '40');
+        $supplier_array[8]['mapping_array'] = array('1', '2', '36', '37');
         $supplier_array[8]['delimiter'] = ",";
 
         /*$supplier_array[9]['name'] = "vandeban";
