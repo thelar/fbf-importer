@@ -22,9 +22,10 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
+        'build_price_match_data',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
@@ -960,6 +961,11 @@ class Fbf_Importer_File_Parser {
         }
     }
 
+    private function build_price_match_data()
+    {
+
+    }
+
     /**
      * Loops through all stock items looking for white lettering flag and duplicates the item. SKU is appended with '_white' as is the image reference. White lettering flag is reset to false on original item and set to true on duplicated item
      */
@@ -1033,6 +1039,16 @@ class Fbf_Importer_File_Parser {
 
         if($s_price === (float)0){
             return $s_price; //Return with zero so we can catch error
+        }
+
+        // Price match
+        foreach($this->rsp_rules as $rule){
+            if($this->does_rule_apply($rule, $product_id)){
+                if($rule['price_match']==='1'){
+                    // Price match rule found - try to match SKU against data
+
+                }
+            }
         }
 
         if($s_price != $price){
