@@ -29,12 +29,12 @@ class Fbf_Importer_File_Parser {
         'setup_products_to_hide',
         //'import_stock_white',
         'import_stock',
-        'hide_products',
-        'hide_products_without_images',
-        'update_ebay_packages',
-        'rotate_stock_files',
+        //'hide_products',
+        //'hide_products_without_images',
+        //'update_ebay_packages',
+        //'rotate_stock_files',
         'write_rsp_xml',
-        'collate_suppliers'
+        //'collate_suppliers'
     ];
     private $stage;
     public $stock;
@@ -240,9 +240,13 @@ class Fbf_Importer_File_Parser {
             ]
         ]);*/
         $counter = 0;
+        $max = 2;
 
 
         foreach ($list as $item) {
+            if($counter >= $max){
+                break;
+            }
             $sku = (string)$item['Product Code'];
             $name_gpf = null; // need to set to null for looping
 
@@ -736,9 +740,9 @@ class Fbf_Importer_File_Parser {
                             // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
                             $rsp = $this->get_rsp($item, $product_id, (float)$product->get_regular_price());
                             if($rsp['price_match']){
-                                $rsp_price = round($rsp['price'] * 1.2, 2);
-                            }else{
                                 $rsp_price = round($rsp['price'], 2);
+                            }else{
+                                $rsp_price = round($rsp['price'] * 1.2, 2);
                             }
                             $rsp_price_match = $rsp['price_match'];
                         }else{
