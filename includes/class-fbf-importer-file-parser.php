@@ -46,6 +46,7 @@ class Fbf_Importer_File_Parser {
     private $rsp = [];
     private $min_stock;
     private $flat_fee;
+    private $fitting_cost;
     private $suppliers;
     private $supplier_stock_errors;
     private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
@@ -963,6 +964,7 @@ class Fbf_Importer_File_Parser {
             $this->rsp_rules = Fbf_Rsp_Generator_Admin::fbf_rsp_generator_generate_rules();
             $this->min_stock = get_option('fbf_rsp_generator_min_stock');
             $this->flat_fee = get_option('fbf_rsp_generator_flat_fee');
+            $this->fitting_cost = get_option('fbf_rsp_generator_fitting_cost');
         }
     }
 
@@ -1082,7 +1084,7 @@ class Fbf_Importer_File_Parser {
                     if(key_exists($sku, $this->price_match_data)){
                         return [
                             'price_match' => true,
-                            'price' => $this->price_match_data[$sku]['price'],
+                            'price' => $this->price_match_data[$sku]['price'] - ($this->fitting_cost * 1.2),
                         ];
                     }
                 }
