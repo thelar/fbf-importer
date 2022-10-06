@@ -8,6 +8,8 @@
  * @author     Your Name <email@example.com>
  */
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class Fbf_Importer_File_Parser {
     private $plugin_name;
     private $option_name = 'fbf_importer';
@@ -22,6 +24,7 @@ class Fbf_Importer_File_Parser {
         'file_valid',
         'build_stock_array',
         'get_rsp_rules',
+        'build_price_match_data',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
         'import_stock_white',
@@ -43,6 +46,7 @@ class Fbf_Importer_File_Parser {
     private $rsp = [];
     private $min_stock;
     private $flat_fee;
+    private $fitting_cost;
     private $suppliers;
     private $supplier_stock_errors;
     private $max_items = 10; //If set, processing will exit after this number of items, making it quick - for testing purposes
@@ -50,6 +54,8 @@ class Fbf_Importer_File_Parser {
     private $save_stock_files_to = 'imported_stock';
     private $days_to_keep = 7;
     private $products_to_hide;
+    private $price_match_fp;
+    private $price_match_data = [];
 
     public function __construct($plugin_name)
     {
@@ -59,8 +65,10 @@ class Fbf_Importer_File_Parser {
 
         if(function_exists('get_home_path')){
             $this->filepath = get_home_path() . '../supplier/' . $this->filename;
+            $this->price_match_fp = get_home_path() . '../supplier/competitor_monitor/';
         }else{
             $this->filepath = ABSPATH . '../../supplier/' . $this->filename;
+            $this->price_match_fp = ABSPATH . '../../supplier/competitor_monitor/';
         }
 
         $this->xml = new XMLReader();
@@ -219,23 +227,16 @@ class Fbf_Importer_File_Parser {
     private function import_stock_list($list, $is_white=false)
     {
         $stock_status = [];
-        /*$products_to_hide = get_posts([
-            'post_type' => 'product',
-            'posts_per_page' => -1,
-            'fields' => 'ids',
-            'tax_query' => [ //Added to exclude packages
-                [
-                    'taxonomy' => 'product_cat',
-                    'field' => 'slug',
-                    'terms' => ['package'],
-                    'operator' => 'NOT IN'
-                ]
-            ]
-        ]);*/
+
         $counter = 0;
+
+        //$max = 2; -- uncomment to only import $max products for testing purposes
 
 
         foreach ($list as $item) {
+            /*if($counter >= $max){ -- uncomment to only import $max products for testing purposes
+                break;
+            }*/
             $sku = (string)$item['Product Code'];
             $name_gpf = null; // need to set to null for looping
 
@@ -727,40 +728,33 @@ class Fbf_Importer_File_Parser {
                     if ($item['Wheel Tyre Accessory'] == 'Tyre') {
                         if((string)$item['Include in Price Match']=='True'){
                             // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
-                            $rsp_price = round($this->get_rsp($item, $product_id, (float)$product->get_regular_price()) * 1.2, 2);
-                            /*if($product_id=='299196'){
-                                ob_start();
-                                print($product_id . ': ' .$rsp_price);
-                                $email = ob_get_clean();
-
-                                $headers = "MIME-Version: 1.0\r\n";
-                                $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-                                wp_mail('kevin@code-mill.co.uk', 'RSP price: ' . $product_id, $email, $headers);
-                            }*/
-
-
+                            $rsp = $this->get_rsp($item, $product_id, (float)$product->get_regular_price());
+                            if($rsp['price_match']){
+                                $rsp_price = round($rsp['price'], 2);
+                            }else{
+                                $rsp_price = round($rsp['price'] * 1.2, 2);
+                            }
+                            $rsp_price_match = $rsp['price_match'];
                         }else{
                             $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
+                            $rsp_price_match = false;
                         }
-
-
-
-
-
 
                         //Handle zero here - throw a warning and don't add to RSP
                         if(!$is_white){ // We only need to add non-white skus to rsp
                             if($rsp_price!==(float)0){
                                 $this->rsp[] = [
                                     'Variant_Code' => $sku,
-                                    'RSP_Inc' => $rsp_price
+                                    'RSP_Inc' => $rsp_price,
+                                    'Price_Match' => $rsp_price_match
                                 ];
                             }else{
                                 $status['errors'][] = 'RSP was calculated as zero';
                                 //Just set the RSP to the PriceExcVat in the stock file
                                 $this->rsp[] = [
                                     'Variant_Code' => $sku,
-                                    'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2)
+                                    'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2),
+                                    'Price_Match' => $rsp_price_match
                                 ];
                             }
                         }
@@ -931,8 +925,10 @@ class Fbf_Importer_File_Parser {
             $variant = $xml->createElement("Variant");
             $variant_code = $xml->createElement("Variant_Code", $node['Variant_Code']);
             $RSP_Inc = $xml->createElement("RSP_Inc", $node['RSP_Inc']);
+            $price_match = $xml->createElement("Price_Match", (string)$node['Price_Match']);
             $variant->appendChild($variant_code);
             $variant->appendChild($RSP_Inc);
+            $variant->appendChild($price_match);
             $root->appendChild($variant);
         }
         if(function_exists('get_home_path')){
@@ -957,6 +953,55 @@ class Fbf_Importer_File_Parser {
             $this->rsp_rules = Fbf_Rsp_Generator_Admin::fbf_rsp_generator_generate_rules();
             $this->min_stock = get_option('fbf_rsp_generator_min_stock');
             $this->flat_fee = get_option('fbf_rsp_generator_flat_fee');
+            $this->fitting_cost = get_option('fbf_rsp_generator_fitting_cost');
+        }
+    }
+
+    private function build_price_match_data()
+    {
+        $files = array_diff(scandir($this->price_match_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
+        $updates = 0;
+        $log = [];
+        $latest_ctime = 0;
+
+        foreach($files as $cfile){
+            if (is_file($this->price_match_fp.$cfile) && filectime($this->price_match_fp.$cfile) > $latest_ctime){
+                $latest_ctime = filectime($this->price_match_fp.$cfile);
+                $latest_filename = $cfile;
+                $newest_file = $latest_filename;
+            }
+        }
+
+        if(!is_null($newest_file)){
+            $inputFileType = IOFactory::identify($this->price_match_fp . $newest_file);
+            $spreadsheet = IOFactory::load( $this->price_match_fp . $newest_file );
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+            $update_count = 0;
+
+            if(!empty($rows)){
+                foreach($rows as $ri => $rv){
+                    if($ri > 0){
+                        if(!is_null($rv[3])&&!is_null($rv[4])){
+                            if($this->price_match_data[strtoupper($rv[4])]){
+                                // Check to see if price is lower
+                                $this->price_match_data[strtoupper($rv[4])]['count']++;
+                                if($rv[3] < $this->price_match_data[strtoupper($rv[4])]['price']){
+                                    $this->price_match_data[strtoupper($rv[4])]['price'] = $rv[3];
+                                    $this->price_match_data[strtoupper($rv[4])]['cheapest'] = $rv[7];
+                                }
+                            }else{
+                                $this->price_match_data[strtoupper($rv[4])] = [
+                                    'price' => $rv[3],
+                                    'count' => 1,
+                                    'cheapest' => $rv[7],
+                                ];
+                            }
+                        }
+                    }
+                }
+                $a = 1;
+            }
         }
     }
 
@@ -1018,21 +1063,31 @@ class Fbf_Importer_File_Parser {
 
     private function get_rsp($item, $product_id, $price)
     {
+        $sku = strtoupper((string) $item['Product Code']);
+
+        // Price match
+        foreach($this->rsp_rules as $rule){
+            if($this->does_rule_apply($rule, $product_id)){
+                if($rule['price_match']==='1'){
+                    // Price match rule found - try to match SKU against data
+                    if(key_exists($sku, $this->price_match_data)){
+                        return [
+                            'price_match' => true,
+                            'price' => $this->price_match_data[$sku]['price'] - ($this->fitting_cost * 1.2),
+                        ];
+                    }
+                }
+            }
+        }
+
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
 
-        /*if($product_id=='299196'){
-            ob_start();
-            print('Supplier price: ' .$s_price);
-            $email = ob_get_clean();
-
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            wp_mail('kevin@code-mill.co.uk', 'Supplier price: ' . $product_id, $email, $headers);
-        }*/
-
         if($s_price === (float)0){
-            return $s_price; //Return with zero so we can catch error
+            return [
+                'price_match' => false,
+                'price' => $s_price,
+            ]; //Return with zero so we can catch error
         }
 
         if($s_price != $price){
@@ -1047,20 +1102,16 @@ class Fbf_Importer_File_Parser {
             }
         }
 
-        /*if($product_id=='299196'){
-            ob_start();
-            print('Percentage: ' .$pc);
-            $email = ob_get_clean();
-
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-            wp_mail('kevin@code-mill.co.uk', 'Rule percentage: ' . $product_id, $email, $headers);
-        }*/
-
         if($pc){
-            return (($pc/100) * $s_price) + $s_price + $this->flat_fee;
+            return [
+                'price_match' => false,
+                'price' => (($pc/100) * $s_price) + $s_price + $this->flat_fee,
+            ];
         }else{
-            return $price;
+            return [
+                'price_match' => false,
+                'price' => $price,
+            ];
         }
     }
 
