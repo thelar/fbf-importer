@@ -365,6 +365,10 @@ class Fbf_Importer_Stock_Processor
                             //	$write_array[$row][$data_columns_array[1]] = $write_array[$row][$data_columns_array[0]];
                             //	}
                             //}
+
+                            if($supplier_id == 19){
+                                $write_array[$row][$data_columns_array[2]] = round($write_array[$row][$data_columns_array[2]] * 0.75, 2);
+                            }
                         }
                     }
                     $row++;
