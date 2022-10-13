@@ -18,6 +18,19 @@ class Fbf_Importer_Stock_Processor
 
     public function process($redirect=true)
     {
+        $a = 1;
+        $b = 2;
+
+        //$file = file_get_contents('ssh2.sftp://4x4tyressftp:Evilct7848!@SFTP.wheelpros.com:22/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv');
+
+        $connection = ssh2_connect('SFTP.wheelpros.com', 22);
+        ssh2_auth_password($connection, '4x4tyressftp', 'Evilct7848!');
+        $sftp = ssh2_sftp($connection);
+        $stream = fopen("ssh2.sftp://$sftp/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv", 'r');
+        $contents = stream_get_contents($stream);
+        file_put_contents(self::UPLOAD_LOCATION . 'wheelpros/wheelpros.csv', $contents);
+        @fclose($stream);
+
 //        var_dump(ABSPATH);
 //        var_dump(__DIR__);
         /*file_put_contents(self::UPLOAD_LOCATION . "wheelwright/stockfile_00w0.csv", fopen("http://dealer.wheelwright.co.uk/wheelwright_stock_listing_00w0?token=7xUBeYEaoYPBzV7wVPkd", 'r'));
@@ -41,6 +54,8 @@ class Fbf_Importer_Stock_Processor
         /** \PhpOffice\PhpSpreadsheet\Writer\Xlsx */
 //include('\PhpOffice\PhpSpreadsheet\Spreadsheet/\PhpOffice\PhpSpreadsheet\Spreadsheet/Writer/Excel2007.php');
 //include('\PhpOffice\PhpSpreadsheet\Spreadsheet/\PhpOffice\PhpSpreadsheet\Spreadsheet/IOFactory.php');
+
+
 
         $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
         $data_columns_array = array('1', '3', '5', '6'); //A2, C2, E2, F2
@@ -251,7 +266,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[18]['mapping_array'] = array('0', '0', '3', '2');
         $supplier_array[18]['delimiter'] = ",";*/
 
-
+        $supplier_array[19]['name'] = "Wheelpros";
+        $supplier_array[19]['read_filename'] = "wheelpros.csv";
+        $supplier_array[19]['write_filename'] = "wheelpros";
+        $supplier_array[19]['cell_1a'] = "WHEELPRO";
+        $supplier_array[19]['data_start_row'] = "1";
+        $supplier_array[19]['mapping_array'] = array('0', '0', '15', '21');
+        $supplier_array[19]['delimiter'] = ",";
 
         if (!function_exists('tep_xls_to_csv_single_file')){
             function tep_xls_to_csv_single_file($inputfile, $outputfile) {
