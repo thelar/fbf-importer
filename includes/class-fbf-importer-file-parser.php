@@ -25,16 +25,16 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'build_price_match_data',
-        'duplicate_white_lettering_items',
+        //'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
-        'hide_products',
-        'hide_products_without_images',
-        'update_ebay_packages',
-        'rotate_stock_files',
+        //'hide_products',
+        //'hide_products_without_images',
+        //'update_ebay_packages',
+        //'rotate_stock_files',
         'write_rsp_xml',
-        'collate_suppliers'
+        //'collate_suppliers'
     ];
     private $stage;
     public $stock;
@@ -230,13 +230,13 @@ class Fbf_Importer_File_Parser {
 
         $counter = 0;
 
-        //$max = 2; -- uncomment to only import $max products for testing purposes
+        $max = 2; // -- uncomment to only import $max products for testing purposes
 
 
         foreach ($list as $item) {
-            /*if($counter >= $max){ -- uncomment to only import $max products for testing purposes
+            if($counter >= $max){ // -- uncomment to only import $max products for testing purposes
                 break;
-            }*/
+            }
             $sku = (string)$item['Product Code'];
             $name_gpf = null; // need to set to null for looping
 
@@ -982,8 +982,8 @@ class Fbf_Importer_File_Parser {
             if(!empty($rows)){
                 foreach($rows as $ri => $rv){
                     if($ri > 0){
-                        if(!is_null($rv[3])&&!is_null($rv[4])){
-                            if($this->price_match_data[strtoupper($rv[4])]){
+                        if(!empty($rv[3])&&!empty($rv[4])){
+                            if(isset($this->price_match_data[strtoupper($rv[4])]) && $this->price_match_data[strtoupper($rv[4])]){
                                 // Check to see if price is lower
                                 $this->price_match_data[strtoupper($rv[4])]['count']++;
                                 if($rv[3] < $this->price_match_data[strtoupper($rv[4])]['price']){
@@ -1066,7 +1066,7 @@ class Fbf_Importer_File_Parser {
         $sku = strtoupper((string) $item['Product Code']);
 
         // Price match
-        foreach($this->rsp_rules as $rule){
+        /*foreach($this->rsp_rules as $rule){
             if($this->does_rule_apply($rule, $product_id)){
                 if($rule['price_match']==='1'){
                     // Price match rule found - try to match SKU against data
@@ -1078,7 +1078,7 @@ class Fbf_Importer_File_Parser {
                     }
                 }
             }
-        }
+        }*/
 
         $s_price = $this->get_supplier_cost($item, $price);
         $pc = 0;
@@ -1094,8 +1094,18 @@ class Fbf_Importer_File_Parser {
             //1. Loop through the rules
             foreach ($this->rsp_rules as $rule) {
                 if ($this->does_rule_apply($rule, $product_id)) {
-                    $pc = $rule['amount'];
-                    break;
+                    if($rule['price_match']==='1'){
+                        // Price match rule found - try to match SKU against data
+                        if(key_exists($sku, $this->price_match_data)){
+                            return [
+                                'price_match' => true,
+                                'price' => $this->price_match_data[$sku]['price'] - ($this->fitting_cost * 1.2),
+                            ];
+                        }
+                    }else{
+                        $pc = $rule['amount'];
+                        break;
+                    }
                 } else {
                     $pc = 0;
                 }
