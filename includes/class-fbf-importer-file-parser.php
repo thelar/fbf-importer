@@ -25,16 +25,16 @@ class Fbf_Importer_File_Parser {
         'build_stock_array',
         'get_rsp_rules',
         'build_price_match_data',
-        //'duplicate_white_lettering_items',
+        'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        //'import_stock_white',
+        'import_stock_white',
         'import_stock',
-        //'hide_products',
-        //'hide_products_without_images',
-        //'update_ebay_packages',
-        //'rotate_stock_files',
+        'hide_products',
+        'hide_products_without_images',
+        'update_ebay_packages',
+        'rotate_stock_files',
         'write_rsp_xml',
-        //'collate_suppliers'
+        'collate_suppliers'
     ];
     private $stage;
     public $stock;
@@ -230,13 +230,13 @@ class Fbf_Importer_File_Parser {
 
         $counter = 0;
 
-        $max = 2; // -- uncomment to only import $max products for testing purposes
+        //$max = 2; // -- uncomment to only import $max products for testing purposes
 
 
         foreach ($list as $item) {
-            if($counter >= $max){ // -- uncomment to only import $max products for testing purposes
+            /*if($counter >= $max){ // -- uncomment to only import $max products for testing purposes
                 break;
-            }
+            }*/
             $sku = (string)$item['Product Code'];
             $name_gpf = null; // need to set to null for looping
 
