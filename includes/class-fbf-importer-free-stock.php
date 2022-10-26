@@ -28,6 +28,7 @@ class Fbf_Importer_Free_Stock
     public function run()
     {
         $files = array_diff(scandir($this->filepath, SCANDIR_SORT_DESCENDING), array('.', '..'));
+        $latest_ctime = 0;
 
         foreach($files as $cfile){
             if (is_file($this->filepath.$cfile) && filectime($this->filepath.$cfile) > $latest_ctime){
@@ -126,15 +127,17 @@ class Fbf_Importer_Free_Stock
                                 ];
                             }
 
-                            // This corresponds to similar for wheels in import script - line 443
-                            update_post_meta($product_id, '_expected_back_in_stock_date', $date->format('Y-m-d'));
-                            $updates++;
-                            $log[] = [
-                                'id' => $product_id,
-                                'date' => $date->format('Y-m-d'),
-                                'row' => $ri,
-                                'sku' => $row[$sku_col]
-                            ];
+                            if($date){
+                                // This corresponds to similar for wheels in import script - line 443
+                                update_post_meta($product_id, '_expected_back_in_stock_date', $date->format('Y-m-d'));
+                                $updates++;
+                                $log[] = [
+                                    'id' => $product_id,
+                                    'date' => $date->format('Y-m-d'),
+                                    'row' => $ri,
+                                    'sku' => $row[$sku_col]
+                                ];
+                            }
                         }
                     }
                 }
