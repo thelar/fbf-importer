@@ -1178,9 +1178,9 @@ class Fbf_Importer_File_Parser {
                     }
                 }
                 // If we are here then no suppliers are marked as the main supplier - get average cost
+                $count = 0;
+                $total = 0;
                 foreach($item['Suppliers'] as $supplier){
-                    $count = 0;
-                    $total = 0;
                     if((float)$supplier['Supplier Cost Price'] > 0){
                         $total+= (float)$supplier['Supplier Cost Price'];
                         $count++;
