@@ -740,6 +740,9 @@ class Fbf_Importer_File_Parser {
                             $rsp_price_match = false;
                         }
 
+                        // Set meta on product for price match
+                        update_post_meta($product_id, '_price_match', $rsp_price_match);
+
                         //Handle zero here - throw a warning and don't add to RSP
                         if(!$is_white){ // We only need to add non-white skus to rsp
                             if($rsp_price!==(float)0){
