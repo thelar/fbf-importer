@@ -27,7 +27,7 @@ class Fbf_Importer_File_Parser {
         'build_price_match_data',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
@@ -1102,32 +1102,37 @@ class Fbf_Importer_File_Parser {
                     if($rule['price_match']==='1'){
                         // Price match rule found - try to match SKU against data
                         if(key_exists($sku, $this->price_match_data)){
+                            if($rule['price_match_addition']){
+                                $addition = $rule['price_match_addition'];
+                            }else{
+                                $addition = 0;
+                            }
                             return [
                                 'price_match' => true,
-                                'price' => $this->price_match_data[$sku]['price'] - ($this->fitting_cost * 1.2),
+                                'price' => ($this->price_match_data[$sku]['price'] + $addition) - ($this->fitting_cost * 1.2),
                             ];
                         }
                     }else{
-                        $pc = $rule['amount'];
-                        break;
+                        if($rule['is_pc']==='1'){
+                            return [
+                                'price_match' => false,
+                                'price' => (($rule['amount']/100) * $s_price) + $s_price + $this->flat_fee,
+                            ];
+                        }else{
+                            return [
+                                'price_match' => false,
+                                'price' => $s_price + $rule['amount'] + $this->flat_fee,
+                            ];
+                        }
                     }
-                } else {
-                    $pc = 0;
                 }
             }
         }
 
-        if($pc){
-            return [
-                'price_match' => false,
-                'price' => (($pc/100) * $s_price) + $s_price + $this->flat_fee,
-            ];
-        }else{
-            return [
-                'price_match' => false,
-                'price' => $price,
-            ];
-        }
+        return [
+            'price_match' => false,
+            'price' => $price,
+        ];
     }
 
     private function get_supplier_cost($item, $price)
