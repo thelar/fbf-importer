@@ -27,7 +27,7 @@ class Fbf_Importer_File_Parser {
         'build_price_match_data',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        //'import_stock_white',
+        'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
