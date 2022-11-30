@@ -56,6 +56,7 @@ class Fbf_Importer_File_Parser {
     private $products_to_hide;
     private $price_match_fp;
     private $price_match_data = [];
+    private $do_images = false;
 
     public function __construct($plugin_name)
     {
@@ -636,67 +637,69 @@ class Fbf_Importer_File_Parser {
                         //Product saved - handle the product image
                         //include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
 
-                        include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-gallery.php';
+                        if($this->do_images){
+                            include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-gallery.php';
 
-                        if (isset($item['Image name'])) {
-                            if($is_white){
-                                $image_name = $this->stock_white_changes[$orig_sku]['image_white'];
-                            }else{
-                                $image_name = (string)$item['Image name'];
-                            }
+                            if (isset($item['Image name'])) {
+                                if($is_white){
+                                    $image_name = $this->stock_white_changes[$orig_sku]['image_white'];
+                                }else{
+                                    $image_name = (string)$item['Image name'];
+                                }
 
-                            $image_gallery = new Fbf_Importer_Product_Gallery($product_id, $image_name, $this->plugin_name);
+                                $image_gallery = new Fbf_Importer_Product_Gallery($product_id, $image_name, $this->plugin_name);
 
-                            $main_image_result = $image_gallery->process($status['action']);
+                                $main_image_result = $image_gallery->process($status['action']);
 
-                            if (isset($main_image_result['errors'])) {
-                                $status['errors'] = $main_image_result['errors'];
+                                if (isset($main_image_result['errors'])) {
+                                    $status['errors'] = $main_image_result['errors'];
 
-                                // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images)
-                                // do this by adding the id back to the $products_to_hide array in same position as $key
-                                //if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
+                                    // If there is a main image error - i.e. if the source image doesn't exist, hide the product (temporary while there are lots of products without images)
+                                    // do this by adding the id back to the $products_to_hide array in same position as $key
+                                    //if($_SERVER['SERVER_NAME']==='4x4tyres.co.uk'){ // Only hide the products on live
                                     /*if(isset($key)){
                                         $this->products_to_hide[$key] = $product->get_id();
                                     }else{
                                         $this->products_to_hide[] = $product->get_id();
                                     }*/
-                                //}
+                                    //}
 
-                            } else {
-                                $status['image_info'] = $main_image_result['info'];
-                            }
-
-                            $image_gallery_result = $image_gallery->gallery_process($status['action']);
-
-                            /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
-                            $image_import = $image_handler->process($status['action']);*/
-                            if (isset($image_gallery_result['errors'])) {
-                                $status['errors'] = $image_gallery_result['errors'];
-                            } else {
-                                $status['gallery_info'] = $image_gallery_result['gallery_info'];
-                                $s = [];
-                                if(!empty($image_gallery_result['gallery_image_info'])){
-                                    foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
-                                        $s[] = $gal_item_info[0];
-                                    }
+                                } else {
+                                    $status['image_info'] = $main_image_result['info'];
                                 }
-                                //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
-                            }
 
-                            // ebay images
-                            $ebay_images = $image_gallery->ebay_process($status['action']);
-                            if(!empty($ebay_images)){
-                                update_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
+                                $image_gallery_result = $image_gallery->gallery_process($status['action']);
+
+                                /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
+                                $image_import = $image_handler->process($status['action']);*/
+                                if (isset($image_gallery_result['errors'])) {
+                                    $status['errors'] = $image_gallery_result['errors'];
+                                } else {
+                                    $status['gallery_info'] = $image_gallery_result['gallery_info'];
+                                    $s = [];
+                                    if(!empty($image_gallery_result['gallery_image_info'])){
+                                        foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
+                                            $s[] = $gal_item_info[0];
+                                        }
+                                    }
+                                    //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
+                                }
+
+                                // ebay images
+                                $ebay_images = $image_gallery->ebay_process($status['action']);
+                                if(!empty($ebay_images)){
+                                    update_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
+                                }else{
+                                    delete_post_meta($product_id, '_fbf_ebay_images');
+                                }
                             }else{
-                                delete_post_meta($product_id, '_fbf_ebay_images');
+                                // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)
+                                /*if(isset($key)){
+                                    $this->products_to_hide[$key] = $product->get_id();
+                                }else{
+                                    $this->products_to_hide[] = $product->get_id();
+                                }*/
                             }
-                        }else{
-                            // Hide the product if there isn't an image referenced - (temporary while there are lots of products without images)
-                            /*if(isset($key)){
-                                $this->products_to_hide[$key] = $product->get_id();
-                            }else{
-                                $this->products_to_hide[] = $product->get_id();
-                            }*/
                         }
                     }
 
