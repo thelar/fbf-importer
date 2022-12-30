@@ -1875,6 +1875,9 @@ class Fbf_Importer_File_Parser {
 
     private function set_price(WC_Product $product, $category, $in_price)
     {
+        if($category==='Accessories'){
+            return $in_price;
+        }
         $tax = 1.2;
 
         // First add VAT
