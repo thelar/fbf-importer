@@ -27,7 +27,7 @@ class Fbf_Importer_File_Parser {
         'build_price_match_data',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
@@ -263,6 +263,7 @@ class Fbf_Importer_File_Parser {
                 if ($item['Wheel Tyre Accessory'] == 'Tyre'||$item['Wheel Tyre Accessory'] == 'tyre') {
                     //It's a Tyre
                     $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
+                    $runflat = (string) $item['Tyre Runflat'] ?? 'False';
                     array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
 
                     // Remove the word Tyres from the brand name if it's there
@@ -283,6 +284,14 @@ class Fbf_Importer_File_Parser {
 
                     $name = sprintf('%s/%s%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'/':'', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
                     $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'/':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
+
+                    if(in_array((string)$item['Tyre Type'], ['All Terrain', 'Mud Terrain', 'All Season', 'Winter']) && !empty($model_title)){
+                        $name_display = sprintf('%s %s %s %s', $model_title, strtolower((string)$item['Tyre Type']), $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
+                        $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
+                    }else if(!empty($model_title)){
+                        $name_display = sprintf('%s %s %s', $model_title, $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
+                        $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
+                    }
 
                     $name = str_ireplace(['   ', '  '], ' ', $name);
                     $name_gpf = str_ireplace(['   ', '  '], ' ', $name_gpf);
@@ -332,6 +341,7 @@ class Fbf_Importer_File_Parser {
                     }
 
                     $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
+                    $name_display = sprintf('%s %s %s x %s ET%s %s', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
@@ -418,6 +428,15 @@ class Fbf_Importer_File_Parser {
                     }else{
                         delete_post_meta($product->get_id(), '_fbf_gpf_product_title');
                     }
+
+                    //Set display title if set
+                    if (isset($name_display)){
+                        update_post_meta($product->get_id(), '_fbf_display_product_title', $name_display);
+                    }else{
+                        delete_post_meta($product->get_id(), '_fbf_display_product_title');
+                    }
+
+
 
                     //Set the title in the post meta - this is for eBay Package searches and other searches where we need to filter by both SKU and Title
                     update_post_meta($product->get_id(), '_fbf_product_title', $name);
