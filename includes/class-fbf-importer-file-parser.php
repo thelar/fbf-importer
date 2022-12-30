@@ -286,7 +286,7 @@ class Fbf_Importer_File_Parser {
                     $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'/':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
 
                     if(in_array((string)$item['Tyre Type'], ['All Terrain', 'Mud Terrain', 'All Season', 'Winter']) && !empty($model_title)){
-                        $name_display = sprintf('%s %s %s %s', $model_title, strtolower((string)$item['Tyre Type']), $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
+                        $name_display = sprintf('%s %s %s %s', $model_title, (string)$item['Tyre Type'], $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
                         $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
                     }else if(!empty($model_title)){
                         $name_display = sprintf('%s %s %s', $model_title, $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
