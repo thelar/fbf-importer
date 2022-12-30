@@ -27,7 +27,7 @@ class Fbf_Importer_File_Parser {
         'build_price_match_data',
         'duplicate_white_lettering_items',
         'setup_products_to_hide',
-        'import_stock_white',
+        //'import_stock_white',
         'import_stock',
         'hide_products',
         'hide_products_without_images',
@@ -446,7 +446,7 @@ class Fbf_Importer_File_Parser {
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
                     //Price
-                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                    $product->set_regular_price($this->set_price($product, (string)$item['Wheel Tyre Accessory'], round((string)$item['RSP Exc Vat'], 2)));
 
 
                     //Category
@@ -1871,5 +1871,37 @@ class Fbf_Importer_File_Parser {
         }else{
             return false;
         }
+    }
+
+    private function set_price(WC_Product $product, $category, $in_price)
+    {
+        $tax = 1.2;
+
+        // First add VAT
+        $in_price_plus_vat = $in_price * $tax;
+
+        // Get the decimal amount
+        $fln = $in_price_plus_vat - floor($in_price_plus_vat);
+
+        // If it's a tyre round to nearest 0.49 or 0.99 - https://stackoverflow.com/questions/47389399/round-number-up-to-49-or-99
+        if($category==='Tyre'){
+            if($fln > 0 && $fln < 0.5){
+                $fln = 0.49;
+            }else{
+                $fln = 0.99;
+            }
+        }else if($category==='Alloy Wheel' || $category==='Steel Wheel'){
+            // If it's a wheel round up or down
+            $fln = $in_price_plus_vat - floor($in_price_plus_vat);
+            if($fln > 0 && $fln < 0.5){
+                $fln = 0;
+            }else{
+                $fln = 1;
+            }
+        }
+        $price = floor($in_price_plus_vat) + $fln;
+        $base_price = $price/$tax;
+
+        return round($base_price, 4);
     }
 }
