@@ -289,7 +289,7 @@ class Fbf_Importer_File_Parser {
                         $name_display = sprintf('%s %s %s %s %s', $brand_title, $model_title, (string)$item['Tyre Type'], $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
                         $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
                     }else if(!empty($model_title)){
-                        $name_display = sprintf('%s %s %s', $model_title, $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
+                        $name_display = sprintf('%s %s %s %s', $brand_title, $model_title, $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
                         $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
                     }
 
