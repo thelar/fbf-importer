@@ -91,7 +91,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[3]['write_filename'] = "malvern";
         $supplier_array[3]['cell_1a'] = "MALVERN";
         $supplier_array[3]['data_start_row'] = "3";
-        $supplier_array[3]['mapping_array'] = array('0', '1', '3', '6');
+        $supplier_array[3]['mapping_array'] = array('0', '1', '4', '7');
         $supplier_array[3]['delimiter'] = ",";
 
         /*$supplier_array[4]['name'] = "DELDO";

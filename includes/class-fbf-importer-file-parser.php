@@ -286,10 +286,10 @@ class Fbf_Importer_File_Parser {
                     $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'/':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
 
                     if(in_array((string)$item['Tyre Type'], ['All Terrain', 'Mud Terrain', 'All Season', 'Winter']) && !empty($model_title)){
-                        $name_display = sprintf('%s %s %s %s', $model_title, strtolower((string)$item['Tyre Type']), $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
+                        $name_display = sprintf('%s %s %s %s %s', $brand_title, $model_title, (string)$item['Tyre Type'], $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
                         $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
                     }else if(!empty($model_title)){
-                        $name_display = sprintf('%s %s %s', $model_title, $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
+                        $name_display = sprintf('%s %s %s %s', $brand_title, $model_title, $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
                         $name_display = str_ireplace(['   ', '  '], ' ', $name_display);
                     }
 
@@ -446,7 +446,7 @@ class Fbf_Importer_File_Parser {
                     //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
 
                     //Price
-                    $product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                    $product->set_regular_price($this->set_price($product, (string)$item['Wheel Tyre Accessory'], round((string)$item['RSP Exc Vat'], 2)));
 
 
                     //Category
@@ -615,12 +615,20 @@ class Fbf_Importer_File_Parser {
                             }
                         }else{
                             // Here if there is stock
-                            $product->update_meta_data('_went_out_of_stock_on', '');
-                            $product->set_backorders('notify');
 
-                            // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
-                            if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
-                                $product->update_meta_data('_back_in_stock_date', time());
+                            // Mod 13 Jan 2023 - if it's NOT All Terrain or Mud Terrain - no backordering!
+                            if((string)$item['Tyre Type']=='All Terrain'||(string)$item['Tyre Type']=='Mud Terrain') {
+                                $product->update_meta_data('_went_out_of_stock_on', '');
+                                $product->set_backorders('notify');
+
+                                // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
+                                if ($initial_stock <= 0 && $product->get_stock_quantity() >= 4) {
+                                    $product->update_meta_data('_back_in_stock_date', time());
+                                }
+                            }else{
+                                $product->set_backorders('no');
+                                $product->delete_meta_data('_went_out_of_stock_on');
+                                $product->delete_meta_data('_back_in_stock_date');
                             }
                         }
                     }
@@ -1871,5 +1879,40 @@ class Fbf_Importer_File_Parser {
         }else{
             return false;
         }
+    }
+
+    private function set_price(WC_Product $product, $category, $in_price)
+    {
+        if($category==='Accessories'){
+            return $in_price;
+        }
+        $tax = 1.2;
+
+        // First add VAT
+        $in_price_plus_vat = $in_price * $tax;
+
+        // Get the decimal amount
+        $fln = $in_price_plus_vat - floor($in_price_plus_vat);
+
+        // If it's a tyre round to nearest 0.49 or 0.99 - https://stackoverflow.com/questions/47389399/round-number-up-to-49-or-99
+        if($category==='Tyre'){
+            if($fln > 0 && $fln < 0.5){
+                $fln = 0.49;
+            }else{
+                $fln = 0.99;
+            }
+        }else if($category==='Alloy Wheel' || $category==='Steel Wheel'){
+            // If it's a wheel round up or down
+            $fln = $in_price_plus_vat - floor($in_price_plus_vat);
+            if($fln > 0 && $fln < 0.5){
+                $fln = 0;
+            }else{
+                $fln = 1;
+            }
+        }
+        $price = floor($in_price_plus_vat) + $fln;
+        $base_price = $price/$tax;
+
+        return round($base_price, 4);
     }
 }
