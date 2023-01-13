@@ -70,6 +70,14 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[0]['mapping_array'] = array('1', '2', '39', '41');
         $supplier_array[0]['delimiter'] = ",";
 
+        $supplier_array[1]['name'] = "OPONEO";
+        $supplier_array[1]['read_filename'] = "3WHEELWH.CSV";
+        $supplier_array[1]['write_filename'] = "oponeo";
+        $supplier_array[1]['cell_1a'] = "OPONEO";
+        $supplier_array[1]['data_start_row'] = "1";
+        $supplier_array[1]['mapping_array'] = array('2', '41');
+        $supplier_array[1]['delimiter'] = ",";
+
         /*$supplier_array[1]['name'] = "BOND";
         $supplier_array[1]['read_filename'] = "bond.csv";
         $supplier_array[1]['write_filename'] = "bond";
