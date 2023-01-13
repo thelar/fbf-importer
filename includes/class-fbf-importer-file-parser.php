@@ -615,12 +615,20 @@ class Fbf_Importer_File_Parser {
                             }
                         }else{
                             // Here if there is stock
-                            $product->update_meta_data('_went_out_of_stock_on', '');
-                            $product->set_backorders('notify');
 
-                            // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
-                            if($initial_stock <= 0 && $product->get_stock_quantity() >= 4){
-                                $product->update_meta_data('_back_in_stock_date', time());
+                            // Mod 13 Jan 2023 - if it's NOT All Terrain or Mud Terrain - no backordering!
+                            if((string)$item['Tyre Type']=='All Terrain'||(string)$item['Tyre Type']=='Mud Terrain') {
+                                $product->update_meta_data('_went_out_of_stock_on', '');
+                                $product->set_backorders('notify');
+
+                                // If the stock is back up to 4 or more - and the initial stock was less than or equal to 0 - it's just come back into stock - so mark accordingly
+                                if ($initial_stock <= 0 && $product->get_stock_quantity() >= 4) {
+                                    $product->update_meta_data('_back_in_stock_date', time());
+                                }
+                            }else{
+                                $product->set_backorders('notify');
+                                $product->delete_meta_data('_went_out_of_stock_on');
+                                $product->delete_meta_data('_back_in_stock_date');
                             }
                         }
                     }
