@@ -626,7 +626,7 @@ class Fbf_Importer_File_Parser {
                                     $product->update_meta_data('_back_in_stock_date', time());
                                 }
                             }else{
-                                $product->set_backorders('notify');
+                                $product->set_backorders('no');
                                 $product->delete_meta_data('_went_out_of_stock_on');
                                 $product->delete_meta_data('_back_in_stock_date');
                             }
