@@ -56,7 +56,7 @@ class Fbf_Importer_File_Parser {
     private $products_to_hide;
     private $price_match_fp;
     private $price_match_data = [];
-    private $do_images = true;
+    private $do_images = false;
 
     public function __construct($plugin_name)
     {
