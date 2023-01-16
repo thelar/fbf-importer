@@ -23,13 +23,13 @@ class Fbf_Importer_Stock_Processor
 
         //$file = file_get_contents('ssh2.sftp://4x4tyressftp:Evilct7848!@SFTP.wheelpros.com:22/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv');
 
-        $connection = ssh2_connect('SFTP.wheelpros.com', 22);
+        /*$connection = ssh2_connect('SFTP.wheelpros.com', 22);
         ssh2_auth_password($connection, '4x4tyressftp', getenv('WHEELPROS_FTP_PASS'));
         $sftp = ssh2_sftp($connection);
         $stream = fopen("ssh2.sftp://$sftp/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv", 'r');
         $contents = stream_get_contents($stream);
         file_put_contents(self::UPLOAD_LOCATION . 'wheelpros/wheelpros.csv', $contents);
-        @fclose($stream);
+        @fclose($stream);*/
 
 //        var_dump(ABSPATH);
 //        var_dump(__DIR__);
@@ -469,8 +469,49 @@ class Fbf_Importer_Stock_Processor
             //ftp_close($ftp_conn);
 
 
-            // Duplicate Micheldever file, re-arrange columns and send to oponeo
+            $x = 2;
 
+            // Duplicate Micheldever file, re-arrange columns and send to oponeo
+            if($supplier_id === 0){
+                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+                $spreadsheet = $reader->load(self::STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
+                $worksheet = $spreadsheet->getActiveSheet();
+                $highestRow = $worksheet->getHighestRow(); // e.g. 10
+                $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+                // Increment the highest column letter
+                $highestColumn++;
+
+                $data = [];
+                for ($row = 1; $row <= $highestRow; $row++) {
+                    $row_data = [];
+                    if($row > 2){
+                        for ($col = 'A'; $col != $highestColumn; ++$col) {
+                            if($col=='C'||$col=='F'){
+                                $row_data[] = (string)$worksheet->getCell($col.$row)->getValue();
+                            }
+                        }
+                        $data[] = $row_data;
+                    }
+                }
+
+                $opono_file = 'opono_ftp.xlsx';
+                $opono_path = self::STOCK_FEED_LOCATION . 'Excel/' . $opono_file;
+                $opono_ftp_path = 'stock/' . $opono_file;
+                $mySpreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                $sheet = $mySpreadsheet->getActiveSheet();
+                $sheet->fromArray($data);
+                $opono_writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($mySpreadsheet);
+                $opono_writer->save($opono_path);
+
+                // FTP it
+                $ftp = ftp_connect('ftp.oponeo.pl');
+                $login_result = ftp_login($ftp, '4x4tyresUK', 'Midh98476!626aAS');
+                if (($ftp) && ($login_result)) {
+                    $upload = ftp_put($ftp, $opono_ftp_path, $opono_path, FTP_BINARY);
+                }
+                ftp_close($ftp);
+                unlink($opono_path);
+            }
         }
 
         if(!empty($this->errors)){
