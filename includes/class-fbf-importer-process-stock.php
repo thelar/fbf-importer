@@ -467,6 +467,10 @@ class Fbf_Importer_Stock_Processor
 
             // close connection
             //ftp_close($ftp_conn);
+
+
+            // Duplicate Micheldever file, re-arrange columns and send to oponeo
+
         }
 
         if(!empty($this->errors)){
