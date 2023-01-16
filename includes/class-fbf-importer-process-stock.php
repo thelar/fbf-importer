@@ -473,6 +473,7 @@ class Fbf_Importer_Stock_Processor
 
             // Duplicate Micheldever file, re-arrange columns and send to oponeo
             if($supplier_id === 0){
+                // Read the data
                 $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
                 $spreadsheet = $reader->load(self::STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
                 $worksheet = $spreadsheet->getActiveSheet();
@@ -481,6 +482,7 @@ class Fbf_Importer_Stock_Processor
                 // Increment the highest column letter
                 $highestColumn++;
 
+                // Rearrange the columns
                 $data = [];
                 for ($row = 1; $row <= $highestRow; $row++) {
                     $row_data = [];
@@ -494,6 +496,7 @@ class Fbf_Importer_Stock_Processor
                     }
                 }
 
+                // Save the sheet
                 $opono_file = 'opono_ftp.xlsx';
                 $opono_path = self::STOCK_FEED_LOCATION . 'Excel/' . $opono_file;
                 $opono_ftp_path = 'stock/' . $opono_file;
@@ -510,6 +513,8 @@ class Fbf_Importer_Stock_Processor
                     $upload = ftp_put($ftp, $opono_ftp_path, $opono_path, FTP_BINARY);
                 }
                 ftp_close($ftp);
+
+                // Delete the file
                 unlink($opono_path);
             }
         }
