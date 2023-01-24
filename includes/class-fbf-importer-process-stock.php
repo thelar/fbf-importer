@@ -542,15 +542,15 @@ class Fbf_Importer_Stock_Processor
                 $opono_writer->save($opono_path);
 
                 // FTP it
-                /*$ftp = ftp_connect('ftp.oponeo.pl');
+                $ftp = ftp_connect('ftp.oponeo.pl');
                 $login_result = ftp_login($ftp, '4x4tyresUK', 'Midh98476!626aAS');
                 if (($ftp) && ($login_result)) {
                     $upload = ftp_put($ftp, $opono_ftp_path, $opono_path, FTP_BINARY);
                 }
-                ftp_close($ftp);*/
+                ftp_close($ftp);
 
                 // Delete the file
-                //unlink($opono_path);
+                unlink($opono_path);
             }
         }
 
