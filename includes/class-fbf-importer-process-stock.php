@@ -284,11 +284,13 @@ class Fbf_Importer_Stock_Processor
                 $writer->save($outputfile);
             }
         }
+        $oponeo_mapping_array = ['1', '2', '3', '8', '10', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '41', '42', '43'];
 
         foreach($supplier_array as $supplier_id => $supplier_data) {
 
             $row = 0;
             $write_array = array();
+            $opneo_write_array = [];
 
             if(pathinfo($supplier_data['read_filename'], PATHINFO_EXTENSION) == 'xls' || pathinfo($supplier_data['read_filename'], PATHINFO_EXTENSION) == 'XLS') {
                 tep_xls_to_csv_single_file(self::STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['read_filename'], self::STOCK_FEED_LOCATION . 'Upload/' . $supplier_data['write_filename'] . '/' . $supplier_data['write_filename'] . '.csv');
@@ -299,6 +301,15 @@ class Fbf_Importer_Stock_Processor
                 while (($data = fgetcsv($handle, 1000, $supplier_data['delimiter'])) !== FALSE) {
                     $filter = false; // Initially don't filter
 
+                    if($supplier_id == 0 && $row == 0){
+                        $oponeo_row = [];
+                        foreach ($oponeo_mapping_array as $i) {
+                            $oponeo_row[] = $data[$i];
+                        }
+                        $oponeo_row[] = 'PRICE'; // Hardcode last column because I can't think of a better way
+                        $opneo_write_array[] = $oponeo_row;
+                    }
+
                     if($row >= (int)$supplier_data['data_start_row']) {
                         $num = count($data);
 
@@ -307,15 +318,19 @@ class Fbf_Importer_Stock_Processor
                         }
                         if($filter===false){
                             for ($i=0, $n=sizeof($data_columns_array); $i<$n; $i++) {
-                                $write_array[$row][$data_columns_array[$i]] = $data[$supplier_data['mapping_array'][$i]];
-
                                 if ($supplier_id == 13) {
                                     $write_array[$row][$data_columns_array[$i]] = str_replace("£","",$data[$supplier_data['mapping_array'][$i]]);
-                                }
-                                else {
+                                } else {
                                     $write_array[$row][$data_columns_array[$i]] = $data[$supplier_data['mapping_array'][$i]];
                                 }
+                            }
 
+                            if($supplier_id == 0) {
+                                $oponeo_row = [];
+                                foreach ($oponeo_mapping_array as $i) {
+                                    $oponeo_row[] = $data[$i];
+                                }
+                                $opneo_write_array[] = $oponeo_row;
                             }
 
                             //Supplier Part No. = A
@@ -474,16 +489,36 @@ class Fbf_Importer_Stock_Processor
             // Duplicate Micheldever file, re-arrange columns and send to oponeo
             if($supplier_id === 0){
                 // Read the data
-                $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-                $spreadsheet = $reader->load(self::STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
-                $worksheet = $spreadsheet->getActiveSheet();
+                $oponeo_file = self::STOCK_FEED_LOCATION . 'Upload/oponeo/oponeo_prices.xlsx';
+                if(file_exists($oponeo_file)){
+                    $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+                    $spreadsheet = $reader->load($oponeo_file);
+                    $worksheet = $spreadsheet->getActiveSheet();
+                    $rows = $worksheet->toArray();
+
+                    // loop through the oponeo data
+                    foreach($opneo_write_array as $o_key => $o_data){
+                        if($o_key !== 0){
+                            $stcode = $o_data[0];
+                            if($o_stcode_row = array_search($stcode, array_column($rows, 0))){
+                                if($o_stcode_row){
+                                    $opneo_write_array[$o_key][] = str_replace('£', '', $rows[$o_stcode_row][21]);
+                                }
+                            }else{
+                                unset($opneo_write_array[$o_key]);
+                            }
+                        }
+                    }
+                }
+                /*$spreadsheet = $reader->load(self::STOCK_FEED_LOCATION . 'Upload/oponeo/' . $supplier_data['write_filename'] . '.xlsx');
+
                 $highestRow = $worksheet->getHighestRow(); // e.g. 10
                 $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
                 // Increment the highest column letter
-                $highestColumn++;
+                $highestColumn++;*/
 
                 // Rearrange the columns
-                $data = [];
+                /*$data = [];
                 for ($row = 1; $row <= $highestRow; $row++) {
                     $row_data = [];
                     if($row > 2){
@@ -494,28 +529,28 @@ class Fbf_Importer_Stock_Processor
                         }
                         $data[] = $row_data;
                     }
-                }
+                }*/
 
                 // Save the sheet
-                $opono_file = 'opono_ftp.xlsx';
+                $opono_file = 'opono_ftp.csv';
                 $opono_path = self::STOCK_FEED_LOCATION . 'Excel/' . $opono_file;
                 $opono_ftp_path = 'stock/' . $opono_file;
                 $mySpreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
                 $sheet = $mySpreadsheet->getActiveSheet();
-                $sheet->fromArray($data);
-                $opono_writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($mySpreadsheet);
+                $sheet->fromArray($opneo_write_array);
+                $opono_writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($mySpreadsheet);
                 $opono_writer->save($opono_path);
 
                 // FTP it
-                $ftp = ftp_connect('ftp.oponeo.pl');
+                /*$ftp = ftp_connect('ftp.oponeo.pl');
                 $login_result = ftp_login($ftp, '4x4tyresUK', 'Midh98476!626aAS');
                 if (($ftp) && ($login_result)) {
                     $upload = ftp_put($ftp, $opono_ftp_path, $opono_path, FTP_BINARY);
                 }
-                ftp_close($ftp);
+                ftp_close($ftp);*/
 
                 // Delete the file
-                unlink($opono_path);
+                //unlink($opono_path);
             }
         }
 
