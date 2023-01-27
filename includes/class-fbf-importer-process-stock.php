@@ -67,7 +67,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[0]['write_filename'] = "3wheelwh";
         $supplier_array[0]['cell_1a'] = "SOUTHAMT";
         $supplier_array[0]['data_start_row'] = "1";
-        $supplier_array[0]['mapping_array'] = array('1', '2', '39', '41');
+        $supplier_array[0]['mapping_array'] = array('1', '2', '42', '41');
         $supplier_array[0]['delimiter'] = ",";
 
         /*$supplier_array[1]['name'] = "BOND";
