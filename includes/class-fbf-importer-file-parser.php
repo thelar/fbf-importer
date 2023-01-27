@@ -370,6 +370,7 @@ class Fbf_Importer_File_Parser {
                 } else {
                     //It's an Accessory
                     $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
+                    $name_display = null;
                     $attrs = [
                         'Brand Name' => 'brand-name',
                         'Model Name' => 'model-name',
