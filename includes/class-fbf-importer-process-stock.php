@@ -502,7 +502,7 @@ class Fbf_Importer_Stock_Processor
                             $stcode = $o_data[0];
                             if($o_stcode_row = array_search($stcode, array_column($rows, 0))){
                                 if($o_stcode_row){
-                                    $opneo_write_array[$o_key][] = str_replace('£', '', $rows[$o_stcode_row][21]);
+                                    $opneo_write_array[$o_key][] = str_replace('£', '', $rows[$o_stcode_row][19]);
                                 }
                             }else{
                                 unset($opneo_write_array[$o_key]);
