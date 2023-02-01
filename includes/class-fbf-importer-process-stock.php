@@ -550,7 +550,7 @@ class Fbf_Importer_Stock_Processor
                 ftp_close($ftp);
 
                 // Delete the file
-                unlink($opono_path);
+                //unlink($opono_path);
             }
         }
 
