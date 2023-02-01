@@ -284,7 +284,7 @@ class Fbf_Importer_Stock_Processor
                 $writer->save($outputfile);
             }
         }
-        $oponeo_mapping_array = ['1', '2', '3', '8', '10', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '41', '42', '43'];
+        $oponeo_mapping_array = ['1', '2', '3', '8', '10', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '42', '43'];
 
         foreach($supplier_array as $supplier_id => $supplier_data) {
 
@@ -550,7 +550,7 @@ class Fbf_Importer_Stock_Processor
                 ftp_close($ftp);
 
                 // Delete the file
-                //unlink($opono_path);
+                unlink($opono_path);
             }
         }
 
