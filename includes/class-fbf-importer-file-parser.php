@@ -1226,10 +1226,10 @@ class Fbf_Importer_File_Parser {
                         $total+= (float)$supplier['Supplier Cost Price'];
                         $count++;
                     }
-                    $average = $total/$count;
-                    if($average > 0){
-                        return $average;
-                    }
+                }
+                $average = $total/$count;
+                if($average > 0){
+                    return $average;
                 }
             }
             return $price;
