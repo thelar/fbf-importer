@@ -1212,7 +1212,7 @@ class Fbf_Importer_File_Parser {
         }
         if($cheapest===null){
             // If we are here then 4x4 have no stock and All suppliers have no stock - look for the main supplier with a cost price that isn't 0 OR if no main supplier, then take average (excluding 0 costs)
-            if(isset($item['Suppliers'])){
+            /*if(isset($item['Suppliers'])){
                 foreach($item['Suppliers'] as $supplier){
                     if((string)$supplier['Main Supplier']==='True' && (float)$supplier['Supplier Cost Price'] > 0){
                         return (float)$supplier['Supplier Cost Price'];
@@ -1231,7 +1231,7 @@ class Fbf_Importer_File_Parser {
                 if($average > 0){
                     return $average;
                 }
-            }
+            }*/ // Commented out on 5/4/23 on request of DT
             return $price;
         }else{
             return $cheapest;
