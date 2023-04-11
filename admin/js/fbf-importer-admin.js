@@ -33,7 +33,10 @@
 		console.log('fbf-importer-admin.js');
 
 		$('#start-import').bind('click', function(){
-			let data = {};
+			let data = {
+				prod: 23984723,
+				color: 'red',
+			};
 			$.ajax({
 				// eslint-disable-next-line no-undef
 				url: '/test_importer/start',
