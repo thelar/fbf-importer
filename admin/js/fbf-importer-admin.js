@@ -36,7 +36,7 @@
 			let data = {};
 			$.ajax({
 				// eslint-disable-next-line no-undef
-				url: 'https://staging.4x4tyres.co.uk:3001/start',
+				url: '/test_importer/start',
 				type: 'POST',
 				data: data,
 				dataType: 'json',
