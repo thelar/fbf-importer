@@ -36,7 +36,7 @@
 			let data = {};
 			$.ajax({
 				// eslint-disable-next-line no-undef
-				url: 'http://4x4tyres.localhost:3000/start',
+				url: 'http://staging.4x4tyres.co.uk:3000/start',
 				type: 'POST',
 				data: data,
 				dataType: 'json',
@@ -74,6 +74,5 @@
 			});
 		});
 	});
-
 
 })( jQuery );
