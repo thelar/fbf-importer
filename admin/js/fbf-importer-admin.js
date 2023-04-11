@@ -29,4 +29,51 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	$(document).ready(function(){
+		console.log('fbf-importer-admin.js');
+
+		$('#start-import').bind('click', function(){
+			let data = {};
+			$.ajax({
+				// eslint-disable-next-line no-undef
+				url: 'http://4x4tyres.localhost:3000/start',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: function (response) {
+					console.log(response);
+				},
+			});
+		});
+
+		$('#stop-import').bind('click', function(){
+			let data = {};
+			$.ajax({
+				// eslint-disable-next-line no-undef
+				url: 'http://4x4tyres.localhost:3000/stop',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: function (response) {
+					console.log(response);
+				},
+			});
+		});
+
+		$('#import-state').bind('click', function(){
+			let data = {};
+			$.ajax({
+				// eslint-disable-next-line no-undef
+				url: 'http://4x4tyres.localhost:3000/get_state',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: function (response) {
+					console.log(response);
+				},
+			});
+		});
+	});
+
+
 })( jQuery );

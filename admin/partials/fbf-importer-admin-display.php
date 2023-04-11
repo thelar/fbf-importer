@@ -33,10 +33,17 @@
         <input type="submit" value="Process Supplier Stock" class="button-primary">
     </form>
 
-    <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" style="margin-bottom: 1em">
-        <input type="hidden" name="action" value="fbf_importer_remove_variations">
-        <input type="submit" value="Remove Variable Products - White Lettering" class="button-primary">
-    </form>
+    <button type="button" id="start-import" class="button-primary">
+        Start Import
+    </button>
+
+    <button type="button" id="import-state" class="button-primary">
+        Get State
+    </button>
+
+    <button type="button" id="stop-import" class="button-primary">
+        Stop Import
+    </button>
 
     <?php $this->display_log_table(); ?>
 </div>
