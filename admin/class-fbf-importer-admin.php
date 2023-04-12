@@ -247,8 +247,17 @@ class Fbf_Importer_Admin {
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_email' )
         );
+        add_settings_field(
+            $this->option_name . '_batch',
+            __( 'Batch size', 'fbf-importer' ),
+            array( $this, $this->option_name . '_batch_cb' ),
+            $this->plugin_name,
+            $this->option_name . '_general',
+            array( 'label_for' => $this->option_name . '_batch' )
+        );
         register_setting( $this->plugin_name, $this->option_name . '_file', 'sanitize_text_field' );
         register_setting( $this->plugin_name, $this->option_name . '_email', 'sanitize_email' );
+        register_setting( $this->plugin_name, $this->option_name . '_batch', 'sanitize_text_field' );
     }
 
     /**
@@ -302,6 +311,12 @@ class Fbf_Importer_Admin {
 
             echo '</table>';
         }
+    }
+
+    private function display_status()
+    {
+        $option = get_option($this->plugin_name, ['status' => 'READY']);
+        return $option['status'];
     }
 
     private function display_log()
@@ -441,7 +456,18 @@ class Fbf_Importer_Admin {
      */
     public function fbf_importer_email_cb() {
         $email = get_option( $this->option_name . '_email' );
-        echo '<input type="text" name="' . $this->option_name . '_email' . '" id="' . $this->option_name . '_file' . '" value="' . $email . '"> ';
+        echo '<input type="text" name="' . $this->option_name . '_email' . '" id="' . $this->option_name . '_email' . '" value="' . $email . '"> ';
+
+    }
+
+    /**
+     * Render the email input for this plugin
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_batch_cb() {
+        $batch = get_option( $this->option_name . '_batch' );
+        echo '<input type="text" name="' . $this->option_name . '_batch' . '" id="' . $this->option_name . '_batch' . '" value="' . $batch . '"> ';
 
     }
 
@@ -465,9 +491,21 @@ class Fbf_Importer_Admin {
      */
     public function fbf_importer_run_import($auto=null)
     {
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
-        $importer = new Fbf_Importer_File_Parser($this->plugin_name);
-        $importer->run($auto);
+        $options = get_option($this->plugin_name, ['status' => 'READY']);
+        $a = 2;
+        $b = 3;
+
+        if($options['status']==='READY'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-reader.php';
+            $reader = new Fbf_Importer_File_Reader($this->plugin_name);
+            // Check whether the file is uploaded completely
+            $reader->check_file_uploaded();
+        }else{
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
+            $importer = new Fbf_Importer_File_Parser($this->plugin_name);
+            $importer->run($auto);
+        }
+
     }
     /**
      * Perform the free stock update

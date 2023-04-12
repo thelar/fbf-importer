@@ -15,6 +15,7 @@
 
 <div class="wrap">
     <h2><?php echo esc_html( get_admin_page_title() ); ?></h2>
+    <p style="border: 1px solid black; padding: 0.5em; margin: 0;">Status: <?=$this->display_status()?></p>
     <form action="options.php" method="post">
         <?php
         settings_fields( $this->plugin_name );
