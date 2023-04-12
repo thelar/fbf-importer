@@ -38,7 +38,7 @@ class Fbf_Importer_File_Reader
             if($age_in_seconds > (2 * MINUTE_IN_SECONDS)){ // Check that file is older than 2 minutes
                 echo 'Ready to process';
             }else{
-                echo 'Still uploading';
+                echo 'Still uploading, age: ' . $age_in_seconds;
             }
         }
     }
