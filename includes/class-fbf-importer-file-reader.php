@@ -33,9 +33,13 @@ class Fbf_Importer_File_Reader
         if(file_exists($this->filepath)){
             $file_m_time = filemtime($this->filepath);
             $current_time = time();
-            echo 'Time: ' . $current_time . '<br/>';
-            echo 'File time: ' . $file_m_time . '<br/>';
-            echo 'Time diff: ' . ($current_time - $file_m_time) . '<br/>';
+            $age_in_seconds = $current_time - $file_m_time;
+
+            if($age_in_seconds > (2 * MINUTE_IN_SECONDS)){ // Check that file is older than 2 minutes
+                echo 'Ready to process';
+            }else{
+                echo 'Still uploading';
+            }
         }
     }
 }
