@@ -12,6 +12,9 @@ class Fbf_Importer_Cleanup
     ];
     private $stage;
     private $products_to_hide;
+    private static $sku_file = 'sku_xml.xml';
+    private $rsp = [];
+    public $info = [];
 
     public function __construct($plugin_name)
     {
@@ -46,7 +49,7 @@ class Fbf_Importer_Cleanup
 
     private function setup_products_to_hide()
     {
-
+        global $wpdb;
         $this->products_to_hide = get_posts([
             'post_type' => 'product',
             'posts_per_page' => -1,
@@ -60,11 +63,29 @@ class Fbf_Importer_Cleanup
                 ]
             ]
         ]);
+
+        $q = 'SELECT product_id FROM ' . $this->tmp_products_table;
+        $ids = $wpdb->get_col($q);
+
+        foreach($this->products_to_hide as $k => $id){ // Loop through all Woo product_ids
+            if(in_array($id, $ids)){
+                // $id is IS in XML basically - remove it from products to hide
+                unset($this->products_to_hide[$k]);
+            }
+        }
+
+        return $this->products_to_hide;
     }
 
     private function hide_products()
     {
+        $i = 1;
         foreach($this->products_to_hide as $hide_id){
+            $option = get_option($this->plugin_name);
+            $option['num_items'] = count($this->products_to_hide);
+            $option['current_item'] = $i;
+            update_option($this->plugin_name, $option);
+
             $status = [];
             $status['action'] = 'Hide';
             $product_to_hide = new WC_Product($hide_id);
@@ -79,6 +100,78 @@ class Fbf_Importer_Cleanup
             }
             //$stock_status[$sku] = $status;
             $this->info['import_stock']['stock_status'][$sku] = $status;
+            $i++;
+        }
+    }
+
+    private function hide_products_without_images()
+    {
+        $all = get_posts([
+            'post_type' => 'product',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [ //Added to exclude packages
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => ['package', 'tyre'],
+                    'operator' => 'NOT IN'
+                ],
+                [
+                    'taxonomy'  => 'product_visibility',
+                    'field'     => 'name',
+                    'terms'     => ['exclude-from-catalog'],
+                    'operator'  => 'NOT IN',
+                ]
+            ]
+        ]);
+
+        foreach($all as $pid){
+            $sku = get_post_meta($pid, '_sku', true);
+            $status = [];
+            $status['action'] = 'Hide';
+            if(get_post_thumbnail_id($pid)===0){
+                // No thumbnail ID - hide the product
+                $product_to_hide = new WC_Product($pid);
+                $name = $product_to_hide->get_title();
+
+                $product_to_hide->set_catalog_visibility('hidden');
+                $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
+                $product_to_hide->set_backorders('no');
+                if(!$product_to_hide->save()){
+                    $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                }
+                $this->info['import_stock']['stock_status'][$sku] = $status;
+            }
+        }
+    }
+
+    private function write_rsp_xml()
+    {
+        global $wpdb;
+        $q = "SELECT rsp FROM {$this->tmp_products_table} WHERE rsp IS NOT NULL";
+        $rsp = $wpdb->get_col($q);
+        foreach($rsp as $data){
+            $this->rsp[] = unserialize($data);
+        }
+
+        $xml = new DOMDocument();
+        $root = $xml->createElement("Variants");
+        $xml->appendChild($root);
+        foreach($this->rsp as $node){
+            $variant = $xml->createElement("Variant");
+            $variant_code = $xml->createElement("Variant_Code", $node['Variant_Code']);
+            $RSP_Inc = $xml->createElement("RSP_Inc", $node['RSP_Inc']);
+            $price_match = $xml->createElement("Price_Match", (string)$node['Price_Match']);
+            $variant->appendChild($variant_code);
+            $variant->appendChild($RSP_Inc);
+            $variant->appendChild($price_match);
+            $root->appendChild($variant);
+        }
+        if(function_exists('get_home_path')){
+            $xml->save(get_home_path() . '../supplier/' . self::$sku_file);
+        }else{
+            $xml->save(ABSPATH . '../../supplier/' . self::$sku_file);
         }
     }
 }
