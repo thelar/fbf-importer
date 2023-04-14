@@ -316,7 +316,24 @@ class Fbf_Importer_Admin {
     private function display_status()
     {
         $option = get_option($this->plugin_name, ['status' => 'READY']);
-        return $option['status'];
+
+        if(!empty($option['batch'])){
+            if(!empty($option['max_batch'])){
+                $batch_text = sprintf('(batch %s of %s)', $option['batch'], $option['max_batch']);
+            }else{
+                $batch_text = sprintf('(batch %s)', $option['batch']);
+            }
+        }
+
+        if(!empty($option['stage'])){
+            $stage_text = sprintf(' - stage: %s', $option['stage']);
+        }
+
+        if(!empty($option['num_items'])){
+            $item_text = sprintf('(item %s of %s items)', $option['current_item'], $option['num_items']);
+        }
+
+        return sprintf($option['status'] . ' %s %s %s', $batch_text ?? '', $stage_text ?? '', $item_text ?? '');
     }
 
     private function display_log()
@@ -492,20 +509,26 @@ class Fbf_Importer_Admin {
     public function fbf_importer_run_import($auto=null)
     {
         $options = get_option($this->plugin_name, ['status' => 'READY']);
-        $a = 2;
-        $b = 3;
 
         if($options['status']==='READY'){
             require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-reader.php';
             $reader = new Fbf_Importer_File_Reader($this->plugin_name);
             // Check whether the file is uploaded completely
             $reader->check_file_uploaded();
-        }else{
-            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
-            $importer = new Fbf_Importer_File_Parser($this->plugin_name);
-            $importer->run($auto);
-        }
+        }else if($options['status']==='READYTOPROCESS'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-batch-processor.php';
+            $processor = new Fbf_Importer_Batch_Processor($this->plugin_name);
+            $processor->run();
 
+            /*require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-file-parser.php';
+            $importer = new Fbf_Importer_File_Parser($this->plugin_name);
+            $importer->run($auto);*/
+        }else if($options['status']==='READYTOCLEANUP'){
+            // Here when all processing is done and we are able to hide product
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-cleanup.php';
+            $cleaner = new Fbf_Importer_Cleanup($this->plugin_name);
+            $cleaner->clean();
+        }
     }
     /**
      * Perform the free stock update

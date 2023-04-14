@@ -41,6 +41,7 @@ class Fbf_Importer_Activator {
     {
         global $wpdb;
         $table_name = $wpdb->prefix . 'fbf_importer_log';
+        $tmp_products_table_name = $wpdb->prefix . 'fbf_importer_tmp_products';
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $table_name (
@@ -53,8 +54,21 @@ class Fbf_Importer_Activator {
           PRIMARY KEY  (id)
         ) $charset_collate;";
 
+        $sql_products = "CREATE TABLE $tmp_products_table_name (
+          id mediumint(9) NOT NULL AUTO_INCREMENT,
+          product_id mediumint(9),
+          batch tinyint(1),
+          sku varchar(40),
+          item text NOT NULL,
+          rsp text,
+          status text,
+          PRIMARY KEY  (id)
+        ) $charset_collate;";
+
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
         dbDelta( $sql );
+        dbDelta( $sql_products );
 
         add_option('fbf_importer_db_version', FBF_IMPORTER_DB_VERSION);
 	}

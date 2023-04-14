@@ -24,17 +24,17 @@
         ?>
     </form>
 
-    <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" style="margin-bottom: 1em">
+    <!--<form action="<?php /*echo admin_url('admin-post.php'); */?>" method="post" style="margin-bottom: 1em">
         <input type="hidden" name="action" value="fbf_importer_run_import">
         <input type="submit" value="Standard Cost & Supplier Stock Qty Import" class="button-primary">
-    </form>
+    </form>-->
 
     <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" style="margin-bottom: 1em">
         <input type="hidden" name="action" value="fbf_importer_process_stock">
         <input type="submit" value="Process Supplier Stock" class="button-primary">
     </form>
 
-    <button type="button" id="start-import" class="button-primary">
+    <!--<button type="button" id="start-import" class="button-primary">
         Start Import
     </button>
 
@@ -44,7 +44,7 @@
 
     <button type="button" id="stop-import" class="button-primary">
         Stop Import
-    </button>
+    </button>-->
 
     <?php $this->display_log_table(); ?>
 </div>
