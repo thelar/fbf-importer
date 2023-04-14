@@ -140,6 +140,46 @@ class Fbf_Importer_File_Reader
                                 'item' => serialize($item)
                             ]
                         );
+
+                        // Handle white lettering
+                        if(key_exists('Tyre White Lettering', $item)){
+                            $is_white_lettering = (string) $item['Tyre White Lettering']==='True';
+                            if($is_white_lettering){
+                                // Set the original item to white lettering = False
+                                $black_lettering_item = $item;
+                                $black_lettering_item['Tyre White Lettering'] = 'False';
+                                $update = $wpdb->update(
+                                    $table_name,
+                                    [
+                                        'item' => serialize($black_lettering_item)
+                                    ],
+                                    [
+                                        'id' => $insert
+                                    ]
+                                );
+
+                                $this->stock_num+=1;
+                                $item_white = $item;
+                                $item_white['Product Code'] = $item_white['Product Code'] . '_white';
+
+                                if(!empty($item_white['Image name'])){
+                                    $white_image_info = pathinfo($item_white['Image name']);
+                                    $item_white['Image name'] = $white_image_info['filename'] . '_white.' . $white_image_info['extension'];
+                                }else{
+                                    $p = 1;
+                                }
+
+                                $insert_white = $wpdb->insert(
+                                    $table_name,
+                                    [
+                                        'batch' => ceil($this->stock_num/$this->batch),
+                                        'sku' => $item_white['Product Code'],
+                                        'item' => serialize($item_white),
+                                        'is_white_lettering' => $is_white_lettering,
+                                    ]
+                                );
+                            }
+                        }
                     }
                 }
             }
