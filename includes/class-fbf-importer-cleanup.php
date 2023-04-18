@@ -15,6 +15,8 @@ class Fbf_Importer_Cleanup
     private static $sku_file = 'sku_xml.xml';
     private $rsp = [];
     public $info = [];
+    private $log_id;
+    private $logger;
 
     public function __construct($plugin_name)
     {
@@ -22,14 +24,27 @@ class Fbf_Importer_Cleanup
         $this->plugin_name = $plugin_name;
         $this->tmp_products_table = $wpdb->prefix . 'fbf_importer_tmp_products';
         $this->products_to_hide = $this->setup_products_to_hide();
+        $this->log_id = get_option($this->plugin_name)['log_id'];
+
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-logger.php';
+        $this->logger = new Fbf_Importer_Logger($this->plugin_name);
     }
 
     public function clean()
     {
         global $wpdb;
 
+        $dt = new DateTime();
+        $tz = new DateTimeZone("Europe/London");
+        $dt->setTimezone($tz);
+        $start = $dt->getTimestamp();
+
         // Set status to CLEANING
         update_option($this->plugin_name, ['status' => 'CLEANING']);
+
+        $log_info = [
+            'start' => $start,
+        ];
 
         //Loop through $this->stages executing each in turn and fail and return if any errors occur
         foreach($this->stages as $stage) {
@@ -37,7 +52,7 @@ class Fbf_Importer_Cleanup
             $this->stage = $stage;
 
             update_option($this->plugin_name, ['status' => 'CLEANING', 'stage' => $stage]);
-            $this->{$stage}();
+            $this->{$stage}($log_info);
             $stage_end = microtime(true);
             $exec_time = $stage_end - $stage_start;
         }
@@ -77,7 +92,7 @@ class Fbf_Importer_Cleanup
         return $this->products_to_hide;
     }
 
-    private function hide_products()
+    private function hide_products($log_info)
     {
         $i = 1;
         foreach($this->products_to_hide as $hide_id){
@@ -95,16 +110,15 @@ class Fbf_Importer_Cleanup
             $product_to_hide->set_catalog_visibility('hidden');
             $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
             $product_to_hide->set_backorders('no');
-            if(!$product_to_hide->save()){
-                $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
-            }
-            //$stock_status[$sku] = $status;
-            $this->info['import_stock']['stock_status'][$sku] = $status;
+            $product_to_hide->save();
+
             $i++;
         }
+        $log_info+= ['hidden' => $i - 1];
+        $this->logger->log_info($this->stage, $log_info, $this->log_id);
     }
 
-    private function hide_products_without_images()
+    private function hide_products_without_images($log_info)
     {
         $all = get_posts([
             'post_type' => 'product',
@@ -126,6 +140,7 @@ class Fbf_Importer_Cleanup
             ]
         ]);
 
+        $i = 1;
         foreach($all as $pid){
             $sku = get_post_meta($pid, '_sku', true);
             $status = [];
@@ -142,11 +157,14 @@ class Fbf_Importer_Cleanup
                     $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
                 }
                 $this->info['import_stock']['stock_status'][$sku] = $status;
+                $i++;
             }
         }
+        $log_info+= ['hidden' => $i - 1];
+        $this->logger->log_info($this->stage, $log_info, $this->log_id);
     }
 
-    private function write_rsp_xml()
+    private function write_rsp_xml($log_info)
     {
         global $wpdb;
         $q = "SELECT rsp FROM {$this->tmp_products_table} WHERE rsp IS NOT NULL";
@@ -173,5 +191,6 @@ class Fbf_Importer_Cleanup
         }else{
             $xml->save(ABSPATH . '../../supplier/' . self::$sku_file);
         }
+        $this->logger->log_info($this->stage, $log_info, $this->log_id, true);
     }
 }

@@ -294,7 +294,6 @@ class Fbf_Importer_Admin {
             echo '<th>Start time</th>';
             echo '<th>End time</th>';
             echo '<th>Status</th>';
-            echo '<th>Type</th>';
             echo '<th></th>';
             echo '</tr>';
             echo '</thead>';
@@ -303,8 +302,7 @@ class Fbf_Importer_Admin {
                 printf('<tr class="%s">', $i%2?"alternate":"");
                 printf('<td>%s</td>', $logs[$i]['starttime']);
                 printf('<td>%s</td>', $logs[$i]['endtime']);
-                printf('<td>%s</td>', $logs[$i]['success']?'<span style="color:green;font-weight:bold;">Success</span>':'<span style="color:red;font-weight:bold;">Fail</span>');
-                printf('<td>%s</td>', $logs[$i]['type']);
+                printf('<td>%s</td>', $logs[$i]['success']?'<span style="color:green;font-weight:bold;">Complete</span>':'<span style="color:dimgrey;font-weight:bold;">Running</span>');
                 printf('<td><a href="%s">%s</a></td>', get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&log_id=' . $logs[$i]['id'], 'View log');
                 printf('</tr>');
             }
@@ -344,16 +342,20 @@ class Fbf_Importer_Admin {
         $sql = "SELECT * FROM $table WHERE id = $id";
         $log = $wpdb->get_row($sql);
         if(!empty($log)){
-            $text = json_decode($log->log);
+            $text = unserialize($log->log);
             echo '<div class="postbox">';
             echo '<div class="inside">';
-            printf('<h3><code class="transparent">Import - <strong>%s</strong></code></h3>', $log->success?'<span style="color:green;">succeeded</span>':'<span style="color:red;">failed</span>');
+            printf('<h3><code class="transparent">Import - <strong>%s</strong></code></h3>', $log->success?'<span style="color:green;">completed</span>':'<span style="color:dimgrey;">running</span>');
             echo '<hr/>';
             printf('<p><code class="transparent">Started: <strong>%s</strong></code></p>', $log->starttime);
             printf('<p><code class="transparent">Finished: <strong>%s</strong></code></p>', $log->endtime);
 
             if(!empty($text)){
-                echo '<table class="widefat code">';
+                echo '<pre>';
+                print_r($text);
+                echo '</pre>';
+
+                /*echo '<table class="widefat code">';
                 echo '<thead>';
                 echo '<tr>';
                 echo '<th>Stage</th>';
@@ -389,7 +391,7 @@ class Fbf_Importer_Admin {
                     }
                 }
                 echo '<tbody>';
-                echo '</table>';
+                echo '</table>';*/
             }
             echo '</div>';
             echo '</div>';

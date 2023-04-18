@@ -17,6 +17,7 @@ class Fbf_Importer_File_Reader
     public $stock_num;
     private $mapping;
     private $batch;
+    private $logger;
 
     public function __construct($plugin_name)
     {
@@ -80,6 +81,9 @@ class Fbf_Importer_File_Reader
             ]
         ];
         $this->batch = get_option($this->option_name . '_batch', 1000);
+
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-logger.php';
+        $this->logger = new Fbf_Importer_Logger($this->plugin_name);
     }
 
     public function check_file_uploaded()
@@ -97,16 +101,29 @@ class Fbf_Importer_File_Reader
             $age_in_seconds = $current_time - $file_m_time;
 
             if($age_in_seconds > (2 * MINUTE_IN_SECONDS)){ // Check that file is older than 2 minutes
-                $this->process_file();
+                $log_id = $this->logger->start();
+                $this->process_file($log_id);
             }else{
                 echo 'Still uploading';
             }
         }
     }
 
-    private function process_file()
+    private function process_file($log_id)
     {
-        update_option($this->plugin_name, ['status' => 'PROCESSINGXML']);
+        update_option($this->plugin_name, ['status' => 'PROCESSINGXML', 'log_id' => $log_id]);
+
+        // For logging
+        $dt = new DateTime();
+        $tz = new DateTimeZone("Europe/London");
+        $dt->setTimezone($tz);
+        $start = $dt->getTimestamp();
+        $log_info = [
+            'start' => $start,
+            'items' => 0,
+            'white_letter_tyres' => 0
+        ];
+
 
         global $wpdb;
         // Firstly rename the file by adding timestamp and delete original
@@ -120,6 +137,7 @@ class Fbf_Importer_File_Reader
 
             // Now we can move the XML to the tmp database
             $path = $file_info['dirname'] . '/' . $file_info['filename'] . '_' . $ts . '.' . $file_info['extension'];
+            $log_info['file'] = $file_info['filename'] . '_' . $ts . '.' . $file_info['extension'];
 
             require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-dom-validator.php';
             $validator = new Fbf_Importer_Dom_Validator();
@@ -130,6 +148,7 @@ class Fbf_Importer_File_Reader
                 while($xml->read()){
                     if($xml->nodeType == XMLReader::ELEMENT && $xml->name == 'Variant'){
                         $this->stock_num+=1;
+                        $log_info['items']++;
                         $node = simplexml_import_dom($doc->importNode($xml->expand(), true));
                         $item = $this->map_item($node);
                         $insert = $wpdb->insert(
@@ -146,6 +165,7 @@ class Fbf_Importer_File_Reader
                             $is_white_lettering = (string) $item['Tyre White Lettering']==='True';
                             if($is_white_lettering){
                                 // Set the original item to white lettering = False
+                                $log_info['white_letter_tyres']++;
                                 $black_lettering_item = $item;
                                 $black_lettering_item['Tyre White Lettering'] = 'False';
                                 $update = $wpdb->update(
@@ -190,7 +210,8 @@ class Fbf_Importer_File_Reader
             rename($new_file, $moved_file);
         }
 
-        update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => 1]);
+        $id = $this->logger->log_info('processingxml', $log_info, $log_id);
+        update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => 1, 'log_id' => $id]);
     }
 
     private function map_item(SimpleXMLElement $node)

@@ -27,17 +27,17 @@ class Fbf_Importer_Batch_Processor
     private $price_match_fp;
     private $tmp_products_table;
     private $batch_ids;
+    private $log_id;
+    private $logger;
 
     public function __construct($plugin_name)
     {
         global $wpdb;
 
-        // Set status to PROCESSING
-        update_option($this->plugin_name, ['status' => 'PROCESSING']);
-
         $this->tmp_products_table = $wpdb->prefix . 'fbf_importer_tmp_products';
         $this->plugin_name = $plugin_name;
         $this->batch = get_option($this->plugin_name)['batch'];
+        $this->log_id = get_option($this->plugin_name)['log_id'];
 
         // Get the max batch from the tmp products db
         $q = "SELECT MAX(batch) as m FROM {$this->tmp_products_table}";
@@ -46,12 +46,14 @@ class Fbf_Importer_Batch_Processor
             $this->max_batch = $r->m;
         }
 
-
         if(function_exists('get_home_path')){
             $this->price_match_fp = get_home_path() . '../supplier/competitor_monitor/';
         }else{
             $this->price_match_fp = ABSPATH . '../../supplier/competitor_monitor/';
         }
+
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-logger.php';
+        $this->logger = new Fbf_Importer_Logger($this->plugin_name);
     }
 
     public function run()
@@ -67,9 +69,14 @@ class Fbf_Importer_Batch_Processor
             foreach($this->stages as $stage){
                 $stage_start = microtime(true);
                 $this->stage = $stage;
+                $log_info = [
+                    'start' => $start,
+                    'batch' => $this->batch,
+                    'max_batch' => $this->max_batch,
+                ];
 
                 // Update the option with the current stage
-                update_option($this->plugin_name, ['status' => 'PROCESSING', 'batch' => $this->batch, 'max_batch' => $this->max_batch, 'stage' => $stage]);
+                update_option($this->plugin_name, ['status' => 'PROCESSING', 'batch' => $this->batch, 'max_batch' => $this->max_batch, 'stage' => $stage, 'log_id' => $this->log_id]);
 
                 $this->{$stage}();
                 $stage_end = microtime(true);
@@ -79,14 +86,17 @@ class Fbf_Importer_Batch_Processor
                 $this->info[$stage]['End time'] = $stage_end;
                 $this->info[$stage]['Execution time'] = $exec_time;
 
-                if($this->has_errors($stage)){ //Any errors at any stage will break the run script immediately
+                if($count = $this->has_errors($stage)){ //Any errors at any stage will break the run script immediately
                     // $this->log_info($start, false, $auto); TODO: come back to logging
-                    break;
+                    $log_info['error_count'] = $count;
+                    $log_info['errors'] = $this->errors[$stage];
                 }
+
+                $this->logger->log_info($stage . '_' . $this->batch, $log_info, $this->log_id);
             }
         }else{
             // Batch processing finished - ready to clean up
-            update_option($this->plugin_name, ['status' => 'READYTOCLEANUP']);
+            update_option($this->plugin_name, ['status' => 'READYTOCLEANUP', 'log_id' => $this->log_id]);
         }
 
 
@@ -206,6 +216,6 @@ class Fbf_Importer_Batch_Processor
         }
 
         // After processing all the items set the status back to READYTOPROCESS incrementing the batch number by 1
-        update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => $this->batch + 1]);
+        update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => $this->batch + 1, 'log_id' => $this->log_id]);
     }
 }
