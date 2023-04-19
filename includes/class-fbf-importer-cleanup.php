@@ -6,6 +6,7 @@ class Fbf_Importer_Cleanup
     private $option_name = 'fbf_importer';
     private $tmp_products_table;
     private $stages = [
+        'delete_logs',
         'hide_products',
         'hide_products_without_images',
         'write_rsp_xml',
@@ -191,6 +192,22 @@ class Fbf_Importer_Cleanup
         }else{
             $xml->save(ABSPATH . '../../supplier/' . self::$sku_file);
         }
+        $this->logger->log_info($this->stage, $log_info, $this->log_id);
+    }
+
+    private function delete_logs($log_info)
+    {
+        global $wpdb;
+        $days_to_keep_logs_for = get_option($this->option_name . '_logdays');
+
+        $deleted_logs = $this->logger->delete_logs($days_to_keep_logs_for, $this->log_id);
+        if(is_array($deleted_logs)){
+            foreach($deleted_logs as $file_to_delete){
+                // Loop through the returned array of filenames and delete them
+                unlink($file_to_delete);
+            }
+        }
+
         $this->logger->log_info($this->stage, $log_info, $this->log_id, true);
     }
 }

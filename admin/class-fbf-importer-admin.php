@@ -137,8 +137,10 @@ class Fbf_Importer_Admin {
     public function display_options_page() {
         if(!isset($_GET['log_id'])){
             include_once 'partials/fbf-importer-admin-display.php';
-        }else{
+        }else if(!isset($_GET['filename'])){
             include_once 'partials/fbf-importer-admin-display-log.php';
+        }else{
+            include_once 'partials/fbf-importer-admin-download-xml.php';
         }
     }
 
@@ -255,9 +257,18 @@ class Fbf_Importer_Admin {
             $this->option_name . '_general',
             array( 'label_for' => $this->option_name . '_batch' )
         );
+        add_settings_field(
+            $this->option_name . '_logdays',
+            __( 'Keep logs for (days)', 'fbf-importer' ),
+            array( $this, $this->option_name . '_logdays_cb' ),
+            $this->plugin_name,
+            $this->option_name . '_general',
+            array( 'label_for' => $this->option_name . '_logdays' )
+        );
         register_setting( $this->plugin_name, $this->option_name . '_file', 'sanitize_text_field' );
         register_setting( $this->plugin_name, $this->option_name . '_email', 'sanitize_email' );
         register_setting( $this->plugin_name, $this->option_name . '_batch', 'sanitize_text_field' );
+        register_setting( $this->plugin_name, $this->option_name . '_logdays', 'sanitize_text_field' );
     }
 
     /**
@@ -295,15 +306,18 @@ class Fbf_Importer_Admin {
             echo '<th>End time</th>';
             echo '<th>Status</th>';
             echo '<th></th>';
+            echo '<th></th>';
             echo '</tr>';
             echo '</thead>';
 
             for($i=0;$i<count($logs);$i++){
+                $file = unserialize($logs[$i]['log'])['processingxml']['file'];
                 printf('<tr class="%s">', $i%2?"alternate":"");
                 printf('<td>%s</td>', $logs[$i]['starttime']);
                 printf('<td>%s</td>', $logs[$i]['endtime']);
                 printf('<td>%s</td>', $logs[$i]['success']?'<span style="color:green;font-weight:bold;">Complete</span>':'<span style="color:dimgrey;font-weight:bold;">Running</span>');
                 printf('<td><a href="%s">%s</a></td>', get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&log_id=' . $logs[$i]['id'], 'View log');
+                printf('<td><form action="%s" method="post"><input type="hidden" name="action" value="%s"/><input type="hidden" name="file" value="%s"/><a href="#" onclick="this.closest(\'form\').submit();return false;">%s</a></form></td>', admin_url('admin-post.php'), 'fbf_importer_download_file', $file, 'Download XML');
                 printf('</tr>');
             }
 
@@ -480,13 +494,24 @@ class Fbf_Importer_Admin {
     }
 
     /**
-     * Render the email input for this plugin
+     * Render the batch input for this plugin
      *
      * @since  1.0.9
      */
     public function fbf_importer_batch_cb() {
         $batch = get_option( $this->option_name . '_batch' );
         echo '<input type="text" name="' . $this->option_name . '_batch' . '" id="' . $this->option_name . '_batch' . '" value="' . $batch . '"> ';
+
+    }
+
+    /**
+     * Render the logdays input for this plugin
+     *
+     * @since  1.0.9
+     */
+    public function fbf_importer_logdays_cb() {
+        $logdays = get_option( $this->option_name . '_logdays' );
+        echo '<input type="text" name="' . $this->option_name . '_logdays' . '" id="' . $this->option_name . '_logdays' . '" value="' . $logdays . '"> ';
 
     }
 
@@ -579,6 +604,27 @@ class Fbf_Importer_Admin {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-clean-data.php';
         $cleaner = new Fbf_Importer_Clean_Data($this->plugin_name);
         $cleaner->run();
+    }
+
+    /**
+     * Download an xml file
+     *
+     * @return void
+     */
+    public function fbf_importer_download_file()
+    {
+        if(function_exists('get_home_path')){
+            $filepath = get_home_path() . '../supplier/imported_stock/' . $_REQUEST['file'];
+        }else{
+            $filepath = ABSPATH . '../../supplier/imported_stock/' . $_REQUEST['file'];
+        }
+        $file = file_get_contents($filepath);
+
+        header('Content-type: text/xml');
+        header(sprintf('Content-Disposition: attachment; filename="%s"', $_REQUEST['file']));
+
+        echo $file;
+        exit();
     }
 
     public function fbf_importer_admin_notices()
