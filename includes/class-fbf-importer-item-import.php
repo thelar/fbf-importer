@@ -12,6 +12,7 @@ class Fbf_Importer_Item_Import
     private $fitting_cost;
     private $flat_fee;
     private $tmp_products_table;
+    private $suppliers;
 
     public function __construct($plugin_name, $id, $min_stock, $rsp_rules, $price_match_data, $fitting_cost, $flat_fee)
     {
@@ -24,6 +25,8 @@ class Fbf_Importer_Item_Import
         $this->fitting_cost = $fitting_cost;
         $this->flat_fee = $flat_fee;
         $this->tmp_products_table = $wpdb->prefix . 'fbf_importer_tmp_products';
+
+        $this->suppliers = $this->build_suppliers();
     }
 
     public function import($item)
@@ -1132,5 +1135,21 @@ class Fbf_Importer_Item_Import
                 'id' => $this->db_id
             ]
         );
+    }
+
+    private function build_suppliers()
+    {
+        $suppliers_a = null;
+        $suppliers = get_posts([
+            'post_type' => 'suppliers',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ]);
+        if(!empty($suppliers)){
+            foreach($suppliers as $supplier_id){
+                $suppliers_a[get_field('supplier_id', $supplier_id)] = get_field('lead_time', $supplier_id);
+            }
+        }
+        return $suppliers_a;
     }
 }
