@@ -174,7 +174,7 @@ class Fbf_Importer_File_Reader
                                         'item' => serialize($black_lettering_item)
                                     ],
                                     [
-                                        'id' => $insert
+                                        'id' => $wpdb->insert_id
                                     ]
                                 );
 
