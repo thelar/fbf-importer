@@ -147,18 +147,19 @@ class Fbf_Importer_Cleanup
             $status = [];
             $status['action'] = 'Hide';
             if(get_post_thumbnail_id($pid)===0){
-                // No thumbnail ID - hide the product
-                $product_to_hide = new WC_Product($pid);
-                $name = $product_to_hide->get_title();
-
-                $product_to_hide->set_catalog_visibility('hidden');
-                $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
-                $product_to_hide->set_backorders('no');
-                if(!$product_to_hide->save()){
-                    $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                if($_ENV['WP_ENV']==='production'){ // Only hide products without images if WP_ENV is production
+                    // No thumbnail ID - hide the product
+                    $product_to_hide = new WC_Product($pid);
+                    $name = $product_to_hide->get_title();
+                    $product_to_hide->set_catalog_visibility('hidden');
+                    $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
+                    $product_to_hide->set_backorders('no');
+                    if(!$product_to_hide->save()){
+                        $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
+                    }
+                    $this->info['import_stock']['stock_status'][$sku] = $status;
+                    $i++;
                 }
-                $this->info['import_stock']['stock_status'][$sku] = $status;
-                $i++;
             }
         }
         $log_info+= ['hidden' => $i - 1];
