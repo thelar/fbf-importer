@@ -107,17 +107,17 @@ class Fbf_Importer_Free_Stock
 
             foreach($rows as $ri => $row){
                 $test_cols = [0, 2, 3];
-                $sku_col = 1;
+                $sku_col = 0;
 
                 if($product_id = wc_get_product_id_by_sku($row[$sku_col])){
                     $product = wc_get_product($product_id);
                     $pc = (int)$row[10];
                     if($pc===0){
 
-                        if(!empty($row[11])){
+                        if(!empty($row[12])){
                             //Date
                             try {
-                                $date = DateTime::createFromFormat('m/d/Y', $row[11]);
+                                $date = DateTime::createFromFormat('m/d/Y', $row[12]);
                             } catch (Exception $e) {
                                 $log[] = [
                                     'id' => $product_id,
