@@ -107,7 +107,7 @@ class Fbf_Importer_Free_Stock
 
             foreach($rows as $ri => $row){
                 $test_cols = [0, 2, 3];
-                $sku_col = 0;
+                $sku_col = 2;
 
                 if($product_id = wc_get_product_id_by_sku($row[$sku_col])){
                     $product = wc_get_product($product_id);
