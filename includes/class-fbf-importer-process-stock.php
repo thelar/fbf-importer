@@ -78,13 +78,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[1]['mapping_array'] = array('0', '1', '24', '23');
         $supplier_array[1]['delimiter'] = ",";*/
 
-        $supplier_array[2]['name'] = "STAPLETONS";
+        /*$supplier_array[2]['name'] = "STAPLETONS";
         $supplier_array[2]['read_filename'] = "EXP48419S.CSV";
         $supplier_array[2]['write_filename'] = "stapletons";
         $supplier_array[2]['cell_1a'] = "STPTYRES";
         $supplier_array[2]['data_start_row'] = "1";
         $supplier_array[2]['mapping_array'] = array('0', '16', '13', '15');
-        $supplier_array[2]['delimiter'] = ",";
+        $supplier_array[2]['delimiter'] = ",";*/
 
         $supplier_array[3]['name'] = "MALVERN";
         $supplier_array[3]['read_filename'] = "cooper.xls";
@@ -102,13 +102,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[4]['mapping_array'] = array('0', '19', '16', '15');
         $supplier_array[4]['delimiter'] = ";";*/
 
-        $supplier_array[5]['name'] = "NANKANG";
+        /*$supplier_array[5]['name'] = "NANKANG";
         $supplier_array[5]['read_filename'] = "nankang.csv";
         $supplier_array[5]['write_filename'] = "nankang";
         $supplier_array[5]['cell_1a'] = "WESTLAND";
         $supplier_array[5]['data_start_row'] = "1";
         $supplier_array[5]['mapping_array'] = array('0', '4', '2', '3');
-        $supplier_array[5]['delimiter'] = ",";
+        $supplier_array[5]['delimiter'] = ",";*/
 
         /*$supplier_array[6]['name'] = "yoko";
         $supplier_array[6]['read_filename'] = "yoko.csv";
