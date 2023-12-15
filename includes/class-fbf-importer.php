@@ -118,6 +118,11 @@ class Fbf_Importer {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-fbf-importer-admin.php';
 
+        /**
+         * The class responsible for admin ajax functions.
+         */
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-fbf-importer-admin-ajax.php';
+
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
@@ -164,6 +169,7 @@ class Fbf_Importer {
 	 */
 	private function define_admin_hooks() {
 		$plugin_admin = new Fbf_Importer_Admin( $this->get_plugin_name(), $this->get_version() );
+        $plugin_admin_ajax = new Fbf_Importer_Admin_Ajax($this->get_plugin_name(), $this->get_version());
 		$plugin_api = new Fbf_Importer_Api($this->get_plugin_name(), $this->get_version());
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -175,6 +181,12 @@ class Fbf_Importer {
         $this->loader->add_action( 'admin_post_fbf_importer_remove_variations', $plugin_admin, 'fbf_importer_remove_variations' );
         $this->loader->add_action( 'admin_post_fbf_importer_download_file', $plugin_admin, 'fbf_importer_download_file' );
         $this->loader->add_action( 'admin_notices', $plugin_admin, 'fbf_importer_admin_notices');
+
+        // Ajax
+        $this->loader->add_action('wp_ajax_fbf_importer_mts_ow_check_status', $plugin_admin_ajax, 'fbf_importer_mts_ow_check_status');
+        $this->loader->add_action('wp_ajax_nopriv_fbf_importer_mts_ow_check_status', $plugin_admin_ajax, 'fbf_importer_mts_ow_check_status');
+        $this->loader->add_action('wp_ajax_fbf_importer_mts_ow_start', $plugin_admin_ajax, 'fbf_importer_mts_ow_start');
+        $this->loader->add_action('wp_ajax_nopriv_fbf_importer_mts_ow_start', $plugin_admin_ajax, 'fbf_importer_mts_ow_start');
 	}
 
 	/**

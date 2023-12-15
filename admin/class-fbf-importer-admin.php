@@ -95,7 +95,7 @@ class Fbf_Importer_Admin {
      *
      * @since    1.0.0
      */
-    public function enqueue_scripts() {
+    public function enqueue_scripts($hook_suffix) {
 
         /**
          * This function is provided for demonstration purposes only.
@@ -111,6 +111,14 @@ class Fbf_Importer_Admin {
 
         wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin.js', array( 'jquery' ), $this->version, false );
 
+        if($hook_suffix == $this->mts_ow_id()){
+            wp_enqueue_script( $this->plugin_name . '-mts-ow', plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin-mts-ow.js', array( 'jquery' ), $this->version, false );
+            $ajax_params = array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'ajax_nonce' => wp_create_nonce($this->plugin_name),
+            );
+            wp_localize_script($this->plugin_name . '-mts-ow', 'fbf_importer_admin_mts_ow', $ajax_params);
+        }
     }
 
     /**
@@ -119,13 +127,19 @@ class Fbf_Importer_Admin {
      * @since  1.0.0
      */
     public function add_options_page() {
-
         $this->plugin_screen_hook_suffix = add_options_page(
             __( 'Importer Settings', 'fbf-importer' ),
             __( 'Importer', 'fbf-importer' ),
             'manage_options',
             $this->plugin_name,
             array( $this, 'display_options_page' )
+        );
+        $this->plugin_pimberly_ow_screen_hook_suffix = add_options_page(
+            __('MTS to OrderWise Import', 'fbf-importer'),
+            __('Pimberly to OW', 'fbf-importer'),
+            'manage_options',
+            $this->plugin_name . '-mts-ow',
+            [$this, 'display_mts_ow']
         );
     }
 
@@ -142,6 +156,16 @@ class Fbf_Importer_Admin {
         }else{
             include_once 'partials/fbf-importer-admin-download-xml.php';
         }
+    }
+
+    /**
+     * Render the MTS to OW page
+     *
+     * @since  1.0.0
+     */
+    public function display_mts_ow()
+    {
+        include_once 'partials/fbf-importer-admin-display-mts-ow.php';
     }
 
     /**
@@ -557,6 +581,21 @@ class Fbf_Importer_Admin {
             $cleaner->clean();
         }
     }
+
+    /**
+     * Perform the Pimberly to OW import
+     */
+    public function fbf_importer_run_pimberly_to_ow_import()
+    {
+        $options = get_option($this->plugin_name . '-mts_ow', ['status' => 'STOPPED']);
+
+        if($options['status']==='READY'){
+            plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-pimberly-ow.php';
+            $pimberly_to_ow = new Fbf_Importer_Pimberly_Ow($this->plugin_name);
+
+        }
+    }
+
     /**
      * Perform the free stock update
      *
@@ -650,5 +689,18 @@ class Fbf_Importer_Admin {
 
         header('Content-Type: application/json');
         echo json_encode($files);
+    }
+
+    public function mts_ow_id(){
+        return 'settings_page_fbf-importer-mts-ow';
+    }
+
+    public function get_status()
+    {
+        $option = $this->plugin_name . '-mts-ow';
+        if(get_option($option)){
+            $state = get_option($option)['state'];
+            echo $state;
+        }
     }
 }
