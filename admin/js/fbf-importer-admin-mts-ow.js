@@ -74,11 +74,17 @@
                 success: function (response) {
                     if(!starting){
                         console.log(response.status);
-                        $status.text(response.status);
+
                         if(response.status==='STOPPED'){
                             $start_button.prop('disabled', false);
+                            $status.text(response.status);
                         }else{
                             $start_button.prop('disabled', true);
+                            if(response.status==='RUNNING'){
+                                $status.text(response.status + ' - ' + response.stage);
+                            }else{
+                                $status.text(response.status);
+                            }
                         }
                     }
                 },

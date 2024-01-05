@@ -587,12 +587,49 @@ class Fbf_Importer_Admin {
      */
     public function fbf_importer_run_pimberly_to_ow_import()
     {
-        $options = get_option($this->plugin_name . '-mts_ow', ['status' => 'STOPPED']);
+        $options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
 
         if($options['status']==='READY'){
-            plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-pimberly-ow.php';
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-pimberly-ow.php';
             $pimberly_to_ow = new Fbf_Importer_Pimberly_Ow($this->plugin_name);
-
+            $pimberly_to_ow->run();
+        }else if($options['status']==='READYFOROW') {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if ($token) {
+                // OK to run OW api calls
+                require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_ow_prepare();
+            }
+        }else if($options['status']==='READYFOROWDISCONTINUE'){
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if($token){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_ow_discontinue();
+            }
+        }else if($options['status']==='READYFOROWCREATE'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if($token){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_ow_create();
+            }
+        }else if($options['status']==='READYFOROWUPDATE'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if($token){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_ow_update();
+            }
         }
     }
 

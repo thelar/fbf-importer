@@ -43,6 +43,7 @@ class Fbf_Importer_Activator {
         $table_name = $wpdb->prefix . 'fbf_importer_log';
         $tmp_products_table_name = $wpdb->prefix . 'fbf_importer_tmp_products';
         $pimberly_products_table_name = $wpdb->prefix . 'fbf_importer_pimberly_data';
+        $pimberly_logs = $wpdb->prefix . 'fbf_importer_pimberly_logs';
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $table_name (
@@ -81,11 +82,23 @@ class Fbf_Importer_Activator {
           UNIQUE  (primary_id)
         ) $charset_collate;";
 
+        $sql_pimberly_logs = "CREATE TABLE $pimberly_logs (
+          id mediumint(9) NOT NULL AUTO_INCREMENT,
+          started datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+          ended datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+          process varchar(20),
+          log text,
+          PRIMARY KEY  (id)
+        ) $charset_collate;";
+
+
+
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
         dbDelta( $sql );
         dbDelta( $sql_products );
         dbDelta( $sql_pimberly );
+        dbDelta( $sql_pimberly_logs );
 
         add_option('fbf_importer_db_version', FBF_IMPORTER_DB_VERSION);
     }
