@@ -44,6 +44,7 @@ class Fbf_Importer_Activator {
         $tmp_products_table_name = $wpdb->prefix . 'fbf_importer_tmp_products';
         $pimberly_products_table_name = $wpdb->prefix . 'fbf_importer_pimberly_data';
         $pimberly_logs = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $pimberly_log_items = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $table_name (
@@ -84,6 +85,15 @@ class Fbf_Importer_Activator {
 
         $sql_pimberly_logs = "CREATE TABLE $pimberly_logs (
           id mediumint(9) NOT NULL AUTO_INCREMENT,
+          status varchar(20),
+          started datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+          ended datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+          PRIMARY KEY  (id)
+        ) $charset_collate;";
+
+        $sql_pimberly_log_items = "CREATE TABLE $pimberly_log_items (
+          id mediumint(9) NOT NULL AUTO_INCREMENT,
+          log_id mediumint(9) NOT NULL,
           started datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           ended datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           process varchar(20),
@@ -91,14 +101,13 @@ class Fbf_Importer_Activator {
           PRIMARY KEY  (id)
         ) $charset_collate;";
 
-
-
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
         dbDelta( $sql );
         dbDelta( $sql_products );
         dbDelta( $sql_pimberly );
         dbDelta( $sql_pimberly_logs );
+        dbDelta( $sql_pimberly_log_items );
 
         add_option('fbf_importer_db_version', FBF_IMPORTER_DB_VERSION);
     }

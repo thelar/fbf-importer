@@ -34,8 +34,18 @@ class Fbf_Importer_Admin_Ajax
 
     public function fbf_importer_mts_ow_start()
     {
+        global $wpdb;
+        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
+        $log = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id
+            FROM {$log_table}");
+        $log_id = $wpdb->get_col($max_sql)[0]+1?:1;
+        $i = $wpdb->insert($log, [
+            'started' => wp_date('Y-m-d H:i:s'),
+            'status' => 'RUNNING',
+        ]);
         $resp = [];
-        if($update = update_option($this->plugin_name . '-mts-ow', ['status' => 'READY'])){
+        if($update = update_option($this->plugin_name . '-mts-ow', ['status' => 'READY', 'log_id' => $log_id])){
             $resp['status'] = 'success';
             $resp['option'] = get_option($this->plugin_name . '-mts-ow');
         }else{

@@ -22,4 +22,6 @@
             Start
         </button>
     </div>
+
+    <?php $this->display_mts_ow_log_table(); ?>
 </div>

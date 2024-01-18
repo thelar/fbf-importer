@@ -30,16 +30,17 @@ class Fbf_Importer_Owapi
         $this->token = $token;
     }
 
-    public function run_ow_prepare()
+    public function run_ow_prepare($log_id)
     {
         global $wpdb;
         $table = $wpdb->prefix . 'fbf_importer_pimberly_data';
-        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => 'Starting OW comparison']);
         $report = [];
 
         // Create the log entry
         $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
             'started' => wp_date('Y-m-d H:i:s'),
             'process' => 'OW_IMPORT_PREPARE'
         ]);
@@ -121,15 +122,16 @@ class Fbf_Importer_Owapi
             ], [
                 'id' => $insert_id
             ]);
-            update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWDISCONTINUE']);
+            update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWDISCONTINUE', 'log_id' => $log_id]);
         }
     }
 
-    public function run_ow_create()
+    public function run_ow_create($log_id)
     {
         global $wpdb;
         $table = $wpdb->prefix . 'fbf_importer_pimberly_data';
-        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
+        $log = $wpdb->prefix . 'fbf_importer_pimberly_logs';
         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => 'Creating new OW records']);
         $report = [];
         $created_count = 0;
@@ -137,6 +139,7 @@ class Fbf_Importer_Owapi
 
         // Create the log entry
         $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
             'started' => wp_date('Y-m-d H:i:s'),
             'process' => 'OW_IMPORT_CREATE'
         ]);
@@ -194,14 +197,22 @@ class Fbf_Importer_Owapi
         ], [
             'id' => $insert_id
         ]);
-        update_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
+        update_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED', 'log_id' => $log_id]);
+
+        // Now set the status of the current log to completed
+        $u = $wpdb->update($log, [
+            'ended' => wp_date('Y-m-d H:i:s'),
+            'status' => 'COMPLETED'
+        ], [
+            'id' => $log_id
+        ]);
     }
 
-    public function run_ow_discontinue()
+    public function run_ow_discontinue($log_id)
     {
         global $wpdb;
         $table = $wpdb->prefix . 'fbf_importer_pimberly_data';
-        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => 'Discontinuing OW records']);
         $report = [];
         $discontinued_count = 0;
@@ -209,6 +220,7 @@ class Fbf_Importer_Owapi
 
         // Create the log entry
         $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
             'started' => wp_date('Y-m-d H:i:s'),
             'process' => 'OW_UPDATE_DCNT'
         ]);
@@ -256,14 +268,14 @@ class Fbf_Importer_Owapi
         ], [
             'id' => $insert_id
         ]);
-        update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWUPDATE']);
+        update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWUPDATE', 'log_id' => $log_id]);
     }
 
-    public function run_ow_update()
+    public function run_ow_update($log_id)
     {
         global $wpdb;
         $table = $wpdb->prefix . 'fbf_importer_pimberly_data';
-        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => 'Starting OW update - checking updates required']);
         $report = [];
         $updates_required = [];
@@ -272,6 +284,7 @@ class Fbf_Importer_Owapi
 
         // Create the log entry
         $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
             'started' => wp_date('Y-m-d H:i:s'),
             'process' => 'OW_IMPORT_UPDATE'
         ]);
@@ -341,7 +354,7 @@ class Fbf_Importer_Owapi
         ], [
             'id' => $insert_id
         ]);
-        update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWCREATE']);
+        update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWCREATE', 'log_id' => $log_id]);
     }
 
     private function get_create_item_payload($item, $include_code=true)

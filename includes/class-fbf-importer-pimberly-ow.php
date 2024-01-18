@@ -12,11 +12,11 @@ class Fbf_Importer_Pimberly_Ow
         $this->plugin_name = $plugin_name;
     }
 
-    public function run()
+    public function run($log_id)
     {
         global $wpdb;
         $table = $wpdb->prefix . 'fbf_importer_pimberly_data';
-        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+        $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => 'Importing products from Pimberly']);
         $reponse_code = 200;
         $next = null;
@@ -27,6 +27,7 @@ class Fbf_Importer_Pimberly_Ow
 
         // Create the log entry
         $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
             'started' => wp_date('Y-m-d H:i:s'),
             'process' => 'PIMBERLY_IMPORT'
         ]);
@@ -127,7 +128,7 @@ class Fbf_Importer_Pimberly_Ow
             ], [
                 'id' => $insert_id
             ]);
-            update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROW']);
+            update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROW', 'log_id' => $log_id]);
         }else{
             // Add the end time to the log entry
             $u = $wpdb->update($log_table, [
