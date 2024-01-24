@@ -62,4 +62,25 @@ class Fbf_Importer_Admin_Ajax
         echo json_encode($status);
         die();
     }
+
+    public function fbf_importer_boughto_ow_start()
+    {
+        $resp = [];
+        if($update = update_option($this->plugin_name . '-boughto-ow', ['status' => 'READY'])){
+            $resp['status'] = 'success';
+            $resp['option'] = get_option($this->plugin_name . '-boughto-ow');
+        }else{
+            $resp['status'] = 'error';
+            $resp['error'] = 'Unable to update ' . $this->plugin_name . '-boughto-ow' . ' option';
+        }
+        echo json_encode($resp);
+        die();
+    }
+
+    public function fbf_importer_boughto_ow_check_status()
+    {
+        $status = get_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED']);
+        echo json_encode($status);
+        die();
+    }
 }

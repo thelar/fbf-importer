@@ -187,6 +187,10 @@ class Fbf_Importer {
         $this->loader->add_action('wp_ajax_nopriv_fbf_importer_mts_ow_check_status', $plugin_admin_ajax, 'fbf_importer_mts_ow_check_status');
         $this->loader->add_action('wp_ajax_fbf_importer_mts_ow_start', $plugin_admin_ajax, 'fbf_importer_mts_ow_start');
         $this->loader->add_action('wp_ajax_nopriv_fbf_importer_mts_ow_start', $plugin_admin_ajax, 'fbf_importer_mts_ow_start');
+        $this->loader->add_action('wp_ajax_fbf_importer_boughto_ow_check_status', $plugin_admin_ajax, 'fbf_importer_boughto_ow_check_status');
+        $this->loader->add_action('wp_ajax_nopriv_fbf_importer_boughto_ow_check_status', $plugin_admin_ajax, 'fbf_importer_boughto_ow_check_status');
+        $this->loader->add_action('wp_ajax_fbf_importer_boughto_ow_start', $plugin_admin_ajax, 'fbf_importer_boughto_ow_start');
+        $this->loader->add_action('wp_ajax_nopriv_fbf_importer_boughto_ow_start', $plugin_admin_ajax, 'fbf_importer_boughto_ow_start');
 	}
 
 	/**

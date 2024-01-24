@@ -65,6 +65,7 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             // Your own function to process end point
             $this->fbf_importer_run_import('automatic');
             $this->fbf_importer_run_pimberly_to_ow_import();
+            $this->fbf_importer_run_boughto_to_ow_import();
             exit;
         }else if($wp->request == 'api/v2/freestock'){
             require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-free-stock.php';

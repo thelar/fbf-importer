@@ -118,6 +118,13 @@ class Fbf_Importer_Admin {
                 'ajax_nonce' => wp_create_nonce($this->plugin_name),
             );
             wp_localize_script($this->plugin_name . '-mts-ow', 'fbf_importer_admin_mts_ow', $ajax_params);
+        }else if($hook_suffix == $this->boughto_ow_id()){
+            wp_enqueue_script( $this->plugin_name . '-boughto-ow', plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin-boughto-ow.js', array( 'jquery' ), $this->version, false );
+            $ajax_params = array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'ajax_nonce' => wp_create_nonce($this->plugin_name),
+            );
+            wp_localize_script($this->plugin_name . '-boughto-ow', 'fbf_importer_admin_boughto_ow', $ajax_params);
         }
     }
 
@@ -140,6 +147,13 @@ class Fbf_Importer_Admin {
             'manage_options',
             $this->plugin_name . '-mts-ow',
             [$this, 'display_mts_ow']
+        );
+        $this->plugin_boughto_ow_screen_hook_suffix = add_options_page(
+            __('Boughto to OrderWise Import', 'fbf-importer'),
+            __('Boughto to OW', 'fbf-importer'),
+            'manage_options',
+            $this->plugin_name . '-boughto-ow',
+            [$this, 'display_boughto_ow']
         );
     }
 
@@ -169,6 +183,20 @@ class Fbf_Importer_Admin {
             include_once 'partials/fbf-importer-admin-display-mts-ow.php';
         }else{
             include_once 'partials/fbf-importer-admin-display-mts-ow-log.php';
+        }
+    }
+
+    /**
+     * Render the MTS to OW page
+     *
+     * @since  1.0.0
+     */
+    public function display_boughto_ow()
+    {
+        if(!isset($_GET['log_id'])){
+            include_once 'partials/fbf-importer-admin-display-boughto-ow.php';
+        }else{
+            include_once 'partials/fbf-importer-admin-display-boughto-ow-log.php';
         }
     }
 
@@ -388,6 +416,11 @@ class Fbf_Importer_Admin {
 
             echo '</table>';
         }
+    }
+
+    private function display_boughto_ow_log_table()
+    {
+        echo 'Log table here';
     }
 
     private function display_status()
@@ -765,6 +798,23 @@ class Fbf_Importer_Admin {
     }
 
     /**
+     * Perform the Boughto to OW import
+     */
+    public function fbf_importer_run_boughto_to_ow_import()
+    {
+        $options = get_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED']);
+        if(array_key_exists('log_id', $options)){
+            $log_id = $options['log_id'];
+        }
+
+        if($options['status']==='READY'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-boughto-ow.php';
+            $pimberly_to_ow = new Fbf_Importer_Boughto_Ow($this->plugin_name);
+            $pimberly_to_ow->run($log_id);
+        }
+    }
+
+    /**
      * Perform the free stock update
      *
      * @return integer or boolean false
@@ -861,6 +911,10 @@ class Fbf_Importer_Admin {
 
     public function mts_ow_id(){
         return 'settings_page_fbf-importer-mts-ow';
+    }
+
+    public function boughto_ow_id(){
+        return 'settings_page_fbf-importer-boughto-ow';
     }
 
     public function get_status()
