@@ -65,8 +65,18 @@ class Fbf_Importer_Admin_Ajax
 
     public function fbf_importer_boughto_ow_start()
     {
+        global $wpdb;
+        $logs_table = $wpdb->prefix . 'fbf_importer_boughto_logs';
+        $log_items_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+        $max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id
+            FROM {$log_items_table}");
+        $log_id = $wpdb->get_col($max_sql)[0]+1?:1;
+        $i = $wpdb->insert($logs_table, [
+            'started' => wp_date('Y-m-d H:i:s'),
+            'status' => 'RUNNING',
+        ]);
         $resp = [];
-        if($update = update_option($this->plugin_name . '-boughto-ow', ['status' => 'READY'])){
+        if($update = update_option($this->plugin_name . '-boughto-ow', ['status' => 'READY', 'log_id' => $log_id])){
             $resp['status'] = 'success';
             $resp['option'] = get_option($this->plugin_name . '-boughto-ow');
         }else{
