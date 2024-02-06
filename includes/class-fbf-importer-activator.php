@@ -101,7 +101,7 @@ class Fbf_Importer_Activator {
           started datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           ended datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           process varchar(20),
-          log text,
+          log mediumblob,
           PRIMARY KEY  (id)
         ) $charset_collate;";
 
@@ -134,7 +134,7 @@ class Fbf_Importer_Activator {
           started datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           ended datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           process varchar(20),
-          log text,
+          log mediumblob,
           PRIMARY KEY  (id)
         ) $charset_collate;";
 

@@ -47,7 +47,7 @@ class Fbf_Importer_Owapi
         if($i){
             $insert_id = $wpdb->insert_id;
         }
-        $variants = $this->ow_curl('stock/variants?limit=100000', 'GET', 200);
+        $variants = $this->ow_curl('stock/variants?limit=200000', 'GET', 200);
         if($variants['status']!=='error'){
             $variants_a = json_decode($variants['response']);
             $ow_skus = array_column($variants_a, 'variantCode');
@@ -291,7 +291,7 @@ class Fbf_Importer_Owapi
         if($i){
             $insert_id = $wpdb->insert_id;
         }
-        $variants = $this->ow_curl('stock/variants?limit=100000', 'GET', 200);
+        $variants = $this->ow_curl('stock/variants?limit=200000', 'GET', 200);
         if($variants['status']!=='error'){
             $variants_a = json_decode($variants['response']);
             $ow_skus = array_column($variants_a, 'variantCode');
@@ -357,6 +357,322 @@ class Fbf_Importer_Owapi
         update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWCREATE', 'log_id' => $log_id]);
     }
 
+    public function run_boughto_ow_prepare($log_id)
+    {
+        global $wpdb;
+        $data_table = $wpdb->prefix . 'fbf_importer_boughto_data';
+        $log_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Starting OW comparison']);
+        $report = [];
+
+        // Create the log entry
+        $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
+            'started' => wp_date('Y-m-d H:i:s'),
+            'process' => 'OW_IMPORT_PREPARE'
+        ]);
+        if($i){
+            $insert_id = $wpdb->insert_id;
+        }
+        $variants = $this->ow_curl('stock/variants?limit=200000', 'GET', 200);
+        if($variants['status']!=='error'){
+            $variants_a = json_decode($variants['response']);
+            $ow_skus = array_column($variants_a, 'variantCode');
+            $ow_ids = array_column($variants_a, 'variantID');
+
+            // 1. Get the BD ow_ids where NOT discontinued
+            $sql = $wpdb->prepare("SELECT * 
+            FROM {$data_table}
+            WHERE discontinued=%s", false);
+            $all_bd_not_dc = $wpdb->get_results($sql, ARRAY_A);
+            $in_ow = [];
+            $not_in_ow = [];
+
+            if(!empty($all_bd_not_dc)) {
+                foreach ($all_bd_not_dc as $bd_item) {
+                    if (in_array($bd_item['primary_id'], $ow_skus)) {
+                        $in_ow[] = $bd_item;
+                    } else {
+                        $not_in_ow[] = $bd_item;
+                    }
+                }
+            }
+
+            // For all items that ARE in OW, we need to check that the ow_id in BD is the same as the VariantID from OW
+            foreach($in_ow as $in_ow_item){
+                $primary_id = $in_ow_item['primary_id'];
+                $variant_pos = array_search($primary_id, array_column($variants_a, 'variantCode'));
+                $variant = $variants_a[$variant_pos];
+
+                // Is the ow_id in PD the same as variantCode?
+                if((int)$in_ow_item['ow_id']!==$variant->variantID){
+                    // Set ow_id to variantCode and unset updated so that we force an update
+                    $u = $wpdb->update($data_table, [
+                        'ow_id' => $variant->variantID,
+                        'updated' => '0000-00-00 00:00:00',
+                    ], [
+                        'id' => $in_ow_item['id']
+                    ]);
+                    if($u){
+                        $report['ow_id_updates']++;
+                    }else{
+                        $report['ow_id_update_errors']++;
+                    }
+                }else{
+                    // Do nothing - the primary_id exists in both places so will need to check update dates later to see if we need to update record in OW
+                    $report['ow_id_update_not_required']++;
+                }
+            }
+
+            // For all items that ARE NOT in OW, we need to create them in OW, then get the variantID of the created record, store it in ow_id in PD and set updated & created to moment it was created in OW
+            foreach($not_in_ow as $not_in_ow_item){
+                // Set ow_id to variantCode and unset updated so that we force an update
+                if(!is_null($not_in_ow_item['ow_id'])){
+                    $u = $wpdb->update($data_table, [
+                        'ow_id' => null,
+                        'updated' => '0000-00-00 00:00:00',
+                    ], [
+                        'id' => $not_in_ow_item['id']
+                    ]);
+                    if($u){
+                        $report['ow_id_null']++;
+                    }else{
+                        $report['ow_id_null_errors']++;
+                    }
+                }else{
+                    $report['ow_id_null_not_required']++;
+                }
+            }
+            // Add the end time to the log entry
+            $u = $wpdb->update($log_table, [
+                'ended' => wp_date('Y-m-d H:i:s'),
+                'log' => serialize($report)
+            ], [
+                'id' => $insert_id
+            ]);
+            update_option($this->plugin_name . '-boughto-ow', ['status' => 'READYFOROWDISCONTINUE', 'log_id' => $log_id]);
+        }
+    }
+
+    public function run_boughto_ow_discontinue($log_id)
+    {
+        global $wpdb;
+        $data_table = $wpdb->prefix . 'fbf_importer_boughto_data';
+        $log_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Discontinuing OW records']);
+        $report = [];
+        $report = [];
+        $discontinued_count = 0;
+        $errored_count = 0;
+
+        // Create the log entry
+        $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
+            'started' => wp_date('Y-m-d H:i:s'),
+            'process' => 'OW_UPDATE_DCNT'
+        ]);
+        if($i){
+            $insert_id = $wpdb->insert_id;
+        }
+
+        // First find the records that need to be discontinued - i.e. they have an ow_id in PD and they ARE discontinued
+        $sql = $wpdb->prepare("SELECT * 
+            FROM {$data_table}
+            WHERE discontinued=%s AND ow_id IS NOT NULL", true);
+        $items_to_discontinue = $wpdb->get_results($sql, ARRAY_A);
+
+        foreach($items_to_discontinue as $item_to_discontinue) {
+            $payload = [
+                "variantInfo" => [
+                    "eanCode" => null // Remember that the eanCode is unset so that when the same eanCode crops up on a new Pimberly product, it does not cause an issue where OW reports that the ean already exists
+                ],
+                "variantSettings" => [
+                    "discontinued" => true
+                ]
+            ];
+            $ow_discontinue = $this->ow_curl('variants/' . $item_to_discontinue['ow_id'], 'PUT', 200, json_encode($payload), ['Content-Type:application/json']);
+            if($ow_discontinue['status']==='success'){
+                $discontinued_count++;
+                $report['ow_discontinue_updated']++;
+                $report['ow_discontinue_variant_ids'][] = $item_to_discontinue['ow_id'];
+            }else if($ow_discontinue['status']==='error'){
+                $errored_count++;
+                $report['ow_discontinue_errors']++;
+                $report['ow_discontinue_error_items'][] = [
+                    'primary_id' => $item_to_discontinue['primary_id'],
+                    'ow_id' => $item_to_discontinue['ow_id'],
+                    'errors' => $ow_discontinue['errors'],
+                    'response' => $ow_discontinue['response'],
+                ];
+            }
+            update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Discontinuing OW records, total: %s, discontinued: %s, errored: %s', count($items_to_discontinue), $discontinued_count, $errored_count)]);
+        }
+
+        // Add the end time to the log entry
+        $u = $wpdb->update($log_table, [
+            'ended' => wp_date('Y-m-d H:i:s'),
+            'log' => serialize($report)
+        ], [
+            'id' => $insert_id
+        ]);
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'READYFOROWUPDATE', 'log_id' => $log_id]);
+    }
+
+    public function run_boughto_ow_update($log_id)
+    {
+        global $wpdb;
+        $data_table = $wpdb->prefix . 'fbf_importer_boughto_data';
+        $log_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Starting OW update - checking updates required']);
+        $report = [];
+        $updates_required = [];
+        $update_count = 0;
+        $errored_count = 0;
+
+        // Create the log entry
+        $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
+            'started' => wp_date('Y-m-d H:i:s'),
+            'process' => 'OW_IMPORT_UPDATE'
+        ]);
+        if($i){
+            $insert_id = $wpdb->insert_id;
+        }
+        $variants = $this->ow_curl('stock/variants?limit=200000', 'GET', 200);
+        if($variants['status']!=='error'){
+            $variants_a = json_decode($variants['response']);
+            $ow_skus = array_column($variants_a, 'variantCode');
+            $ow_ids = array_column($variants_a, 'variantID');
+
+            foreach($ow_ids as $ow_id) {
+                $pd_sql = $wpdb->prepare("SELECT * 
+                    FROM {$data_table}
+                    WHERE discontinued=%s AND ow_id=%s", false, $ow_id);
+                $pd_item = $wpdb->get_results($pd_sql, ARRAY_A);
+
+                if($pd_item) {
+                    $updates_required[] = $pd_item[0];
+                }
+            }
+
+            foreach($updates_required as $item_to_update){
+                // This is where we differ from the Pimberly data in that we cannot compare dates because Boughto does not have a modified date in its data - therefore we  have to assume that EVERYTHING requires an update
+                $payload  = $this->get_create_wheel_item_payload($item_to_update, false);
+                $ow_update = $this->ow_curl('variants/' . $item_to_update['ow_id'], 'PUT', 200, $payload, ['Content-Type:application/json']);
+
+                if($ow_update['status']==='success'){
+                    $update_count++;
+                    $report['ow_update_updated']++;
+                    $report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
+                    $u = $wpdb->update($data_table, [
+                        'updated' => wp_date('Y-m-d H:i:s')
+                    ], [
+                        'id' => $item_to_update['id']
+                    ]);
+                }else{
+                    $errored_count++;
+                    $report['ow_update_errors']++;
+                    $report['ow_update_error_items'][] = [
+                        'primary_id' => $item_to_update['primary_id'],
+                        'ow_id' => $item_to_update['ow_id'],
+                        'errors' => $ow_update['errors'],
+                        'response' => $ow_update['response']
+                    ];
+                }
+                update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Updating OW records, total: %s, updated: %s, errored: %s', count($updates_required), $update_count, $errored_count)]);
+            }
+        }
+
+        // Add the end time to the log entry
+        $u = $wpdb->update($log_table, [
+            'ended' => wp_date('Y-m-d H:i:s'),
+            'log' => serialize($report)
+        ], [
+            'id' => $insert_id
+        ]);
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'READYFOROWCREATE', 'log_id' => $log_id]);
+    }
+
+    public function run_boughto_ow_create($log_id)
+    {
+        global $wpdb;
+        $data_table = $wpdb->prefix . 'fbf_importer_boughto_data';
+        $log_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+        $log = $wpdb->prefix . 'fbf_importer_boughto_logs';
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Creating new OW records']);
+        $report = [];
+        $created_count = 0;
+        $errored_count = 0;
+
+        // Create the log entry
+        $i = $wpdb->insert($log_table, [
+            'log_id' => $log_id,
+            'started' => wp_date('Y-m-d H:i:s'),
+            'process' => 'OW_IMPORT_CREATE'
+        ]);
+        if($i){
+            $insert_id = $wpdb->insert_id;
+        }
+
+        // First find the records that need to be created - i.e. they have no ow_id in BD and they are not discontinued
+        $sql = $wpdb->prepare("SELECT * 
+            FROM {$data_table}
+            WHERE discontinued=%s AND ow_id IS NULL", false);
+        $items_to_create = $wpdb->get_results($sql, ARRAY_A);
+
+        $limit = null;
+        $i = 0;
+
+        foreach($items_to_create as $item_to_create) {
+            if (is_null($limit) || $i <= $limit) {
+                $payload = $this->get_create_wheel_item_payload($item_to_create);
+                $ow_insert = $this->ow_curl('variants?template_variant_id=107729', 'POST', 201, $payload, ['Content-Type:application/json']);
+                if($ow_insert['status']==='success'){
+                    $created_count++;
+                    $ow_response = json_decode($ow_insert['response']);
+                    $ow_id = $ow_response->variantInfo->id;
+                    $u = $wpdb->update($data_table, [
+                        'ow_id' => $ow_id,
+                        'created' => wp_date('Y-m-d H:i:s'),
+                        'updated' => wp_date('Y-m-d H:i:s')
+                    ], [
+                        'id' => $item_to_create['id']
+                    ]);
+                    $report['ow_create_created']++;
+                    $report['ow_created_primary_ids'][] = $item_to_create['primary_id'];
+                }else if($ow_insert['status']==='error'){
+                    $errored_count++;
+                    $report['ow_create_errors']++;
+                    $report['ow_create_error_items'][] = [
+                        'primary_id' => $item_to_create['primary_id'],
+                        'errors' => $ow_insert['errors'],
+                        'response' => $ow_insert['response'],
+                        'ean' => unserialize($item_to_create['data'])->EAN,
+                    ];
+                }
+                update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Creating new OW records, total: %s, created: %s, errored: %s', count($items_to_create), $created_count, $errored_count)]);
+                $i++;
+            }
+        }
+
+        // Add the end time to the log entry
+        $u = $wpdb->update($log_table, [
+            'ended' => wp_date('Y-m-d H:i:s'),
+            'log' => serialize($report)
+        ], [
+            'id' => $insert_id
+        ]);
+        update_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED', 'log_id' => $log_id]);
+
+        // Now set the status of the current log to completed
+        $u = $wpdb->update($log, [
+            'ended' => wp_date('Y-m-d H:i:s'),
+            'status' => 'COMPLETED'
+        ], [
+            'id' => $log_id
+        ]);
+    }
+
     private function get_create_item_payload($item, $include_code=true)
     {
         $data = unserialize($item['data']);
@@ -376,7 +692,8 @@ class Fbf_Importer_Owapi
                 "description" => $description
             ],
             "variantSettings" => [
-                "templateVariant" => false
+                "templateVariant" => false,
+                "discontinued" => false
             ],
             "variantSalesInfo" => null,
             "variantDimensions" => [
@@ -414,6 +731,74 @@ class Fbf_Importer_Owapi
         if(!$include_code){
             unset($payload['variantInfo']['code']);
         }
+        return json_encode($payload);
+    }
+
+    private function get_create_wheel_item_payload($item, $include_code=true)
+    {
+        $data = unserialize($item['data']);
+
+        $width_p = explode('.', $data['width']);
+        if(count($width_p) > 1 && (int)$width_p[1]){
+            $width = round($width_p[0]) . '.' . round($width_p[1]) . '&quot;';
+        }else{
+            $width = round($width_p[0]) . '&quot;';
+        }
+
+        $diameter_p = explode('.', $data['diameter']);
+        if(count($diameter_p) > 1 && (int)$diameter_p[1]){
+            $diameter = round($diameter_p[0]) . '.' . round($diameter_p[1]) . '&quot;';
+        }else{
+            $diameter = round($diameter_p[0]) . '&quot;';
+        }
+
+        $name = sprintf('%s x %s %s %s %s - %s - %s ET %s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $data['pcds'][0]['pcd'], $data['offset_et'], !is_null($data['center_bore'])?' CB ' . $data['center_bore']:'');
+        $description = 'API TEST ' . $name;
+        if($data['range']['material']=='alloy'){
+            $material = 'Alloy Wheel';
+        }else if($data['range']['material']=='steel'){
+            $material = 'Steel Wheel';
+        }
+        $length = (float) ($data['diameter'] / 2.54);
+        $width = $length;
+        $depth = (float) ($data['width'] / 2.54);
+        $volume = (float) (($width * $length * $depth) / 5000);
+
+        $payload = [
+            "variantInfo" => [
+                "code" => $data['product_code'],
+                "description" => $description
+            ],
+            "variantSettings" => [
+                "templateVariant" => false,
+                "discontinued" => false
+            ],
+            "variantSalesInfo" => null,
+            "variantDimensions" => [
+                "weight" => $data['weight']?:1,
+                "volume" => round($volume, 2),
+                "length" => round($length, 2),
+                "width" => round($width, 2),
+                "depth" => round($depth, 2)
+            ],
+            "analysis" => [
+                "c_2" => ucwords(strtolower($data['range']['brand']['name'])),
+                "c_3" => ucwords(strtolower($data['range']['design'])),
+                "c_8" => $data['range']['image_url'],
+                "m_2" => $material,
+                "m_3" => $data['diameter'],
+                "m_4" => round($width, 2),
+                "m_5" => ucwords($data['range']['color']),
+                "m_6" => $data['load_rating'],
+                "m_7" => $data['offset_et'],
+                "m_10" => $data['pcds'][0]['pcd'],
+                "n_3" => $data['center_bore']
+            ]
+        ];
+        if(!$include_code){
+            unset($payload['variantInfo']['code']);
+        }
+
         return json_encode($payload);
     }
 

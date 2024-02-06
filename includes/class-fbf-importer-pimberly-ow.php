@@ -114,9 +114,9 @@ class Fbf_Importer_Pimberly_Ow
                         'primary_id' => $pid
                     ]);
                     if($u){
-                        $report['dicontinued']++;
+                        $report['discontinued']++;
                     }else{
-                        $report['dicontinue_errors']++;
+                        $report['discontinue_errors']++;
                     }
                 }
             }

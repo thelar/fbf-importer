@@ -420,7 +420,39 @@ class Fbf_Importer_Admin {
 
     private function display_boughto_ow_log_table()
     {
-        echo 'Log table here';
+        global $wpdb;
+        $table = $wpdb->prefix . 'fbf_importer_boughto_logs';
+        $sql = "SELECT * FROM $table ORDER BY started DESC";
+        $logs = $wpdb->get_results($sql, 'ARRAY_A');
+        if(!empty($logs)){
+            echo '<hr/>';
+            echo '<h2>Boughto to Orderwise Import log</h2>';
+            echo '<table class="widefat">';
+            echo '<thead>';
+            echo '<tr>';
+            echo '<th>Start time</th>';
+            echo '<th>End time</th>';
+            echo '<th>Status</th>';
+            echo '<th></th>';
+            echo '</tr>';
+            echo '</thead>';
+
+            for($i=0;$i<count($logs);$i++){
+                $file = unserialize($logs[$i]['log'])['processingxml']['file'];
+                printf('<tr class="%s">', $i%2?"alternate":"");
+                printf('<td>%s</td>', $logs[$i]['started']);
+                printf('<td>%s</td>', $logs[$i]['ended']);
+                printf('<td>%s</td>', $logs[$i]['status']==='COMPLETED'?'<span style="color:darkgreen;font-weight:bold;">Completed</span>':'<span style="color:dimgrey;font-weight:bold;">Running</span>');
+                if($logs[$i]['status']==='COMPLETED'){
+                    printf('<td><a href="%s">%s</a></td>', get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '-boughto-ow' . '&log_id=' . $logs[$i]['id'], 'View details');
+                }else{
+                    echo '<td></td>';
+                }
+                printf('</tr>');
+            }
+
+            echo '</table>';
+        }
     }
 
     private function display_status()
@@ -535,6 +567,94 @@ class Fbf_Importer_Admin {
                         printf('<p><strong>Inserts</strong> - these are records that are in the Pimberly data but do not currently appear in our data: %s inserts, %s insert errors</p>', array_key_exists('inserts', $log) ? $log['inserts'] : 0, array_key_exists('insert_errors', $log) ? $log['insert_errors'] : 0);
                         printf('<p><strong>Updates</strong> - these are records that are in the Pimberly data AND also appear in our data: %s updates, %s update errors</p>', array_key_exists('updates', $log) ? $log['updates'] : 0, array_key_exists('update_errors', $log) ? $log['update_errors'] : 0);
                         printf('<p><strong>Discontinued</strong> - these are records that are in our data but DO NOT appear in Pimberly data: %s discontinued, %s discontinue errors</p>', array_key_exists('discontinued', $log) ? $log['discontinued'] : 0, array_key_exists('discontinue_errors', $log) ? $log['discontinue_errors'] : 0);
+                        break;
+                    case 'OW_IMPORT_PREPARE':
+                        echo '<h3>Prepare for import to OW:</h3>';
+                        echo '<p><strong><code>primary_id</code> exists in Orderwise:</strong></p>';
+                        printf('<p>&nbsp;- %s items exist where the <code>ow_id</code> in our data and the <code>variantCode</code> of the SKU in Orderwise are the same</p>', $log['ow_id_update_not_required']);
+
+                        printf('<p>&nbsp;- %s items exist where the <code>ow_id</code> in our data and the <code>variantId</code> of the SKU in Orderwise are <strong>NOT</strong> the same, records are updated with fresh <code>variantId</code> and updated date is removed to force an update, there were %s errors</p>', array_key_exists('ow_id_updates', $log) ? $log['ow_id_updates'] : 0, array_key_exists('ow_id_update_errors', $log) ? $log['ow_id_update_errors'] : 0);
+
+                        echo '<p><strong><code>primary_id</code> does not exist in Orderwise:</strong></p>';
+                        printf('<p>&nbsp;- %s items exist where the <code>ow_id</code> in our data is <code>NULL</code></p>', $log['ow_id_null_not_required']);
+                        printf('<p>&nbsp;- %s items exist where the <code>ow_id</code> in our data is <strong>NOT</strong> <code>NULL</code>, records have <code>ow_id</code> set to <code>NULL</code> and updated date is removed to force an update, there were %s errors</p>', array_key_exists('ow_id_null', $log) ? $log['ow_id_null'] : 0, array_key_exists('ow_id_null_errors', $log) ? $log['ow_id_null_errors'] : 0);
+                        break;
+                    case 'OW_UPDATE_DCNT':
+                        echo '<h3>Discontinue items in Orderwise:</h3>';
+                        printf('<p>%s items successfully updated to discontinued</p>', array_key_exists('ow_discontinue_updated', $log) ? $log['ow_discontinue_updated'] : 0);
+                        if(array_key_exists('ow_discontinue_variant_ids', $log)){
+                            foreach($log['ow_discontinue_variant_ids'] as $dc_id){
+                                printf('<p>&nbsp - <code>%s</code></p>', $dc_id);
+                            }
+                        }
+                        if(array_key_exists('ow_discontinue_errors', $log)){
+                            printf('<p>%s items failed to successfully update to discontinued</p>', array_key_exists('ow_discontinue_errors', $log) ? $log['ow_discontinue_errors'] : 0);
+                            foreach($log['ow_discontinue_error_items'] as $dc_error_item){
+                                echo '<pre>';
+                                print_r($dc_error_item);
+                                echo '</pre>';
+                            }
+                        }
+                        break;
+                    case 'OW_IMPORT_UPDATE':
+                        echo '<h3>Update items in Orderwise:</h3>';
+                        if($log){
+                            printf('<p>%s items successfully updated</p>', array_key_exists('ow_update_updated', $log) ? $log['ow_update_updated'] : 0);
+                            if(array_key_exists('ow_update_errors', $log)){
+                                printf('<p>%s items failed to be updated:</p>', array_key_exists('ow_update_errors', $log) ? $log['ow_update_errors'] : 0);
+                                foreach($log['ow_update_error_items'] as $update_error_item){
+                                    echo '<pre>';
+                                    print_r($update_error_item);
+                                    echo '</pre>';
+                                }
+                            }
+                        }else{
+                            echo '<p>0 items successfully updated</p>';
+                        }
+                        break;
+                    case 'OW_IMPORT_CREATE':
+                        echo '<h3>Create items in Orderwise:</h3>';
+                        printf('<p>%s items successfully created</p>', array_key_exists('ow_create_created', $log) ? $log['ow_create_created'] : 0);
+                        if(array_key_exists('ow_create_errors', $log)){
+                            printf('<p>%s items failed to be created:</p>', array_key_exists('ow_create_errors', $log) ? $log['ow_create_errors'] : 0);
+                            foreach($log['ow_create_error_items'] as $create_error_item){
+                                echo '<pre>';
+                                print_r($create_error_item);
+                                echo '</pre>';
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    private function display_boughto_ow_log()
+    {
+        global $wpdb;
+        $logs_table = $wpdb->prefix . 'fbf_importer_boughto_logs';
+        $log_items_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+
+        $id = $_GET['log_id'];
+        $sql = "SELECT * FROM $logs_table WHERE id = $id";
+        $log = $wpdb->get_row($sql);
+        printf('<p>Started: <code>%s</code></p>', $log->started);
+        printf('<p>Ended: <code>%s</code></p>', $log->ended);
+
+        $items_sql = $wpdb->prepare("SELECT * FROM $log_items_table
+        WHERE log_id = %s", $_GET['log_id']);
+        $items = $wpdb->get_results($items_sql, ARRAY_A);
+        if($items){
+            foreach($items as $item){
+                $log = unserialize($item['log']);
+
+                switch($item['process']){
+                    case 'BOUGHTO_IMPORT':
+                        echo '<h3>Import data from Pimberly:</h3>';
+                        printf('<p><strong>Total</strong> - total boughto records read: %s</p>', $log['product_count']);
+                        printf('<p><strong>Inserts</strong> - these are records that are in the Boughto data but do not currently appear in our data: %s inserts, %s insert errors</p>', array_key_exists('inserts', $log) ? $log['inserts'] : 0, array_key_exists('insert_errors', $log) ? $log['insert_errors'] : 0);
+                        printf('<p><strong>Updates</strong> - these are records that are in the Boughto data AND also appear in our data: %s updates, %s update errors</p>', array_key_exists('updates', $log) ? $log['updates'] : 0, array_key_exists('update_errors', $log) ? $log['update_errors'] : 0);
+                        printf('<p><strong>Discontinued</strong> - these are records that are in our data but DO NOT appear in Boughto data: %s discontinued, %s discontinue errors</p>', array_key_exists('discontinued', $log) ? $log['discontinued'] : 0, array_key_exists('discontinue_errors', $log) ? $log['discontinue_errors'] : 0);
                         break;
                     case 'OW_IMPORT_PREPARE':
                         echo '<h3>Prepare for import to OW:</h3>';
@@ -811,6 +931,43 @@ class Fbf_Importer_Admin {
             require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-boughto-ow.php';
             $pimberly_to_ow = new Fbf_Importer_Boughto_Ow($this->plugin_name);
             $pimberly_to_ow->run($log_id);
+        }else if($options['status']==='READYFOROW') {
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if ($token) {
+                // OK to run OW api calls
+                require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_boughto_ow_prepare($log_id);
+            }
+        }else if($options['status']==='READYFOROWDISCONTINUE'){
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if($token){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_boughto_ow_discontinue($log_id);
+            }
+        }else if($options['status']==='READYFOROWUPDATE'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if($token){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_boughto_ow_update($log_id);
+            }
+        }else if($options['status']==='READYFOROWCREATE'){
+            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi-auth.php';
+            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+            $token = $auth->get_valid_token();
+            if($token){
+                require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+                $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+                $owapi->run_boughto_ow_create($log_id);
+            }
         }
     }
 
