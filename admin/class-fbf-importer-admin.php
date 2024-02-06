@@ -650,7 +650,7 @@ class Fbf_Importer_Admin {
 
                 switch($item['process']){
                     case 'BOUGHTO_IMPORT':
-                        echo '<h3>Import data from Pimberly:</h3>';
+                        echo '<h3>Import data from Boughto:</h3>';
                         printf('<p><strong>Total</strong> - total boughto records read: %s</p>', $log['product_count']);
                         printf('<p><strong>Inserts</strong> - these are records that are in the Boughto data but do not currently appear in our data: %s inserts, %s insert errors</p>', array_key_exists('inserts', $log) ? $log['inserts'] : 0, array_key_exists('insert_errors', $log) ? $log['insert_errors'] : 0);
                         printf('<p><strong>Updates</strong> - these are records that are in the Boughto data AND also appear in our data: %s updates, %s update errors</p>', array_key_exists('updates', $log) ? $log['updates'] : 0, array_key_exists('update_errors', $log) ? $log['update_errors'] : 0);
