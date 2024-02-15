@@ -63,7 +63,7 @@ class Fbf_Importer_Boughto_Ow
                     update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Reading ' . $brand_name . ' products from Boughto']);
 
                     // Now get all the individual wheels in each brand
-                    $url = sprintf('%s/search/wheels?brand=%s&ignore_no_stock=1&ignore_no_price=1', $this->boughto_api_url, $brand['name']);
+                    $url = sprintf('%s/search/wheels?brand=%s', $this->boughto_api_url, $brand['name']);
                     $response = wp_remote_get($url, $headers);
                     sleep(1);
                     if(is_array($response) && wp_remote_retrieve_response_code($response)===200){
@@ -73,7 +73,7 @@ class Fbf_Importer_Boughto_Ow
                         $report['product_count']+= $brand_data['pagination']['total'];
                         if($pages > 1){
                             for($i=2;$i<=$pages;$i++){
-                                $url = sprintf('%s/search/wheels?brand=%s&ignore_no_stock=1&ignore_no_price=1&page=%s', $this->boughto_api_url, $brand['name'], $i);
+                                $url = sprintf('%s/search/wheels?brand=%s', $this->boughto_api_url, $brand['name'], $i);
                                 $response = wp_remote_get($url, $headers);
                                 sleep(1);
                                 if(is_array($response)){
