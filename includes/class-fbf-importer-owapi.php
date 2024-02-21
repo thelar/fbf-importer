@@ -161,7 +161,7 @@ class Fbf_Importer_Owapi
                 $code = 'OWCREATE_TEST_01_' . $i;
                 $desc = 'OWCREATE_TEST_01 batch';
                 $payload = $this->get_create_item_payload($item_to_create);
-                $ow_insert = $this->ow_curl('variants?template_variant_id=107729', 'POST', 201, $payload, ['Content-Type:application/json']);
+                $ow_insert = $this->ow_curl('variants?template_variant_id=107741', 'POST', 201, $payload, ['Content-Type:application/json']);
                 if($ow_insert['status']==='success'){
                     $created_count++;
                     $ow_response = json_decode($ow_insert['response']);
@@ -626,7 +626,13 @@ class Fbf_Importer_Owapi
         foreach($items_to_create as $item_to_create) {
             if (is_null($limit) || $i <= $limit) {
                 $payload = $this->get_create_wheel_item_payload($item_to_create);
-                $ow_insert = $this->ow_curl('variants?template_variant_id=107729', 'POST', 201, $payload, ['Content-Type:application/json']);
+                $data = unserialize($item_to_create['data']);
+                if($data['range']['material']=='alloy'){
+                    $template_id = '107739';
+                }else if($data['range']['material']=='steel'){
+                    $template_id = '107740';
+                }
+                $ow_insert = $this->ow_curl('variants?template_variant_id=' . $template_id, 'POST', 201, $payload, ['Content-Type:application/json']);
                 if($ow_insert['status']==='success'){
                     $created_count++;
                     $ow_response = json_decode($ow_insert['response']);
