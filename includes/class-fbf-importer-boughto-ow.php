@@ -73,7 +73,7 @@ class Fbf_Importer_Boughto_Ow
                         $report['product_count']+= $brand_data['pagination']['total'];
                         if($pages > 1){
                             for($i=2;$i<=$pages;$i++){
-                                $url = sprintf('%s/search/wheels?brand=%s', $this->boughto_api_url, $brand['name'], $i);
+                                $url = sprintf('%s/search/wheels?brand=%s&page=%s', $this->boughto_api_url, $brand['name'], $i);
                                 $response = wp_remote_get($url, $headers);
                                 sleep(1);
                                 if(is_array($response)){
