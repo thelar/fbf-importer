@@ -797,10 +797,12 @@ class Fbf_Importer_Owapi
                 "m_5" => ucwords($data['range']['color']),
                 "m_6" => $data['load_rating'],
                 "m_7" => $data['offset_et'],
-                "m_10" => $data['pcds'][0]['pcd'],
-                "n_3" => $data['center_bore']
+                "m_10" => $data['pcds'][0]['pcd']
             ]
         ];
+        if($data['center_bore']){
+            $payload['analysis']['n_3'] = $data['center_bore'];
+        }
         if(!$include_code){
             unset($payload['variantInfo']['code']);
         }
