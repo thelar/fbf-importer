@@ -447,39 +447,62 @@ class Fbf_Importer_Item_Import
 
                             $image_name = (string)$item['Image name'];
 
-                            $image_gallery = new Fbf_Importer_Product_Gallery($product_id, $image_name, $this->plugin_name);
-
-                            $main_image_result = $image_gallery->process($status['action']);
-
-                            if (isset($main_image_result['errors'])) {
-                                $status['errors'] = $main_image_result['errors'];
-                            } else {
-                                $status['image_info'] = $main_image_result['info'];
-                            }
-
-                            $image_gallery_result = $image_gallery->gallery_process($status['action']);
-
-                            /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
-                            $image_import = $image_handler->process($status['action']);*/
-                            if (isset($image_gallery_result['errors'])) {
-                                $status['errors'] = $image_gallery_result['errors'];
-                            } else {
-                                $status['gallery_info'] = $image_gallery_result['gallery_info'];
-                                $s = [];
-                                if(!empty($image_gallery_result['gallery_image_info'])){
-                                    foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
-                                        $s[] = $gal_item_info[0];
-                                    }
-                                }
-                                //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
-                            }
-
-                            // ebay images
-                            $ebay_images = $image_gallery->ebay_process($status['action']);
-                            if(!empty($ebay_images)){
-                                update_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
-                            }else{
+                            // Is it an external image?
+                            if(strpos($image_name, 'cdn.boughtofeed.co.uk')!==false||strpos($image_name, 'assets.micheldever.co.uk')!==false){
+                                // Remove main image
+                                delete_post_thumbnail($product_id);
+                                // Remove any gallery
+                                delete_post_meta($product_id, '_product_image_gallery');
+                                // Remove eBay
                                 delete_post_meta($product_id, '_fbf_ebay_images');
+
+                                if(strpos($image_name, 'cdn.boughtofeed.co.uk')){
+                                    $boughto_parts = pathinfo($image_name);
+                                    $boughto_dirname = $boughto_parts['dirname'];
+                                    update_post_meta($product_id, '_external_product_image', $boughto_dirname);
+                                }else if(strpos($image_name, 'assets.micheldever.co.uk')){
+                                    update_post_meta($product_id, '_external_product_image', $image_name);
+                                }
+
+                            }else{
+                                // Remove external image
+                                delete_post_meta($product_id, '_external_product_image');
+
+                                // Handle our images in normal way
+                                $image_gallery = new Fbf_Importer_Product_Gallery($product_id, $image_name, $this->plugin_name);
+
+                                $main_image_result = $image_gallery->process($status['action']);
+
+                                if (isset($main_image_result['errors'])) {
+                                    $status['errors'] = $main_image_result['errors'];
+                                } else {
+                                    $status['image_info'] = $main_image_result['info'];
+                                }
+
+                                $image_gallery_result = $image_gallery->gallery_process($status['action']);
+
+                                /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
+                                $image_import = $image_handler->process($status['action']);*/
+                                if (isset($image_gallery_result['errors'])) {
+                                    $status['errors'] = $image_gallery_result['errors'];
+                                } else {
+                                    $status['gallery_info'] = $image_gallery_result['gallery_info'];
+                                    $s = [];
+                                    if(!empty($image_gallery_result['gallery_image_info'])){
+                                        foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
+                                            $s[] = $gal_item_info[0];
+                                        }
+                                    }
+                                    //$status['gallery_image_info'] = '[' . implode(', ' , $s) . ']';
+                                }
+
+                                // ebay images
+                                $ebay_images = $image_gallery->ebay_process($status['action']);
+                                if(!empty($ebay_images)){
+                                    update_post_meta($product_id, '_fbf_ebay_images', $ebay_images);
+                                }else{
+                                    delete_post_meta($product_id, '_fbf_ebay_images');
+                                }
                             }
                         }
                     }

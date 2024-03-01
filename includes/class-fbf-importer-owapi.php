@@ -746,19 +746,34 @@ class Fbf_Importer_Owapi
 
         $width_p = explode('.', $data['width']);
         if(count($width_p) > 1 && (int)$width_p[1]){
-            $width = round($width_p[0]) . '.' . round($width_p[1]) . '&quot;';
+            $width = round($width_p[0]) . '.' . round($width_p[1]) . '"';
         }else{
-            $width = round($width_p[0]) . '&quot;';
+            $width = round($width_p[0]) . '"';
         }
 
         $diameter_p = explode('.', $data['diameter']);
         if(count($diameter_p) > 1 && (int)$diameter_p[1]){
-            $diameter = round($diameter_p[0]) . '.' . round($diameter_p[1]) . '&quot;';
+            $diameter = round($diameter_p[0]) . '.' . round($diameter_p[1]) . '"';
         }else{
-            $diameter = round($diameter_p[0]) . '&quot;';
+            $diameter = round($diameter_p[0]) . '"';
         }
 
-        $name = sprintf('%s x %s %s %s %s - %s - %s ET %s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $data['pcds'][0]['pcd'], $data['offset_et'], !is_null($data['center_bore'])?' CB ' . $data['center_bore']:'');
+        if($pcds = $data['pcds'][0]['pcd']){
+            if(strstr($pcds, 'x')){
+                $pcd_parts = explode('x', $pcds);
+                $pcd = $pcd_parts[0] . '/' . number_format($pcd_parts[1], 1);
+            }
+        }
+
+        if(!empty($data['range']['image_url'])&&!empty($data['range']['thumbnail_url'])){
+            $image = $data['range']['thumbnail_url'] . '|' . $data['range']['image_url'];
+        }else if(!empty($data['range']['image_url'])){
+            $image = $data['range']['image_url'];
+        }else{
+            $image = '';
+        }
+
+        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $pcd?:'', round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
         $description = 'API TEST ' . $name;
         if($data['range']['material']=='alloy'){
             $material = 'Alloy Wheel';
@@ -790,7 +805,7 @@ class Fbf_Importer_Owapi
             "analysis" => [
                 "c_2" => ucwords(strtolower($data['range']['brand']['name'])),
                 "c_3" => ucwords(strtolower($data['range']['design'])),
-                "c_8" => $data['range']['image_url'],
+                "c_8" => $data['range']['image_url'], // Gone back to full url
                 "m_2" => $material,
                 "m_3" => $data['diameter'],
                 "m_4" => round($width, 2),
