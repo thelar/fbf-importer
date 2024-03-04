@@ -459,11 +459,19 @@ class Fbf_Importer_Item_Import
                                 if(strpos($image_name, 'cdn.boughtofeed.co.uk')){
                                     $boughto_parts = pathinfo($image_name);
                                     $boughto_dirname = $boughto_parts['dirname'];
-                                    update_post_meta($product_id, '_external_product_image', $boughto_dirname);
+                                    $boughto_ext = $boughto_parts['extension'];
+                                    if(strpos($boughto_parts['filename'], 'wheel-placeholder')===false){
+                                        update_post_meta($product_id, '_external_product_image', [
+                                            'thumb' => $boughto_dirname . '/thumb.' . $boughto_ext,
+                                            'full' => $boughto_dirname . '/full.' . $boughto_ext,
+                                        ]);
+                                    }
                                 }else if(strpos($image_name, 'assets.micheldever.co.uk')){
-                                    update_post_meta($product_id, '_external_product_image', $image_name);
+                                    update_post_meta($product_id, '_external_product_image', [
+                                        'thumb' => $image_name . '?io=transform:fit,height:300,width:300',
+                                        'full' => $image_name,
+                                    ]);
                                 }
-
                             }else{
                                 // Remove external image
                                 delete_post_meta($product_id, '_external_product_image');
