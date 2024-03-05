@@ -70,12 +70,19 @@ class Fbf_Importer_Cleanup
             'post_type' => 'product',
             'posts_per_page' => -1,
             'fields' => 'ids',
-            'tax_query' => [ //Added to exclude packages
+            'tax_query' => [ //Added to exclude packages, also, if it's already hidden, we don't need to hide it again
+                'relation' => 'AND',
                 [
                     'taxonomy' => 'product_cat',
                     'field' => 'slug',
                     'terms' => ['package'],
                     'operator' => 'NOT IN'
+                ],
+                [
+                    'taxonomy' => 'product_visibility',
+                    'field' => 'name',
+                    'terms' => ['outofstock', 'exclude-from-catalog', 'exclude-from-search'],
+                    'operator' => 'IN'
                 ]
             ]
         ]);
@@ -89,6 +96,8 @@ class Fbf_Importer_Cleanup
                 unset($this->products_to_hide[$k]);
             }
         }
+
+        $a = 1;
 
         return $this->products_to_hide;
     }
