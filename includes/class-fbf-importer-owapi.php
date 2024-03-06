@@ -780,10 +780,10 @@ class Fbf_Importer_Owapi
         }else if($data['range']['material']=='steel'){
             $material = 'Steel Wheel';
         }
-        $length = (float) ($data['diameter'] / 2.54);
-        $width = $length;
-        $depth = (float) ($data['width'] / 2.54);
-        $volume = (float) (($width * $length * $depth) / 5000);
+        $dim_length = (float) ($data['diameter'] / 2.54);
+        $dim_width = $dim_length;
+        $dim_depth = (float) ($data['width'] / 2.54);
+        $dim_volume = (float) (($dim_width * $dim_length * $dim_depth) / 5000);
 
         $payload = [
             "variantInfo" => [
@@ -797,18 +797,18 @@ class Fbf_Importer_Owapi
             "variantSalesInfo" => null,
             "variantDimensions" => [
                 "weight" => $data['weight']?:1,
-                "volume" => round($volume, 2),
-                "length" => round($length, 2),
-                "width" => round($width, 2),
-                "depth" => round($depth, 2)
+                "volume" => round($dim_volume, 2),
+                "length" => round($dim_length, 2),
+                "width" => round($dim_width, 2),
+                "depth" => round($dim_depth, 2)
             ],
             "analysis" => [
                 "c_2" => ucwords(strtolower($data['range']['brand']['name'])),
                 "c_3" => ucwords(strtolower($data['range']['design'])),
                 "c_8" => $data['range']['image_url'], // Gone back to full url
                 "m_2" => $material,
-                "m_3" => $data['diameter'],
-                "m_4" => round($width, 2),
+                "m_3" => $diameter,
+                "m_4" => $width,
                 "m_5" => ucwords($data['range']['color']),
                 "m_6" => $data['load_rating'],
                 "m_7" => $data['offset_et'],
