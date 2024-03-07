@@ -90,6 +90,8 @@ class Fbf_Importer_Cleanup
             }
         }
 
+        // Cherry pick comment
+
         return $this->products_to_hide;
     }
 
