@@ -214,6 +214,7 @@ class Fbf_Importer_Item_Import
                 $product->set_sku($sku);
                 $product->set_catalog_visibility('visible');
                 //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
+                delete_post_meta($product->get_id(), '_import_hidden');
 
                 //Price
                 $product->set_regular_price($this->set_price($product, (string)$item['Wheel Tyre Accessory'], round((string)$item['RSP Exc Vat'], 2)));

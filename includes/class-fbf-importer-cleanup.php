@@ -71,20 +71,15 @@ class Fbf_Importer_Cleanup
             'posts_per_page' => -1,
             'fields' => 'ids',
             'tax_query' => [ //Added to exclude packages, also, if it's already hidden, we don't need to hide it again
-                'relation' => 'AND',
                 [
                     'taxonomy' => 'product_cat',
                     'field' => 'slug',
                     'terms' => ['package'],
                     'operator' => 'NOT IN'
-                ],
-                [
-                    'taxonomy' => 'product_visibility',
-                    'field' => 'name',
-                    'terms' => ['outofstock', 'exclude-from-catalog', 'exclude-from-search'],
-                    'operator' => 'IN'
                 ]
-            ]
+            ],
+            'meta_key'=>'_import_hidden',
+            'meta_compare'=>'NOT EXISTS'
         ]);
 
         $q = 'SELECT product_id FROM ' . $this->tmp_products_table;
@@ -96,8 +91,6 @@ class Fbf_Importer_Cleanup
                 unset($this->products_to_hide[$k]);
             }
         }
-
-        $a = 1;
 
         return $this->products_to_hide;
     }
@@ -120,6 +113,7 @@ class Fbf_Importer_Cleanup
             $product_to_hide->set_catalog_visibility('hidden');
             $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
             $product_to_hide->set_backorders('no');
+            update_post_meta($hide_id, '_import_hidden', 'hide');
             $product_to_hide->save();
 
             $i++;
@@ -163,6 +157,7 @@ class Fbf_Importer_Cleanup
                     $product_to_hide->set_catalog_visibility('hidden');
                     $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
                     $product_to_hide->set_backorders('no');
+                    update_post_meta($pid, '_import_hidden', 'hide');
                     if(!$product_to_hide->save()){
                         $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
                     }
