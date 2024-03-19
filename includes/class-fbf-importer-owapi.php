@@ -744,7 +744,21 @@ class Fbf_Importer_Owapi
     {
         $data = unserialize($item['data']);
 
-        $width_p = explode('.', $data['width']);
+        // Get the brand and figure out if it's a House Brand - this will dictate whether we are going to include the price in the Payload
+        $brand = $data['range']['brand']['name'];
+        $variantSalesInfo = null;
+        if($brand_term = get_term_by('name', $brand, 'pa_brand-name')){
+            $term_id = $brand_term->term_id;
+            $is_house_brand = get_field('is_house_brand', 'term_' . $term_id);
+            if($is_house_brand!==true){
+                $variantSalesInfo = [
+                    'rspExcVat' => $data['price']
+                ];
+            }
+        }
+
+        $width_orig = number_format($data['width'], 1);
+        $width_p = explode('.', $width_orig);
         if(count($width_p) > 1 && (int)$width_p[1]){
             $width = round($width_p[0]) . '.' . round($width_p[1]) . '"';
         }else{
@@ -773,7 +787,7 @@ class Fbf_Importer_Owapi
             $image = '';
         }
 
-        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $pcd?:'', round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
+        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $pcd?:'', (int) round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
         $description = 'API TEST ' . $name;
         if($data['range']['material']=='alloy'){
             $material = 'Alloy Wheel';
@@ -794,7 +808,7 @@ class Fbf_Importer_Owapi
                 "templateVariant" => false,
                 "discontinued" => false
             ],
-            "variantSalesInfo" => null,
+            "variantSalesInfo" => $variantSalesInfo,
             "variantDimensions" => [
                 "weight" => $data['weight']?:1,
                 "volume" => round($dim_volume, 2),
