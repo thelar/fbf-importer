@@ -345,6 +345,15 @@ class Fbf_Importer_Item_Import
                             $product->set_backorders('no');
                             $product->set_catalog_visibility('hidden');
                         }
+                    }else{
+                        // Here if it's a house brand
+                        if($product->get_stock_quantity()<=0){
+                            if(empty($product->get_meta('_expected_back_in_stock_date'))){
+                                $product->set_backorders('no');
+                            }else{
+                                $product->set_backorders('notify');
+                            }
+                        }
                     }
                 }else{
                     if($product->get_stock_quantity()<=0){
@@ -376,7 +385,11 @@ class Fbf_Importer_Item_Import
                                 if($stock_date->diff($now)->m >= $months){
                                     $product->set_backorders('no');
                                 }else{
-                                    $product->set_backorders('notify');
+                                    if(empty($product->get_meta('_expected_back_in_stock_date'))){
+                                        $product->set_backorders('no');
+                                    }else{
+                                        $product->set_backorders('notify');
+                                    }
                                 }
                             }else{
                                 $product->set_backorders('no');
