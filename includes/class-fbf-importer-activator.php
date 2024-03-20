@@ -109,6 +109,7 @@ class Fbf_Importer_Activator {
         $sql_boughto = "CREATE TABLE $boughto_products_table_name (
           id mediumint(9) NOT NULL AUTO_INCREMENT,
           ow_id mediumint(9),
+          variant_sales_info_id mediumint(9),
           primary_id varchar(40),
           updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,

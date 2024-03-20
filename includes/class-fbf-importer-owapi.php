@@ -557,29 +557,62 @@ class Fbf_Importer_Owapi
 
             foreach($updates_required as $item_to_update){
                 // This is where we differ from the Pimberly data in that we cannot compare dates because Boughto does not have a modified date in its data - therefore we  have to assume that EVERYTHING requires an update
-                $payload  = $this->get_create_wheel_item_payload($item_to_update, false);
-                $ow_update = $this->ow_curl('variants/' . $item_to_update['ow_id'], 'PUT', 200, $payload, ['Content-Type:application/json']);
+                // First we need to get the variant_sales_info_id - if we don't have it we will need to obtain it from OW
+                $variant_sales_id = null;
+                if(is_null($item_to_update['variant_sales_info_id'])){
+                    $variant = $this->ow_curl('variants/' . $item_to_update['ow_id'] . '?include_sales_info=true', 'GET', 200);
+                    if($variant['status']==='success'){
+                        $variant_a = json_decode($variant['response']);
+                        $variant_sales_id = $variant_a->variantSalesInfo[0]->Id;
 
-                if($ow_update['status']==='success'){
-                    $update_count++;
-                    $report['ow_update_updated']++;
-                    $report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
-                    $u = $wpdb->update($data_table, [
-                        'updated' => wp_date('Y-m-d H:i:s')
-                    ], [
-                        'id' => $item_to_update['id']
-                    ]);
+                        $u = $wpdb->update(
+                            $data_table,
+                            [
+                                'variant_sales_info_id' => $variant_sales_id
+                            ],
+                            [
+                                'id' => $item_to_update['id']
+                            ]
+                        );
+                    }
+                }else{
+                    $variant_sales_id = $item_to_update['variant_sales_info_id'];
+                }
+
+                if(!is_null($variant_sales_id)){
+                    $payload  = $this->get_create_wheel_item_payload($item_to_update, $variant_sales_id, false);
+                    $ow_update = $this->ow_curl('variants/' . $item_to_update['ow_id'], 'PUT', 200, $payload, ['Content-Type:application/json']);
+
+                    if($ow_update['status']==='success'){
+                        $update_count++;
+                        $report['ow_update_updated']++;
+                        $report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
+                        $u = $wpdb->update($data_table, [
+                            'updated' => wp_date('Y-m-d H:i:s')
+                        ], [
+                            'id' => $item_to_update['id']
+                        ]);
+                    }else{
+                        $errored_count++;
+                        $report['ow_update_errors']++;
+                        $report['ow_update_error_items'][] = [
+                            'primary_id' => $item_to_update['primary_id'],
+                            'ow_id' => $item_to_update['ow_id'],
+                            'errors' => $ow_update['errors'],
+                            'response' => $ow_update['response']
+                        ];
+                    }
+                    update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Updating OW records, total: %s, updated: %s, errored: %s', count($updates_required), $update_count, $errored_count)]);
                 }else{
                     $errored_count++;
-                    $report['ow_update_errors']++;
-                    $report['ow_update_error_items'][] = [
+                    $report['ow_update_get_variant_errors']++;
+                    $report['ow_update_get_variant_error_items'][] = [
                         'primary_id' => $item_to_update['primary_id'],
                         'ow_id' => $item_to_update['ow_id'],
                         'errors' => $ow_update['errors'],
                         'response' => $ow_update['response']
                     ];
                 }
-                update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Updating OW records, total: %s, updated: %s, errored: %s', count($updates_required), $update_count, $errored_count)]);
             }
         }
 
@@ -740,22 +773,29 @@ class Fbf_Importer_Owapi
         return json_encode($payload);
     }
 
-    private function get_create_wheel_item_payload($item, $include_code=true)
+    private function get_create_wheel_item_payload($item, $variant_sales_id=false, $include_code=true)
     {
         $data = unserialize($item['data']);
 
         // Get the brand and figure out if it's a House Brand - this will dictate whether we are going to include the price in the Payload
         $brand = $data['range']['brand']['name'];
-        $variantSalesInfo = null;
-        if($brand_term = get_term_by('name', $brand, 'pa_brand-name')){
-            $term_id = $brand_term->term_id;
-            $is_house_brand = get_field('is_house_brand', 'term_' . $term_id);
-            if($is_house_brand!==true){
-                $variantSalesInfo = [
-                    'rspExcVat' => $data['price']
-                ];
+
+        if($variant_sales_id){
+            $variantSalesInfo = null;
+            if($brand_term = get_term_by('name', $brand, 'pa_brand-name')){
+                $term_id = $brand_term->term_id;
+                $is_house_brand = get_field('is_house_brand', 'term_' . $term_id);
+                if($is_house_brand!==true){
+                    $variantSalesInfo = [
+                        [
+                            'rspExcVat' => $data['price'],
+                            'Id' => $variant_sales_id,
+                        ]
+                    ];
+                }
             }
         }
+
 
         $width_orig = number_format($data['width'], 1);
         $width_p = explode('.', $width_orig);
