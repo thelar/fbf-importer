@@ -271,7 +271,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[19]['write_filename'] = "wheelpros";
         $supplier_array[19]['cell_1a'] = "WHEELPRO";
         $supplier_array[19]['data_start_row'] = "1";
-        $supplier_array[19]['mapping_array'] = array('0', '0', '15', '21');
+        $supplier_array[19]['mapping_array'] = array('0', '0', '15', '20');
         $supplier_array[19]['delimiter'] = ",";
 
         if (!function_exists('tep_xls_to_csv_single_file')){
