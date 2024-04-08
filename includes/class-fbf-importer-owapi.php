@@ -609,8 +609,7 @@ class Fbf_Importer_Owapi
                     $report['ow_update_get_variant_error_items'][] = [
                         'primary_id' => $item_to_update['primary_id'],
                         'ow_id' => $item_to_update['ow_id'],
-                        'errors' => $ow_update['errors'],
-                        'response' => $ow_update['response']
+                        'errors' => 'Variant Sales ID is null',
                     ];
                 }
             }
@@ -865,8 +864,8 @@ class Fbf_Importer_Owapi
                 "m_4" => $width,
                 "m_5" => ucwords($data['range']['color']),
                 "m_6" => $data['load_rating'],
-                "m_7" => $data['offset_et'],
-                "m_10" => $data['pcds'][0]['pcd']
+                "m_7" => (int) round($data['offset_et']),
+                "m_10" => $pcd
             ]
         ];
         if($data['center_bore']){
