@@ -849,7 +849,7 @@ class Fbf_Importer_Owapi
             ],
             "variantSalesInfo" => $variantSalesInfo,
             "variantDimensions" => [
-                "weight" => $data['weight']?:1,
+                "weight" => $data['weight']?:14,
                 "volume" => round($dim_volume, 2),
                 "length" => round($dim_length, 2),
                 "width" => round($dim_width, 2),
