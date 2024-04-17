@@ -862,7 +862,7 @@ class Fbf_Importer_Owapi
                 "m_2" => $material,
                 "m_3" => $diameter,
                 "m_4" => $width,
-                "m_5" => ucwords($data['range']['color']),
+                "m_5" => ucwords($data['range']['finish']),
                 "m_6" => $data['load_rating'],
                 "m_7" => (int) round($data['offset_et']),
                 "m_10" => $pcd
