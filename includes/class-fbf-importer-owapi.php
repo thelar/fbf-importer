@@ -274,6 +274,7 @@ class Fbf_Importer_Owapi
     public function run_ow_update($log_id)
     {
         global $wpdb;
+        $force_update = true;
         $table = $wpdb->prefix . 'fbf_importer_pimberly_data';
         $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => 'Starting OW update - checking updates required']);
@@ -308,10 +309,16 @@ class Fbf_Importer_Owapi
                     $pimberly_update_datetime = new \DateTime(unserialize($pd_item[0]['data'])->dateUpdated);
                     $ow_update_datetime = new \DateTime($pd_item[0]['updated']);
 
-                    if($pimberly_update_datetime > $ow_update_datetime){ // If it's been updated on Pimberly after the update time/date on PD
+                    if(!$force_update){
+                        if($pimberly_update_datetime > $ow_update_datetime){ // If it's been updated on Pimberly after the update time/date on PD
+                            $updates_required[] = $pd_item[0];
+                            update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => sprintf('Starting OW update - %s updates required', count($updates_required))]);
+                        }
+                    }else{
                         $updates_required[] = $pd_item[0];
                         update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => sprintf('Starting OW update - %s updates required', count($updates_required))]);
                     }
+
                 }
             }
 
