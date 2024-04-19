@@ -754,7 +754,7 @@ class Fbf_Importer_Owapi
                 "l_1" => !($data->{'3PMSF'} === 'N'),
                 "l_2" => false,
                 "l_3" => !($data->XL === 'N'),
-                "l_4" => $data->{'White Lettering'}==='Y',
+                "l_4" => $data->{'White Lettering'}==='true',
                 "l_5" => $data->{'Run Flat'}==='Y',
                 "l_6" => $data->{'M+S'}==='Y',
                 "l_7" => false,
