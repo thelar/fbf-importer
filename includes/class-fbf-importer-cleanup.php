@@ -157,7 +157,14 @@ class Fbf_Importer_Cleanup
             $sku = get_post_meta($pid, '_sku', true);
             $status = [];
             $status['action'] = 'Hide';
-            if(get_post_thumbnail_id($pid)===0&&get_post_meta($pid, '_external_product_image')===false){
+
+            if(get_post_meta($pid, '_external_product_image')===false||empty(get_post_meta($pid, '_external_product_image'))){
+                $ext = false;
+            }else{
+                $ext = true;
+            }
+
+            if(get_post_thumbnail_id($pid)===0 && $ext===false){
                 if($_ENV['WP_ENV']==='production'){ // Only hide products without images if WP_ENV is production
                     // No thumbnail ID - hide the product
                     $product_to_hide = new WC_Product($pid);
