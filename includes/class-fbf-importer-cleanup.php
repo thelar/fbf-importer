@@ -146,6 +146,12 @@ class Fbf_Importer_Cleanup
             ]
         ]);
 
+        echo '<pre>';
+        print_r($all);
+        echo '</pre>';
+
+        die();
+
         $i = 1;
         foreach($all as $pid){
             $sku = get_post_meta($pid, '_sku', true);
