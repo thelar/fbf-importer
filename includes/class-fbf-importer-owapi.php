@@ -821,7 +821,7 @@ class Fbf_Importer_Owapi
         if($pcds = $data['pcds'][0]['pcd']){
             if(strstr($pcds, 'x')){
                 $pcd_parts = explode('x', $pcds);
-                $pcd = $pcd_parts[0] . '/' . number_format($pcd_parts[1], 1);
+                $pcd = $pcd_parts[0] . '/' . floor($pcd_parts[1])?(int)$pcd_parts[1]:number_format($pcd_parts[1], 1);
             }
         }
 
