@@ -563,11 +563,15 @@ class Fbf_Importer_File_Parser {
 
                         // For non house brands (Wheels), if there is no stock, hide it!
                         $house_wheel_brands = [
+                            'Bowler',
                             'Challenger',
                             'DV8',
                             'DV8 Works',
+                            'Lucari',
+                            'Navis',
                             'OEM Style',
                             'Tuff Torque',
+                            'Urban',
                             'VBS'
                         ];
                         if(!in_array((string)$item['Brand Name'], $house_wheel_brands)){
