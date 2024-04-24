@@ -821,7 +821,14 @@ class Fbf_Importer_Owapi
         if($pcds = $data['pcds'][0]['pcd']){
             if(strstr($pcds, 'x')){
                 $pcd_parts = explode('x', $pcds);
-                $pcd = $pcd_parts[0] . '/' . floor($pcd_parts[1])?(int)$pcd_parts[1]:number_format($pcd_parts[1], 1);
+                if(round($pcd_parts[1]) == floatval($pcd_parts[1])){
+                    // Number is whole
+                    $pcd_part_2 = round($pcd_parts[1]);
+                }else{
+                    // Number is decimal
+                    $pcd_part_2 = number_format($pcd_parts[1], 1);
+                }
+                $pcd = $pcd_parts[0] . '/' . $pcd_part_2;
             }
         }
 
