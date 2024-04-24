@@ -161,7 +161,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[10]['delimiter'] = ",";*/
 
         $supplier_array[11]['name'] = "WOLFRACE";
-        $supplier_array[11]['read_filename'] = "wolfrace_trade_stock.csv";
+        $supplier_array[11]['read_filename'] = "wolfrace_trade_export.csv";
         $supplier_array[11]['write_filename'] = "wolfrace";
         $supplier_array[11]['cell_1a'] = "WOLFR";
         $supplier_array[11]['data_start_row'] = "1";
