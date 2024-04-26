@@ -841,7 +841,7 @@ class Fbf_Importer_Owapi
         }
 
         $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $pcd?:'', (int) round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
-        $description = 'API TEST ' . $name;
+        $description = $name;
         if($data['range']['material']=='alloy'){
             $material = 'Alloy Wheel';
         }else if($data['range']['material']=='steel'){
