@@ -382,7 +382,7 @@ class Fbf_Importer_Stock_Processor
                             //}
 
                             if($supplier_id == 19){
-                                $write_array[$row][$data_columns_array[2]] = round($write_array[$row][$data_columns_array[2]] * 0.75, 2);
+                                $write_array[$row][$data_columns_array[2]] = round($write_array[$row][$data_columns_array[2]] * 0.7, 2);
                             }
                         }
                     }
