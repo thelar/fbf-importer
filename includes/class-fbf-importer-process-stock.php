@@ -165,8 +165,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[11]['write_filename'] = "wolfrace";
         $supplier_array[11]['cell_1a'] = "WOLFR";
         $supplier_array[11]['data_start_row'] = "1";
-        $supplier_array[11]['mapping_array'] = array('3', '3', '20', '0');
-        $supplier_array[11]['mapping_array_alt'] = array('3', '3', '19', '0');
+        $supplier_array[11]['mapping_array'] = array('3', '3', '19', '0');
         $supplier_array[11]['delimiter'] = ",";
 
         /*$supplier_array[12]['name'] = "wheelwright";
@@ -386,11 +385,11 @@ class Fbf_Importer_Stock_Processor
                                 $write_array[$row][$data_columns_array[2]] = round($write_array[$row][$data_columns_array[2]] * 0.7, 2);
                             }
 
-                            if($supplier_id == 11){
+                            /*if($supplier_id == 11){
                                 if($data[0]=='0'){
                                     $write_array[$row][$data_columns_array[2]] = $data[$supplier_data['mapping_array_alt'][2]];
                                 }
-                            }
+                            }*/
                         }
                     }
                     $row++;
