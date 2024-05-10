@@ -840,7 +840,13 @@ class Fbf_Importer_Owapi
             $image = '';
         }
 
-        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), ucwords(strtolower($data['range']['color'])), $pcd?:'', (int) round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
+        if(!empty($data['range']['color'])){
+            $color = ucwords(strtolower($data['range']['color']));
+        }else if(!empty($data['range']['finish'])){
+            $color = ucwords(strtolower($data['range']['finish']));
+        }
+
+        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), $color, $pcd?:'', (int) round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
         $description = $name;
         if($data['range']['material']=='alloy'){
             $material = 'Alloy Wheel';
@@ -876,7 +882,7 @@ class Fbf_Importer_Owapi
                 "m_2" => $material,
                 "m_3" => $diameter,
                 "m_4" => $width,
-                "m_5" => ucwords($data['range']['finish']),
+                "m_5" => $color,
                 "m_6" => $data['load_rating'],
                 "m_7" => (int) round($data['offset_et']),
                 "m_10" => $pcd
