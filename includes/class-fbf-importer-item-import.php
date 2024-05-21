@@ -119,7 +119,7 @@ class Fbf_Importer_Item_Import
                 ];
             } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
                 //It's a Wheel
-                array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
+                array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset');
 
                 if(isset($item['Model Name'])){
                     $model_title = (string) $item['Model Name'];
