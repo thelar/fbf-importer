@@ -55,6 +55,9 @@ class Fbf_Importer_Stock_Processor
 //include('\PhpOffice\PhpSpreadsheet\Spreadsheet/\PhpOffice\PhpSpreadsheet\Spreadsheet/Writer/Excel2007.php');
 //include('\PhpOffice\PhpSpreadsheet\Spreadsheet/\PhpOffice\PhpSpreadsheet\Spreadsheet/IOFactory.php');
 
+        // Supermetal
+        file_put_contents(self::UPLOAD_LOCATION . 'supermetal/supermetal.csv', fopen("https://automotivewheels.co.uk/publicdata/supermetal.csv", 'r'));
+
 
 
         $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
