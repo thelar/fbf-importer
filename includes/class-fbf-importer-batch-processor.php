@@ -129,7 +129,7 @@ class Fbf_Importer_Batch_Processor
 
     private function build_price_match_data()
     {
-        $files = array_diff(scandir($this->price_match_fp, SCANDIR_SORT_DESCENDING), array('.', '..'));
+        $files = array_diff(scandir($this->price_match_fp, SCANDIR_SORT_DESCENDING), array('.', '..', '.ftpquota')); // Also exclude .ftpquota file
         $updates = 0;
         $log = [];
         $latest_ctime = 0;
