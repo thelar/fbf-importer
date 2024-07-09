@@ -406,168 +406,167 @@ class Fbf_Importer_Stock_Processor
                     $row++;
                 }
                 fclose($handle);
+
+                // Create new \PhpOffice\PhpSpreadsheet\Spreadsheet object
+                //echo date('H:i:s') . " Create new \PhpOffice\PhpSpreadsheet\Spreadsheet object\n";
+                $objPHPExcel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+                // Set properties
+                //echo date('H:i:s') . " Set properties\n";
+                $objPHPExcel->getProperties()->setCreator("4x4tyres");
+                $objPHPExcel->getProperties()->setLastModifiedBy("4x4tyres");
+                $objPHPExcel->getProperties()->setTitle("Stock Feed");
+                $objPHPExcel->getProperties()->setSubject("Stock Feed");
+                $objPHPExcel->getProperties()->setDescription("Stock Feed");
+
+                // Add some data
+                //echo date('H:i:s') . " Add some data\n";
+                $objPHPExcel->setActiveSheetIndex(0);
+
+                $objPHPExcel->getActiveSheet()->SetCellValue('A1', $supplier_data['cell_1a']);
+
+                $letter_array = array('a','b','c','d','e','f','g','h');
+                $row = 3;
+                foreach($write_array as $write_row) {
+
+                    //if($write_row[$data_columns_array[2]] >= 5 && (int)$write_row[$data_columns_array[3]] > 0) {
+                    if($write_row[$data_columns_array[2]] >= 5) { //removed qty check
+
+                        if($supplier_id == 0) {
+                            if($write_row[$data_columns_array[1]] == '') {
+                                $write_row[$data_columns_array[1]] = $write_row[$data_columns_array[0]];
+                            }
+                        }
+
+                        foreach($write_row as $k => $data) {
+
+                            $csv_output = '';
+
+                            if($k == 3) {
+                                $objPHPExcel->getActiveSheet()->setCellValueExplicit($letter_array[($k-1)] . $row, $data, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                            } else {
+                                $objPHPExcel->getActiveSheet()->SetCellValue($letter_array[($k-1)] . $row, $data);
+                            }
+                        }
+                        $row++;
+
+                    }
+                }
+
+                // Rename sheet
+                //echo date('H:i:s') . " Rename sheet\n";
+                $objPHPExcel->getActiveSheet()->setTitle('Simple');
+
+
+                //unlink(STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
+                // Save Excel 2007 file
+                //echo date('H:i:s') . " Write to Excel2007 format\n";
+                $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($objPHPExcel);
+                $objWriter->save(self::STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
+
+
+
+                // Echo done
+                //echo(date('H:i:s') .$supplier_data['write_filename'] . " Done writing file.<br />");
+
+                // connect and login to FTP server
+                //$ftp_server="waws-prod-db3-023.ftp.azurewebsites.windows.net";
+                //$ftp_user_name="4x4tyres\website4x4tyres";
+                //$ftp_user_pass="rjWdYsLzpfwT9gRJ";
+                //$ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+                //$login = ftp_login($ftp_conn, $ftp_user_name, $ftp_user_pass);
+                //$file = STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx'; //to be uploaded
+                //$remote_file = $supplier_data['write_filename'] . '.xlsx';
+                //echo $file;
+                //echo $remote_file;
+                // upload file
+                //if (ftp_put($ftp_conn, $remote_file, $file, FTP_ASCII))
+                //  {
+                //  echo("Successfully uploaded $file." . "<br />");
+                //  }
+                //else
+                //  {
+                //  echo("Error uploading $file." . "<br />");
+                //  }
+
+                // close connection
+                //ftp_close($ftp_conn);
+
+
+                $x = 2;
+
+                // Duplicate Micheldever file, re-arrange columns and send to oponeo
+                if($supplier_id === 0){
+                    // Read the data
+                    $oponeo_file = self::STOCK_FEED_LOCATION . 'Upload/oponeo/oponeo_prices.xlsx';
+                    if(file_exists($oponeo_file)){
+                        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+                        $spreadsheet = $reader->load($oponeo_file);
+                        $worksheet = $spreadsheet->getActiveSheet();
+                        $rows = $worksheet->toArray();
+
+                        // loop through the oponeo data
+                        foreach($opneo_write_array as $o_key => $o_data){
+                            if($o_key !== 0){
+                                $stcode = $o_data[0];
+                                if($o_stcode_row = array_search($stcode, array_column($rows, 0))){
+                                    if($o_stcode_row){
+                                        $opneo_write_array[$o_key][] = str_replace('£', '', $rows[$o_stcode_row][19]);
+                                    }
+                                }else{
+                                    unset($opneo_write_array[$o_key]);
+                                }
+                            }
+                        }
+                    }
+                    /*$spreadsheet = $reader->load(self::STOCK_FEED_LOCATION . 'Upload/oponeo/' . $supplier_data['write_filename'] . '.xlsx');
+
+                    $highestRow = $worksheet->getHighestRow(); // e.g. 10
+                    $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
+                    // Increment the highest column letter
+                    $highestColumn++;*/
+
+                    // Rearrange the columns
+                    /*$data = [];
+                    for ($row = 1; $row <= $highestRow; $row++) {
+                        $row_data = [];
+                        if($row > 2){
+                            for ($col = 'A'; $col != $highestColumn; ++$col) {
+                                if($col=='C'||$col=='F'){
+                                    $row_data[] = (string)$worksheet->getCell($col.$row)->getValue();
+                                }
+                            }
+                            $data[] = $row_data;
+                        }
+                    }*/
+
+                    // Save the sheet
+                    $opono_file = 'opono_ftp.csv';
+                    $opono_path = self::STOCK_FEED_LOCATION . 'Excel/' . $opono_file;
+                    $opono_ftp_path = 'stock/' . $opono_file;
+                    $mySpreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                    $sheet = $mySpreadsheet->getActiveSheet();
+                    $sheet->fromArray($opneo_write_array);
+                    $opono_writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($mySpreadsheet);
+                    $opono_writer->save($opono_path);
+
+                    // FTP it
+                    $ftp = ftp_connect('ftp.oponeo.pl');
+                    $login_result = ftp_login($ftp, '4x4tyresUK', 'Midh98476!626aAS');
+                    if (($ftp) && ($login_result)) {
+                        $upload = ftp_put($ftp, $opono_ftp_path, $opono_path, FTP_BINARY);
+                    }
+                    ftp_close($ftp);
+
+                    // Delete the file
+                    unlink($opono_path);
+                }
             }else{
                 $this->errors[] = 'Could not open supplier stock file: <strong>' . $supplier_id['write_filename'] . '/' . $supplier_data['read_filename'] . '</strong>';
             }
 
-
             if(!empty($this->errors)){
                 wp_redirect(get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&fbf_importer_status=error&fbf_importer_message=' . $this->get_errors());
-            }
-
-            // Create new \PhpOffice\PhpSpreadsheet\Spreadsheet object
-            //echo date('H:i:s') . " Create new \PhpOffice\PhpSpreadsheet\Spreadsheet object\n";
-            $objPHPExcel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-
-            // Set properties
-            //echo date('H:i:s') . " Set properties\n";
-            $objPHPExcel->getProperties()->setCreator("4x4tyres");
-            $objPHPExcel->getProperties()->setLastModifiedBy("4x4tyres");
-            $objPHPExcel->getProperties()->setTitle("Stock Feed");
-            $objPHPExcel->getProperties()->setSubject("Stock Feed");
-            $objPHPExcel->getProperties()->setDescription("Stock Feed");
-
-            // Add some data
-            //echo date('H:i:s') . " Add some data\n";
-            $objPHPExcel->setActiveSheetIndex(0);
-
-            $objPHPExcel->getActiveSheet()->SetCellValue('A1', $supplier_data['cell_1a']);
-
-            $letter_array = array('a','b','c','d','e','f','g','h');
-            $row = 3;
-            foreach($write_array as $write_row) {
-
-                //if($write_row[$data_columns_array[2]] >= 5 && (int)$write_row[$data_columns_array[3]] > 0) {
-                if($write_row[$data_columns_array[2]] >= 5) { //removed qty check
-
-                    if($supplier_id == 0) {
-                        if($write_row[$data_columns_array[1]] == '') {
-                            $write_row[$data_columns_array[1]] = $write_row[$data_columns_array[0]];
-                        }
-                    }
-
-                    foreach($write_row as $k => $data) {
-
-                        $csv_output = '';
-
-                        if($k == 3) {
-                            $objPHPExcel->getActiveSheet()->setCellValueExplicit($letter_array[($k-1)] . $row, $data, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                        } else {
-                            $objPHPExcel->getActiveSheet()->SetCellValue($letter_array[($k-1)] . $row, $data);
-                        }
-                    }
-                    $row++;
-
-                }
-            }
-
-            // Rename sheet
-            //echo date('H:i:s') . " Rename sheet\n";
-            $objPHPExcel->getActiveSheet()->setTitle('Simple');
-
-
-            //unlink(STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
-            // Save Excel 2007 file
-            //echo date('H:i:s') . " Write to Excel2007 format\n";
-            $objWriter = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($objPHPExcel);
-            $objWriter->save(self::STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx');
-
-
-
-            // Echo done
-            //echo(date('H:i:s') .$supplier_data['write_filename'] . " Done writing file.<br />");
-
-            // connect and login to FTP server
-            //$ftp_server="waws-prod-db3-023.ftp.azurewebsites.windows.net";
-            //$ftp_user_name="4x4tyres\website4x4tyres";
-            //$ftp_user_pass="rjWdYsLzpfwT9gRJ";
-            //$ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
-            //$login = ftp_login($ftp_conn, $ftp_user_name, $ftp_user_pass);
-            //$file = STOCK_FEED_LOCATION . 'Excel/' . $supplier_data['write_filename'] . '.xlsx'; //to be uploaded
-            //$remote_file = $supplier_data['write_filename'] . '.xlsx';
-            //echo $file;
-            //echo $remote_file;
-            // upload file
-            //if (ftp_put($ftp_conn, $remote_file, $file, FTP_ASCII))
-            //  {
-            //  echo("Successfully uploaded $file." . "<br />");
-            //  }
-            //else
-            //  {
-            //  echo("Error uploading $file." . "<br />");
-            //  }
-
-            // close connection
-            //ftp_close($ftp_conn);
-
-
-            $x = 2;
-
-            // Duplicate Micheldever file, re-arrange columns and send to oponeo
-            if($supplier_id === 0){
-                // Read the data
-                $oponeo_file = self::STOCK_FEED_LOCATION . 'Upload/oponeo/oponeo_prices.xlsx';
-                if(file_exists($oponeo_file)){
-                    $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-                    $spreadsheet = $reader->load($oponeo_file);
-                    $worksheet = $spreadsheet->getActiveSheet();
-                    $rows = $worksheet->toArray();
-
-                    // loop through the oponeo data
-                    foreach($opneo_write_array as $o_key => $o_data){
-                        if($o_key !== 0){
-                            $stcode = $o_data[0];
-                            if($o_stcode_row = array_search($stcode, array_column($rows, 0))){
-                                if($o_stcode_row){
-                                    $opneo_write_array[$o_key][] = str_replace('£', '', $rows[$o_stcode_row][19]);
-                                }
-                            }else{
-                                unset($opneo_write_array[$o_key]);
-                            }
-                        }
-                    }
-                }
-                /*$spreadsheet = $reader->load(self::STOCK_FEED_LOCATION . 'Upload/oponeo/' . $supplier_data['write_filename'] . '.xlsx');
-
-                $highestRow = $worksheet->getHighestRow(); // e.g. 10
-                $highestColumn = $worksheet->getHighestColumn(); // e.g 'F'
-                // Increment the highest column letter
-                $highestColumn++;*/
-
-                // Rearrange the columns
-                /*$data = [];
-                for ($row = 1; $row <= $highestRow; $row++) {
-                    $row_data = [];
-                    if($row > 2){
-                        for ($col = 'A'; $col != $highestColumn; ++$col) {
-                            if($col=='C'||$col=='F'){
-                                $row_data[] = (string)$worksheet->getCell($col.$row)->getValue();
-                            }
-                        }
-                        $data[] = $row_data;
-                    }
-                }*/
-
-                // Save the sheet
-                $opono_file = 'opono_ftp.csv';
-                $opono_path = self::STOCK_FEED_LOCATION . 'Excel/' . $opono_file;
-                $opono_ftp_path = 'stock/' . $opono_file;
-                $mySpreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-                $sheet = $mySpreadsheet->getActiveSheet();
-                $sheet->fromArray($opneo_write_array);
-                $opono_writer = new \PhpOffice\PhpSpreadsheet\Writer\Csv($mySpreadsheet);
-                $opono_writer->save($opono_path);
-
-                // FTP it
-                $ftp = ftp_connect('ftp.oponeo.pl');
-                $login_result = ftp_login($ftp, '4x4tyresUK', 'Midh98476!626aAS');
-                if (($ftp) && ($login_result)) {
-                    $upload = ftp_put($ftp, $opono_ftp_path, $opono_path, FTP_BINARY);
-                }
-                ftp_close($ftp);
-
-                // Delete the file
-                unlink($opono_path);
             }
         }
 
