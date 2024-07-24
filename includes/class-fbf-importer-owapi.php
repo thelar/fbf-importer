@@ -883,7 +883,7 @@ class Fbf_Importer_Owapi
             "analysis" => [
                 "c_2" => ucwords(strtolower($data['range']['brand']['name'])),
                 "c_3" => ucwords(strtolower($data['range']['design'])),
-                "c_8" => $data['range']['image_url'], // Gone back to full url
+                "c_8" => $image,
                 "m_2" => $material,
                 "m_3" => $diameter,
                 "m_4" => $width,
