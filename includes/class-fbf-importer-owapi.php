@@ -832,9 +832,8 @@ class Fbf_Importer_Owapi
             }
         }
 
-        if(!is_null($data['unique_product_image']) && str_contains($data['unique_product_image'],'https://4x4tyres.co.uk/images/')){
-            $parts = parse_url($data['unique_product_image']);
-            $image = str_replace('/images/', '', $parts['path']);
+        if(!is_null($data['unique_product_image'])){
+            $image = $data['unique_product_image'];
         }else{
             if(!empty($data['range']['image_url'])&&!empty($data['range']['thumbnail_url'])){
                 $image = $data['range']['thumbnail_url'] . '|' . $data['range']['image_url'];
