@@ -562,6 +562,9 @@ class Fbf_Importer_Owapi
                 }
             }
 
+            //$test_item = $updates_required[array_search('SRW10048520BKM45', array_column($updates_required, 'primary_id'))];
+            //$updates_required = [$test_item];
+
             foreach($updates_required as $item_to_update){
                 // This is where we differ from the Pimberly data in that we cannot compare dates because Boughto does not have a modified date in its data - therefore we  have to assume that EVERYTHING requires an update
                 // First we need to get the variant_sales_info_id - if we don't have it we will need to obtain it from OW
@@ -835,10 +838,10 @@ class Fbf_Importer_Owapi
         if(!is_null($data['unique_product_image'])){
             $image = $data['unique_product_image'];
         }else{
-            if(!empty($data['range']['image_url'])&&!empty($data['range']['thumbnail_url'])){
-                $image = $data['range']['thumbnail_url'] . '|' . $data['range']['image_url'];
-            }else if(!empty($data['range']['image_url'])){
+            if(!empty($data['range']['image_url'])){
                 $image = $data['range']['image_url'];
+            }else if(!empty($data['range']['thumbnail_url'])){
+                $image = $data['range']['thumbnail_url'];
             }else{
                 $image = '';
             }
