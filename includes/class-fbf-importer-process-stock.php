@@ -282,7 +282,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[20]['write_filename'] = "supermetal";
         $supplier_array[20]['cell_1a'] = "SUPERMET";
         $supplier_array[20]['data_start_row'] = "1";
-        $supplier_array[20]['mapping_array'] = array('8', '8', '19', '16');
+        $supplier_array[20]['mapping_array'] = array('6', '6', '19', '16');
         $supplier_array[20]['delimiter'] = ";";
 
         if (!function_exists('tep_xls_to_csv_single_file')){
