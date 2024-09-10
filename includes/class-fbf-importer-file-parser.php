@@ -572,7 +572,8 @@ class Fbf_Importer_File_Parser {
                             'OEM Style',
                             'Tuff Torque',
                             'Urban',
-                            'VBS'
+                            'VBS',
+                            'Rogue Alloy'
                         ];
                         if(!in_array((string)$item['Brand Name'], $house_wheel_brands)){
                             if($product->get_stock_quantity()<=0){
