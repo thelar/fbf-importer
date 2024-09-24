@@ -97,6 +97,14 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[3]['mapping_array'] = array('0', '1', '4', '7');
         $supplier_array[3]['delimiter'] = ",";
 
+        $supplier_array[2]['name'] = "ROGUE";
+        $supplier_array[2]['read_filename'] = "rogue.csv";
+        $supplier_array[2]['write_filename'] = "rogue";
+        $supplier_array[2]['cell_1a'] = "ROGUETR";
+        $supplier_array[2]['data_start_row'] = "4";
+        $supplier_array[2]['mapping_array'] = array('1', '1', '8', '10');
+        $supplier_array[2]['delimiter'] = ",";
+
         /*$supplier_array[4]['name'] = "DELDO";
         $supplier_array[4]['read_filename'] = "deldo47545.csv"; //"TOPGEAR.csv";
         $supplier_array[4]['write_filename'] = "deldo";
