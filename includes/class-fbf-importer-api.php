@@ -67,6 +67,20 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             $this->fbf_importer_run_pimberly_to_ow_import();
             $this->fbf_importer_run_boughto_to_ow_import();
             exit;
+        }else if($wp->request == 'api/v2/import_pimberly'){
+            $options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
+            if($options['status']==='STOPPED'){
+                $old_options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
+                update_option($this->plugin_name . '-mts-ow', ['status' => 'READY', 'log_id' => $old_options['log_id']]);
+            }
+            exit;
+        }else if($wp->request == 'api/v2/import_boughto'){
+            $options = get_option($this->plugin_name . 'boughto-ow', ['status' => 'STOPPED']);
+            if($options['status']==='STOPPED'){
+                $old_options = get_option($this->plugin_name . 'boughto-ow', ['status' => 'STOPPED']);
+                update_option($this->plugin_name . 'boughto-ow', ['status' => 'READY', 'log_id' => $old_options['log_id']]);
+            }
+            exit;
         }else if($wp->request == 'api/v2/freestock'){
             require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-free-stock.php';
             $free_stock = new Fbf_Importer_Free_Stock($this->plugin_name);
