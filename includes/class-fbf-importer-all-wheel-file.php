@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Class for reading the All Wheel file from Google Sheets
+ * Reference: https://www.nidup.io/blog/manipulate-google-sheets-in-php-with-api
+ */
 class Fbf_Importer_All_Wheel_File
 {
     private $client;
