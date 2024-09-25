@@ -152,6 +152,9 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
         }else if($wp->request == 'api/v2/update_ebay_packages'){
             $this->fbf_update_ebay_packages();
             exit;
+        }else if($wp->request == 'api/v2/read_all_wheel_file'){
+            echo 'reading all wheel file here';
+            exit;
         }
     }
 
