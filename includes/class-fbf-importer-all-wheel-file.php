@@ -13,7 +13,7 @@ class Fbf_Importer_All_Wheel_File
         $this->client->setApplicationName('Google Sheets API');
         $this->client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);
         $this->client->setAccessType('offline');
-        $path = plugin_dir_path(WP_PLUGIN_DIR . '/fbf-importer/fbf-importer.php') . 'credentials.json';
+        $path = get_template_directory() . '/../config/google_service_account.json';
         $this->client->setAuthConfig($path);
 
         // configure the Sheets Service
