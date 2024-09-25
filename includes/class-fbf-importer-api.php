@@ -8,7 +8,6 @@
  * @author     Kevin Price-Ward <kevin.price-ward@chapteragency.com>
  */
 
-
 class Fbf_Importer_Api extends Fbf_Importer_Admin
 {
     /**
@@ -153,7 +152,10 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             $this->fbf_update_ebay_packages();
             exit;
         }else if($wp->request == 'api/v2/read_all_wheel_file'){
-            echo 'reading all wheel file here';
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-all-wheel-file.php';
+            $google_sheet = new Fbf_Importer_All_Wheel_File();
+            $data = $google_sheet->read('14Itwv5zfBk0-PwUWBME-dx-Z7wuNu2-QoiGGLQdtT7w', 'AW Update', true);
+            var_dump($data);
             exit;
         }
     }

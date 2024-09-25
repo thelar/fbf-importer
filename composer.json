@@ -7,12 +7,12 @@
   "authors": [
     {
       "name": "Kevin Price-Ward",
-      "email": "kevin@code-mill.co.uk",
-      "homepage": ""
+      "email": "kevin@code-mill.co.uk"
     }
   ],
   "type": "wordpress-plugin",
   "require": {
-    "php": ">=7.1"
+    "php": ">=7.1",
+    "google/apiclient": "2.8.1"
   }
 }
