@@ -81,6 +81,13 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
 
             $options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
             $boughto_options = get_option($this->plugin_name . 'boughto-ow', ['status' => 'STOPPED']); // Need to check if Boughto import is stopped as well because OW will error if both run at the same time
+
+            echo '<pre>';
+            print_r($options);
+            print_r($boughto_options);
+            echo '</pre>';
+
+
             if($options['status']==='STOPPED' && $boughto_options['status']==='STOPPED'){
                 update_option($this->plugin_name . '-mts-ow', ['status' => 'READY', 'log_id' => $log_id]);
             }
