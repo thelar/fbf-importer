@@ -80,7 +80,7 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             ]);
 
             $options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
-            $boughto_options = get_option($this->plugin_name . 'boughto-ow', ['status' => 'STOPPED']); // Need to check if Boughto import is stopped as well because OW will error if both run at the same time
+            $boughto_options = get_option($this->plugin_name . '=boughto-ow', ['status' => 'STOPPED']); // Need to check if Boughto import is stopped as well because OW will error if both run at the same time
 
             echo '<pre>';
             print_r($options);
@@ -104,10 +104,10 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
                 'status' => 'RUNNING',
             ]);
 
-            $options = get_option($this->plugin_name . 'boughto-ow', ['status' => 'STOPPED']);
+            $options = get_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED']);
             $pimberly_options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']); // Need to check if Pimbery import is stopped as well because OW will error if both run at the same time
             if($options['status']==='STOPPED' && $pimberly_options['status']==='STOPPED'){
-                update_option($this->plugin_name . 'boughto-ow', ['status' => 'READY', 'log_id' => $log_id]);
+                update_option($this->plugin_name . '-boughto-ow', ['status' => 'READY', 'log_id' => $log_id]);
             }
             exit;
         }else if($wp->request == 'api/v2/freestock'){
