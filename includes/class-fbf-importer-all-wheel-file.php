@@ -12,7 +12,12 @@ class Fbf_Importer_All_Wheel_File
     public function __construct()
     {
         // include your composer dependencies
-        require_once plugin_dir_path(WP_PLUGIN_DIR . '/fbf-importer/fbf-importer.php') . 'vendor/autoload.php';
+        if(function_exists('get_home_path')){
+            require_once get_home_path() . '../vendor/autoload.php';
+        }else{
+            require_once ABSPATH . '../../vendor/autoload.php';
+        }
+
         $this->client = new \Google_Client();
         $this->client->setApplicationName('Google Sheets API');
         $this->client->setScopes([\Google_Service_Sheets::SPREADSHEETS]);

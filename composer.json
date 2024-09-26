@@ -10,9 +10,5 @@
       "email": "kevin@code-mill.co.uk"
     }
   ],
-  "type": "wordpress-plugin",
-  "require": {
-    "php": ">=7.1",
-    "google/apiclient": "2.8.1"
-  }
+  "type": "wordpress-plugin"
 }
