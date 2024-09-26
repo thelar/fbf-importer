@@ -565,6 +565,11 @@ class Fbf_Importer_Owapi
             //$test_item = $updates_required[array_search('SRW10048520BKM45', array_column($updates_required, 'primary_id'))];
             //$updates_required = [$test_item];
 
+            // Get the All Wheel file data for comparison purposes in the item payload
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-all-wheel-file.php';
+            $google_sheet = new Fbf_Importer_All_Wheel_File();
+            $all_wheel_data = $google_sheet->read('14Itwv5zfBk0-PwUWBME-dx-Z7wuNu2-QoiGGLQdtT7w', 'AW Update', true);
+
             foreach($updates_required as $item_to_update){
                 // This is where we differ from the Pimberly data in that we cannot compare dates because Boughto does not have a modified date in its data - therefore we  have to assume that EVERYTHING requires an update
                 // First we need to get the variant_sales_info_id - if we don't have it we will need to obtain it from OW
@@ -590,7 +595,7 @@ class Fbf_Importer_Owapi
                 }
 
                 if(!is_null($variant_sales_id)){
-                    $payload  = $this->get_create_wheel_item_payload($item_to_update, $variant_sales_id, false);
+                    $payload  = $this->get_create_wheel_item_payload($item_to_update, $all_wheel_data, $variant_sales_id, false);
                     $ow_update = $this->ow_curl('variants/' . $item_to_update['ow_id'], 'PUT', 200, $payload, ['Content-Type:application/json']);
 
                     if($ow_update['status']==='success'){
@@ -656,6 +661,11 @@ class Fbf_Importer_Owapi
             $insert_id = $wpdb->insert_id;
         }
 
+        // Get the All Wheel file data for comparison purposes in the item payload
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-all-wheel-file.php';
+        $google_sheet = new Fbf_Importer_All_Wheel_File();
+        $all_wheel_data = $google_sheet->read('14Itwv5zfBk0-PwUWBME-dx-Z7wuNu2-QoiGGLQdtT7w', 'AW Update', true);
+
         // First find the records that need to be created - i.e. they have no ow_id in BD and they are not discontinued
         $sql = $wpdb->prepare("SELECT * 
             FROM {$data_table}
@@ -667,7 +677,7 @@ class Fbf_Importer_Owapi
 
         foreach($items_to_create as $item_to_create) {
             if (is_null($limit) || $i <= $limit) {
-                $payload = $this->get_create_wheel_item_payload($item_to_create);
+                $payload = $this->get_create_wheel_item_payload($item_to_create, $all_wheel_data);
                 $data = unserialize($item_to_create['data']);
                 if($data['range']['material']=='alloy'){
                     $template_id = '107739';
@@ -782,7 +792,7 @@ class Fbf_Importer_Owapi
         return json_encode($payload);
     }
 
-    private function get_create_wheel_item_payload($item, $variant_sales_id=false, $include_code=true)
+    private function get_create_wheel_item_payload($item, $all_wheel_data, $variant_sales_id=false, $include_code=true)
     {
         $data = unserialize($item['data']);
 
