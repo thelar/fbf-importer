@@ -845,18 +845,37 @@ class Fbf_Importer_Owapi
             }
         }
 
-        if(!is_null($data['unique_product_image'])){
-            $image = $data['unique_product_image'];
-        }else{
-            if(!empty($data['range']['image_url'])){
-                $image = $data['range']['image_url'];
-            }else if(!empty($data['range']['thumbnail_url'])){
-                $image = $data['range']['thumbnail_url'];
-            }else{
-                $image = '';
+        $supplier_image_exists = false;
+        $in_all_wheel_file = array_search($data['product_code'], array_column($all_wheel_data, 'product_code'));
+        if($in_all_wheel_file!==false){
+            if(!empty($all_wheel_data[$in_all_wheel_file]['Image URL'])){
+                $file_name = basename($all_wheel_data[$in_all_wheel_file]['Image URL']);
+                if(function_exists('get_home_path')){
+                    $supplier_images_path = get_home_path() . '../supplier/images/';
+                }else{
+                    $supplier_images_path = ABSPATH . '../../supplier/images/';
+                }
+                if(file_exists($supplier_images_path . $file_name)){
+                    $supplier_image_exists = true;
+                }
             }
         }
 
+        if($supplier_image_exists){
+            $image = $file_name;
+        }else {
+            if (!is_null($data['unique_product_image'])) {
+                $image = $data['unique_product_image'];
+            } else {
+                if (!empty($data['range']['image_url'])) {
+                    $image = $data['range']['image_url'];
+                } else if (!empty($data['range']['thumbnail_url'])) {
+                    $image = $data['range']['thumbnail_url'];
+                } else {
+                    $image = '';
+                }
+            }
+        }
 
         if(!empty($data['range']['color'])){
             $color = ucwords(strtolower($data['range']['color']));
