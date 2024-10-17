@@ -881,8 +881,6 @@ class Fbf_Importer_Admin {
             require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
             $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
             $token = $auth->get_valid_token();
-            var_dump($token);
-            die();
             if ($token) {
                 // OK to run OW api calls
                 require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi.php';
