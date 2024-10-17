@@ -878,7 +878,7 @@ class Fbf_Importer_Admin {
             $pimberly_to_ow = new Fbf_Importer_Pimberly_Ow($this->plugin_name);
             $pimberly_to_ow->run($log_id);
         }else if($options['status']==='READYFOROW') {
-
+            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
             $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
             $token = $auth->get_valid_token();
             var_dump($token);
