@@ -68,45 +68,38 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             exit;
         }else if($wp->request == 'api/v2/import_pimberly'){
             global $wpdb;
-            $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
-            $log = $wpdb->prefix . 'fbf_importer_pimberly_logs';
-            $max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id
-            FROM {$log_table}");
-            $log_id = $wpdb->get_col($max_sql)[0]+1?:1;
-            $i = $wpdb->insert($log, [
+            $logs_table = $wpdb->prefix . 'fbf_importer_pimberly_logs';
+            //$log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
+            //$max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id FROM {$log_table}");
+            //$log_id = $wpdb->get_col($max_sql)[0]+1?:1;
+            $i = $wpdb->insert($logs_table, [
                 'started' => wp_date('Y-m-d H:i:s'),
                 'status' => 'RUNNING',
             ]);
-
-            $options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
-            $boughto_options = get_option($this->plugin_name . '=boughto-ow', ['status' => 'STOPPED']); // Need to check if Boughto import is stopped as well because OW will error if both run at the same time
-
-            echo '<pre>';
-            print_r($options);
-            print_r($boughto_options);
-            echo '</pre>';
-
-
-            if($options['status']==='STOPPED' && $boughto_options['status']==='STOPPED'){
-                update_option($this->plugin_name . '-mts-ow', ['status' => 'READY', 'log_id' => $log_id]);
+            if($i){
+                $options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']);
+                $boughto_options = get_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED']); // Need to check if Boughto import is stopped as well because OW will error if both run at the same time
+                if($options['status']==='STOPPED' && $boughto_options['status']==='STOPPED'){
+                    update_option($this->plugin_name . '-mts-ow', ['status' => 'READY', 'log_id' => $wpdb->insert_id]);
+                }
             }
             exit;
         }else if($wp->request == 'api/v2/import_boughto'){
             global $wpdb;
             $logs_table = $wpdb->prefix . 'fbf_importer_boughto_logs';
-            $log_items_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
-            $max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id
-            FROM {$log_items_table}");
-            $log_id = $wpdb->get_col($max_sql)[0]+1?:1;
+            //$log_items_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
+            //$max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id FROM {$log_items_table}");
+            //$log_id = $wpdb->get_col($max_sql)[0]+1?:1;
             $i = $wpdb->insert($logs_table, [
                 'started' => wp_date('Y-m-d H:i:s'),
                 'status' => 'RUNNING',
             ]);
-
-            $options = get_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED']);
-            $pimberly_options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']); // Need to check if Pimbery import is stopped as well because OW will error if both run at the same time
-            if($options['status']==='STOPPED' && $pimberly_options['status']==='STOPPED'){
-                update_option($this->plugin_name . '-boughto-ow', ['status' => 'READY', 'log_id' => $log_id]);
+            if($i){
+                $options = get_option($this->plugin_name . '-boughto-ow', ['status' => 'STOPPED']);
+                $pimberly_options = get_option($this->plugin_name . '-mts-ow', ['status' => 'STOPPED']); // Need to check if Pimbery import is stopped as well because OW will error if both run at the same time
+                if($options['status']==='STOPPED' && $pimberly_options['status']==='STOPPED'){
+                    update_option($this->plugin_name . '-boughto-ow', ['status' => 'READY', 'log_id' => $wpdb->insert_id]);
+                }
             }
             exit;
         }else if($wp->request == 'api/v2/freestock'){
