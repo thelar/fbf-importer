@@ -2,7 +2,7 @@
 
 class Fbf_Importer_Owapi
 {
-    const AUTH_URI = 'https://owapi.4x4tyres.co.uk/owapi/';
+    const AUTH_URI = 'https://4x4tyres.orderwisecloud.com/owapi/';
     private $token;
 
     /**

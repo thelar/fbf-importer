@@ -2,7 +2,7 @@
 
 class Fbf_Importer_Owapi_Auth
 {
-    const AUTH_URI = 'https://owapi.4x4tyres.co.uk/owapi/';
+    const AUTH_URI = 'https://4x4tyres.orderwisecloud.com/owapi/';
     const CLIENT_USERNAME = 'API';
     const CLIENT_PASSWORD = '4x4Tyres7848!!';
     const TOKEN_EXPIRY_DAYS = 28; //OW auth tokens are good for 30 days, setting to 28 for safety
