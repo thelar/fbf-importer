@@ -59,7 +59,7 @@ class Fbf_Importer_Stock_Processor
         file_put_contents(self::UPLOAD_LOCATION . 'supermetal/supermetal.csv', fopen("https://automotivewheels.co.uk/publicdata/supermetal.csv", 'r'));
 
         // Street Track Life
-        file_put_contents(self::UPLOAD_LOCATION . 'street_track/stock.xlsx', fopen("https://docs.google.com/spreadsheets/d/1KQXgqLNU4ehtGXcTBzXTUNZXvFkgFNGNyJuOPraoNQw/export?format=csv&gid=0", 'r'));
+        file_put_contents(self::UPLOAD_LOCATION . 'street_track/stock.csv', fopen("https://docs.google.com/spreadsheets/d/1KQXgqLNU4ehtGXcTBzXTUNZXvFkgFNGNyJuOPraoNQw/export?format=csv&gid=0", 'r'));
 
         $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
         $data_columns_array = array('1', '3', '5', '6'); //A2, C2, E2, F2
@@ -295,7 +295,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[20]['delimiter'] = ";";
 
         $supplier_array[1]['name'] = "STREETTRACK";
-        $supplier_array[1]['read_filename'] = "stock.xlsx";
+        $supplier_array[1]['read_filename'] = "stock.csv";
         $supplier_array[1]['write_filename'] = "street_track";
         $supplier_array[1]['cell_1a'] = "STL";
         $supplier_array[1]['data_start_row'] = "1";
