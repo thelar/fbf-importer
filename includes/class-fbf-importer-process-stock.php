@@ -58,20 +58,21 @@ class Fbf_Importer_Stock_Processor
         // Supermetal
         file_put_contents(self::UPLOAD_LOCATION . 'supermetal/supermetal.csv', fopen("https://automotivewheels.co.uk/publicdata/supermetal.csv", 'r'));
 
-
+        // Street Track Life
+        file_put_contents(self::UPLOAD_LOCATION . 'street_track/stock.xlsx', fopen("https://docs.google.com/spreadsheets/d/1KQXgqLNU4ehtGXcTBzXTUNZXvFkgFNGNyJuOPraoNQw/export?format=csv&gid=0", 'r'));
 
         $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
         $data_columns_array = array('1', '3', '5', '6'); //A2, C2, E2, F2
 
         $supplier_array = array();
 
-        $supplier_array[0]['name'] = "MICHELDEVER";
+        /*$supplier_array[0]['name'] = "MICHELDEVER";
         $supplier_array[0]['read_filename'] = "3WHEELWH.CSV";
         $supplier_array[0]['write_filename'] = "3wheelwh";
         $supplier_array[0]['cell_1a'] = "SOUTHAMT";
         $supplier_array[0]['data_start_row'] = "1";
         $supplier_array[0]['mapping_array'] = array('1', '1', '41', '42');
-        $supplier_array[0]['delimiter'] = ",";
+        $supplier_array[0]['delimiter'] = ",";*/
 
         /*$supplier_array[1]['name'] = "BOND";
         $supplier_array[1]['read_filename'] = "bond.csv";
@@ -293,6 +294,14 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[20]['mapping_array'] = array('6', '6', '19', '16');
         $supplier_array[20]['delimiter'] = ";";
 
+        $supplier_array[1]['name'] = "STREETTRACK";
+        $supplier_array[1]['read_filename'] = "stock.xlsx";
+        $supplier_array[1]['write_filename'] = "street_track";
+        $supplier_array[1]['cell_1a'] = "STL";
+        $supplier_array[1]['data_start_row'] = "1";
+        $supplier_array[1]['mapping_array'] = array('1', '1', '13', '14');
+        $supplier_array[1]['delimiter'] = ",";
+
         if (!function_exists('tep_xls_to_csv_single_file')){
             function tep_xls_to_csv_single_file($inputfile, $outputfile) {
 
@@ -377,7 +386,7 @@ class Fbf_Importer_Stock_Processor
 
                             }
 
-                            if ($supplier_id == 13) {
+                            if ($supplier_id == 13 || $supplier_id == 1) {
                                 $write_array[$row][$data_columns_array[2]] =  str_replace("£","",$write_array[$row][$data_columns_array[2]]);
                             }
 
