@@ -180,7 +180,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[11]['mapping_array'] = array('3', '3', '19', '0');
         $supplier_array[11]['delimiter'] = ",";
 
-        /*$supplier_array[12]['name'] = "wheelwright";
+        $supplier_array[12]['name'] = "wheelwright";
         $supplier_array[12]['read_filename'] = "wheelwright.csv";
         $supplier_array[12]['write_filename'] = "wheelwright";
         $supplier_array[12]['cell_1a'] = "WHEELWRI";
