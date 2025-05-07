@@ -21,8 +21,6 @@ class Fbf_Importer_Stock_Processor
         $a = 1;
         $b = 2;
 
-        //$file = file_get_contents('ssh2.sftp://4x4tyressftp:Evilct7848!@SFTP.wheelpros.com:22/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv');
-
         $connection = ssh2_connect('SFTP.wheelpros.com', 22);
         ssh2_auth_password($connection, '4x4tyressftp', getenv('WHEELPROS_FTP_PASS'));
         $sftp = ssh2_sftp($connection);
