@@ -159,12 +159,22 @@ class Fbf_Importer_Batch_Processor
                                 if($rv[3] < $this->price_match_data[strtoupper($rv[4])]['price']){
                                     $this->price_match_data[strtoupper($rv[4])]['price'] = $rv[3];
                                     $this->price_match_data[strtoupper($rv[4])]['cheapest'] = $rv[7];
+                                    $this->price_match_data[strtoupper($rv[4])]['matched_prices'][] = [
+                                        'name' => $rv[7],
+                                        'price' => $rv[3],
+                                    ];
                                 }
                             }else{
                                 $this->price_match_data[strtoupper($rv[4])] = [
                                     'price' => $rv[3],
                                     'count' => 1,
                                     'cheapest' => $rv[7],
+                                    'matched_prices' => [
+                                        [
+                                            'name' => $rv[7],
+                                            'price' => $rv[3]
+                                        ]
+                                    ]
                                 ];
                             }
                         }

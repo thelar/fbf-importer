@@ -69,6 +69,7 @@ class Fbf_Importer_Activator {
           item text NOT NULL,
           rsp text,
           status text,
+          price_data text,
           PRIMARY KEY  (id)
         ) $charset_collate;";
 

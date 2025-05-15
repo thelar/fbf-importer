@@ -13,6 +13,7 @@ class Fbf_Importer_Item_Import
     private $flat_fee;
     private $tmp_products_table;
     private $suppliers;
+    private $price_report_data = [];
 
     public function __construct($plugin_name, $id, $min_stock, $rsp_rules, $price_match_data, $fitting_cost, $flat_fee)
     {
@@ -568,14 +569,30 @@ class Fbf_Importer_Item_Import
                         $rsp = $this->get_rsp($item, $product_id, (float)$product->get_regular_price());
                         if($rsp['price_match']){
                             $rsp_price = round($rsp['price'], 2);
+                            if($this->price_match_data[$sku]['cheapest']){
+                                $this->price_report_data['pm_cheapest_name'] = $this->price_match_data[$sku]['cheapest'];
+                            }
+                            if($this->price_match_data[$sku]['price']){
+                                $this->price_report_data['pm_cheapest_price'] = $this->price_match_data[$sku]['price'];
+                            }
+                            if($this->price_match_data[$sku]['matched_prices']){
+                                $this->price_report_data['pm_matched_prices'] = $this->price_match_data[$sku]['matched_prices'];
+                            }
                         }else{
                             $rsp_price = round($rsp['price'] * 1.2, 2);
                         }
                         $rsp_price_match = $rsp['price_match'];
+                        $this->price_report_data['is_price_matched'] = $rsp['price_match'];
                     }else{
                         $rsp_price = round((float)$item['RSP Exc Vat'] * 1.2, 2); //Added vat here
                         $rsp_price_match = false;
+                        $this->price_report_data['is_price_matched'] = false;
                     }
+                    $this->price_report_data['use_rsp_rules'] = (string)$item['Include in Price Match'];
+                    $this->price_report_data['rsp_price'] = $rsp_price;
+                    $this->price_report_data['regular_price'] = $product->get_regular_price();
+                    $this->price_report_data['regular_price_inc_vat'] = $product->get_regular_price() * 1.2;
+                    $this->set_price_report_data();
 
                     // Set meta on product for price match
                     update_post_meta($product_id, '_price_match', $rsp_price_match);
@@ -597,6 +614,9 @@ class Fbf_Importer_Item_Import
                             'Price_Match' => $rsp_price_match
                         ]);
                     }
+
+                    // Set up the report items
+
                 }
 
                 // Update the product_id
@@ -1009,6 +1029,7 @@ class Fbf_Importer_Item_Import
         }*/
 
         $s_price = $this->get_supplier_cost($item, $price);
+        $this->price_report_data['supplier_cost'] = $s_price;
         $pc = 0;
 
         if($s_price === (float)0){
@@ -1033,6 +1054,8 @@ class Fbf_Importer_Item_Import
                             return [
                                 'price_match' => true,
                                 'price' => ($this->price_match_data[$sku]['price'] + $addition) - ($this->fitting_cost * 1.2),
+                                'price_raw' => $this->price_match_data[$sku]['price'],
+                                'addition' => $addition,
                             ];
                         }
                     }else{
@@ -1152,6 +1175,20 @@ class Fbf_Importer_Item_Import
             $this->tmp_products_table,
             [
                 'rsp' => serialize($rsp)
+            ],
+            [
+                'id' => $this->db_id
+            ]
+        );
+    }
+
+    private function set_price_report_data()
+    {
+        global $wpdb;
+        $wpdb->update(
+            $this->tmp_products_table,
+            [
+                'price_data' => serialize($this->price_report_data)
             ],
             [
                 'id' => $this->db_id
