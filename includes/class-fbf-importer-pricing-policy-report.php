@@ -62,21 +62,29 @@ class Fbf_Importer_Pricing_Policy_Report {
             $q = $wpdb->prepare("SELECT * FROM {$table} WHERE sku = %s", $sku);
             $r = $wpdb->get_row($q);
             $price = get_post_meta($tyre_id, '_regular_price', true);
-            if($r){
-                $item = unserialize($r->item);
-                $supplier_cost = $this->get_supplier_cost($item, $price);
-            }
 
-
-
-            $data[] = [
+            $row = [
                 $tyre_id,
-                get_post_meta($tyre_id, '_sku', true),
+                $sku,
                 $brand ?:'',
                 $tyre_type ?:'',
-                $price,
-                $supplier_cost,
             ];
+
+
+
+
+            if($r){
+                if($price_data = $r->price_data){
+                    $price_data = unserialize($price_data);
+                    $row[] = $price_data['supplier_cost'];
+                    $row[] = $price_data['regular_price'];
+                    $row[] = $price_data['regular_price_inc_vat'];
+                    $row[] = $price_data['use_rsp_rules'];
+                    $row[] = $price_data['is_price_matched'];
+                }
+            }
+
+            $data[] = $row;
         }
 
 
