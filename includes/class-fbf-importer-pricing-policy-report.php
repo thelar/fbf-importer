@@ -96,6 +96,27 @@ class Fbf_Importer_Pricing_Policy_Report {
 
             $data[] = $row;
         }
+        $data[0] = [
+            'PRODUCT_ID',
+            'SKU',
+            'BRAND',
+            'TYRE_TYPE',
+            'SUPPLIER_COST',
+            'REGULAR_PRICE',
+            'REGULAR_PRICE_INC_VAT',
+            'USE_RSP',
+            'IS_PRICE_MATCHED',
+            'CHEAPEST_SUPPLIER_NAME',
+            'CHEAPEST_SUPPLIER_COST',
+            'PRICE_MATCH_ADDITION',
+            'PRICE_MATCH_RAW',
+            'PM_SUPPLIER_1_NAME',
+            'PM_SUPPLIER_1_PRICE',
+            'PM_SUPPLIER_2_NAME',
+            'PM_SUPPLIER_2_PRICE',
+            'PM_SUPPLIER_3_NAME',
+            'PM_SUPPLIER_3_PRICE'
+        ];
 
 
         return $data;
