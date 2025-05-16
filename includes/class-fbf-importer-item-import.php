@@ -573,7 +573,13 @@ class Fbf_Importer_Item_Import
                                 $this->price_report_data['pm_cheapest_name'] = $this->price_match_data[$sku]['cheapest'];
                             }
                             if($this->price_match_data[$sku]['price']){
-                                $this->price_report_data['pm_cheapest_price'] = $this->price_match_data[$sku]['price'];
+                                $this->price_report_data['pm_calculated_price'] = $this->price_match_data[$sku]['price'];
+                            }
+                            if($this->price_match_data[$sku]['price']){
+                                $this->price_report_data['pm_addition'] = $rsp['addition'];
+                            }
+                            if($this->price_match_data[$sku]['price']){
+                                $this->price_report_data['pm_raw_price'] = $rsp['price_raw'];
                             }
                             if($this->price_match_data[$sku]['matched_prices']){
                                 $this->price_report_data['pm_matched_prices'] = $this->price_match_data[$sku]['matched_prices'];

@@ -80,7 +80,17 @@ class Fbf_Importer_Pricing_Policy_Report {
                     $row[] = $price_data['regular_price'];
                     $row[] = $price_data['regular_price_inc_vat'];
                     $row[] = $price_data['use_rsp_rules'];
-                    $row[] = $price_data['is_price_matched'];
+                    $row[] = (bool)$price_data['is_price_matched'];
+                    if($price_data['is_price_matched']){
+                        $row[] = $price_data['pm_cheapest_name'];
+                        $row[] = $price_data['pm_calculated_price'];
+                        $row[] = $price_data['pm_addition'];
+                        $row[] = $price_data['pm_raw_price'];
+                        foreach($price_data['pm_matched_prices'] as $pm){
+                            $row[] = $pm['name'];
+                            $row[] = $pm['price'];
+                        }
+                    }
                 }
             }
 
