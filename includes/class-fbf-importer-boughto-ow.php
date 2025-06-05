@@ -9,6 +9,7 @@ class Fbf_Importer_Boughto_Ow
     private $location_key = 7;
     private $bearer_token = 'a5785ee35b10c0a179a40ed5567f367235cd28ffb115460b3821bdbcec677d9b';
     private $boughto_items;
+    private $no_stock_items = [];
 
     function __construct($plugin_name){
         $this->plugin_name = $plugin_name;
@@ -55,6 +56,12 @@ class Fbf_Importer_Boughto_Ow
             if($data['status']==='success'){
                 $brands = $data['brands'];
 
+                /*// TMP filter out just Calibre
+                $calibre = $brands[array_search('Calibre', array_column($brands, 'name'))];
+                $brands = [
+                    $calibre
+                ];*/
+
                 // Loop through the returned brands
                 foreach($brands as $brand){
                     $brand_name = $brand['name'];
@@ -91,6 +98,38 @@ class Fbf_Importer_Boughto_Ow
                                 }
                             }
                         }
+
+
+
+                        // If not an in-house brand - get ALL the items anyway and compare difference
+                        if(!$is_house_brand){
+                            $nhb_url = sprintf('%s/search/wheels?brand=%s&ignore_no_price=1&ignore_no_stock=1', $this->boughto_api_url, $brand['name']);
+                            $nhb_response = wp_remote_get($nhb_url, $headers);
+                            sleep(1);
+                            if(is_array($nhb_response) && wp_remote_retrieve_response_code($nhb_response)===200){
+                                $nhb_brand_data = json_decode(wp_remote_retrieve_body($nhb_response), true);
+                                $nhb_pages = $nhb_brand_data['pagination']['total_pages'];
+                                $nhb_products = $nhb_brand_data['results']; // First page
+                                if($nhb_pages > 1){
+                                    for($i=2;$i<=$nhb_pages;$i++){
+                                        $nhb_url = sprintf('%s/search/wheels?brand=%s&page=%s&ignore_no_price=1&ignore_no_stock=1', $this->boughto_api_url, $brand['name'], $i);
+                                        $nhb_response = wp_remote_get($nhb_url, $headers);
+                                        sleep(1);
+                                        if(is_array($nhb_response)){
+                                            $nhb_brand_data = json_decode(wp_remote_retrieve_body($nhb_response), true);
+                                            $nhb_products = array_merge($nhb_products, $nhb_brand_data['results']);
+                                        }
+                                    }
+                                }
+                            }
+
+                            $in_stock_products = array_column($products, 'product_code');
+                            $all_brand_products = array_column($nhb_products, 'product_code');
+
+                            $this->no_stock_items = array_merge(array_diff($all_brand_products, $in_stock_products), $this->no_stock_items);
+                        }
+
+
 
                         $brand_products[$brand_name] = $products;
 
@@ -137,6 +176,11 @@ class Fbf_Importer_Boughto_Ow
                         $report['errors'] = $response->get_error_message();
                         break;
                     }
+                }
+
+                if(!empty($this->no_stock_items)){
+                    // Save no stock items to a transient
+                    set_transient('fbf-importer-boughto-nostock-items', $this->no_stock_items, DAY_IN_SECONDS);
                 }
             }else{
                 $report['errors'][] = 'Boughto returned ERROR when getting Brands';

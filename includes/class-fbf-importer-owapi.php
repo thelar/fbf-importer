@@ -387,6 +387,31 @@ class Fbf_Importer_Owapi
             $ow_skus = array_column($variants_a, 'variantCode');
             $ow_ids = array_column($variants_a, 'variantID');
 
+            // Addition - get the SKU's that are nostock items on Boughto and also appear on OW
+            $potential_exclusions = array_intersect(get_transient('fbf-importer-boughto-nostock-items'), $ow_skus);
+            // then go through the $potential_exclusions checking the free stock
+            $potential_exclusions_with_free_stock = [];
+            $i_e = 0;
+            foreach ($potential_exclusions as $e){
+                update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Starting OW comparison - checking potential exclusions %s of %s', $i_e, count($potential_exclusions))]);
+                $e_pos = array_search($e, array_column($variants_a, 'variantCode'));
+                $e_vid = $variants_a[$e_pos]->variantID;
+                $e_fs = $this->ow_curl(sprintf('stock/%s/free-stock', $e_vid), 'GET', 200);
+                if($e_fs['status']!=='error'){
+                    // Add to array
+                    if((int)json_decode($e_fs['response'])->freeStockQty > 0){
+                        // There is stock
+                        $e_a = [
+                            'variantID' => $variants_a[$e_pos]->variantID,
+                            'variantCode' => $variants_a[$e_pos]->variantCode,
+                            'freeStock' => (int)json_decode($e_fs['response'])->freeStockQty,
+                        ];
+                        $potential_exclusions_with_free_stock[] = $e_a;
+                    }
+                }
+                $i_e++;
+            }
+
             // 1. Get the BD ow_ids where NOT discontinued
             $sql = $wpdb->prepare("SELECT * 
             FROM {$data_table}
