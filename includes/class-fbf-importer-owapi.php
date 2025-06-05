@@ -4,6 +4,8 @@ class Fbf_Importer_Owapi
 {
     const AUTH_URI = 'https://4x4tyres.orderwisecloud.com/owapi/';
     private $token;
+    private $boughto_api_url = 'https://boughtofeed.co.uk/api';
+    private $bearer_token = 'a5785ee35b10c0a179a40ed5567f367235cd28ffb115460b3821bdbcec677d9b';
 
     /**
      * The ID of this plugin.
@@ -410,6 +412,29 @@ class Fbf_Importer_Owapi
                     }
                 }
                 $i_e++;
+            }
+            if(!empty($potential_exclusions_with_free_stock)){
+                $boughto_headers = [
+                    'headers' => [
+                        "Authorization" => "Bearer " . $this->bearer_token
+                    ],
+                    'timeout' => 20
+                ];
+                // Return discontinued status to false and re-populate data
+                foreach($potential_exclusions_with_free_stock as $pe){
+                    $pe_url = sprintf('%s/wheels/product_code/%s', $this->boughto_api_url, $pe['variantCode'] );
+                    $response = wp_remote_get($pe_url, $boughto_headers);
+                    sleep(1);
+                    if(is_array($response) && wp_remote_retrieve_response_code($response)===200){
+                        $product = json_decode(wp_remote_retrieve_body($response), true);
+                        $u = $wpdb->update($data_table, [
+                            'discontinued' => false,
+                            'data' => serialize($product['wheel'])
+                        ], [
+                            'primary_id' => $pe['variantCode']
+                        ]);
+                    }
+                }
             }
 
             // 1. Get the BD ow_ids where NOT discontinued
