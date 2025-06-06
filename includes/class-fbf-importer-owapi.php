@@ -928,7 +928,11 @@ class Fbf_Importer_Owapi
         }
 
         if(!empty($data['range']['color'])){
-            $color = ucwords(strtolower($data['range']['color']));
+            if(is_array($data['range']['color'])){
+                $color = ucwords(strtolower($data['range']['color']['name']));
+            }else{
+                $color = ucwords(strtolower($data['range']['color']));
+            }
         }else if(!empty($data['range']['finish'])){
             $color = ucwords(strtolower($data['range']['finish']));
         }
