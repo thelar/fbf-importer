@@ -1866,7 +1866,7 @@ class Fbf_Importer_File_Parser {
             if(isset($stock_item['Image name'])) {
                 if ($stock_item['Image name']) {
 
-                    if(!count(array_intersect(explode(' ', strtolower($stock_item['Image name'])), ['https://assets.micheldever.co.uk', 'https://cdn.boughtofeed.co.uk']))){
+                    if(!str_contains($stock_item['Image name'], 'https://cdn.boughtofeed.co.uk') && !str_contains($stock_item['Image name'], 'https://assets.micheldever.co.uk')){
                         include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
                         $image_handler = new Fbf_Importer_Product_Image(999999, (string)$stock_item['Image name']);
                         $image_exists = $image_handler->source_image_exists();
