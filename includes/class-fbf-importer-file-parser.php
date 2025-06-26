@@ -1865,13 +1865,17 @@ class Fbf_Importer_File_Parser {
         foreach($list as $stock_item){
             if(isset($stock_item['Image name'])) {
                 if ($stock_item['Image name']) {
-                    include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
-                    $image_handler = new Fbf_Importer_Product_Image(999999, (string)$stock_item['Image name']);
-                    $image_exists = $image_handler->source_image_exists();
-                    if (!$image_exists) {
-                        if (!in_array($stock_item['Image name'], $missing_images))
-                            $missing_images[] = $stock_item['Image name'];
+
+                    if(!count(array_intersect(explode(' ', strtolower($stock_item['Image name'])), ['https://assets.micheldever.co.uk', 'https://cdn.boughtofeed.co.uk']))){
+                        include_once WP_PLUGIN_DIR . '/' . $this->plugin_name . '/includes/class-fbf-importer-product-image.php';
+                        $image_handler = new Fbf_Importer_Product_Image(999999, (string)$stock_item['Image name']);
+                        $image_exists = $image_handler->source_image_exists();
+                        if (!$image_exists) {
+                            if (!in_array($stock_item['Image name'], $missing_images))
+                                $missing_images[] = $stock_item['Image name'];
+                        }
                     }
+
                 }
             }
         }
