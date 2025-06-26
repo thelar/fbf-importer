@@ -1845,8 +1845,11 @@ class Fbf_Importer_File_Parser {
         return $ret;
     }
 
-    public function image_report()
+    public function image_report($filepath)
     {
+        if(file_exists($filepath)){
+            $this->filepath = $filepath;
+        }
         $this->stages = [
             'file_exists',
             'file_valid',
