@@ -53,7 +53,8 @@ class Fbf_Importer_Item_Import
                 //It's a Tyre
                 $white_lettering = (string) $item['Tyre White Lettering'] ?? 'False';
                 $runflat = (string) $item['Tyre Runflat'] ?? 'False';
-                array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
+                //array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Width', 'Tyre Size', 'Tyre Profile', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');
+                array_push($mandatory, 'Load/Speed Rating', 'Tyre Type', 'Tyre Width', 'Tyre Size', 'Tyre XL', 'Tyre White Lettering', 'Tyre Runflat');  //Tyre profile commented out because of issue with 7.50r16 size
 
                 // Remove the word Tyres from the brand name if it's there
                 if(isset($item['Brand Name'])){
@@ -277,6 +278,10 @@ class Fbf_Importer_Item_Import
                         } catch (Exception $e) {
                             $status['errors'][] = $e->getMessage();
                         }
+                    }else if($ak==='Tyre Profile'){
+                        // Zero the value
+                        $profile_attr = $this->check_attribute($product, $av, '0', $wc_attrs);
+                        $new_attrs['pa_tyre-profile'] = $profile_attr;
                     }
                 }
 
