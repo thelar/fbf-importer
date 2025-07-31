@@ -31,7 +31,7 @@ class Fbf_Importer_Product_Gallery
         $this->main_image = $this->base_image_filepath . $this->image_name;
 
         // Get all of the images for the gallery
-        $this->gallery_images = glob($this->base_image_filepath . $this->image_base . '_[0-9]*.{jpg,gif,png}', GLOB_BRACE);
+        $this->gallery_images = glob($this->base_image_filepath . $this->image_base . '_[0-9]*.{jpg,gif,png,webp}', GLOB_BRACE);
 
         // Ebay main image
         if(file_exists($this->base_image_filepath . $this->image_base . '_ebay' . '.' . $this->image_ext)){
@@ -39,7 +39,7 @@ class Fbf_Importer_Product_Gallery
         }
 
         // Get all of the images for eBay
-        $this->ebay_gallery_images = glob($this->base_image_filepath . $this->image_base . '_ebay_[0-9]*.{jpg,gif,png}', GLOB_BRACE);
+        $this->ebay_gallery_images = glob($this->base_image_filepath . $this->image_base . '_ebay_[0-9]*.{jpg,gif,png,webp}', GLOB_BRACE);
     }
 
     public function process($action)
