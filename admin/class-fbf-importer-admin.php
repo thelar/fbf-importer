@@ -20,6 +20,7 @@
  * @subpackage Fbf_Importer/admin
  * @author     Kevin Price-Ward <kevin.price-ward@chapteragency.com>
  */
+#[\AllowDynamicProperties]
 class Fbf_Importer_Admin {
 
     /**
