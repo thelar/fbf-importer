@@ -37,8 +37,7 @@ class Fbf_Importer_Admin_Ajax
         global $wpdb;
         $log_table = $wpdb->prefix . 'fbf_importer_pimberly_log_items';
         $log = $wpdb->prefix . 'fbf_importer_pimberly_logs';
-        $max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id
-            FROM {$log_table}");
+        $max_sql = "SELECT MAX(log_id) AS max_log_id FROM {$log_table}";
         $log_id = $wpdb->get_col($max_sql)[0]+1?:1;
         $i = $wpdb->insert($log, [
             'started' => wp_date('Y-m-d H:i:s'),
@@ -68,8 +67,7 @@ class Fbf_Importer_Admin_Ajax
         global $wpdb;
         $logs_table = $wpdb->prefix . 'fbf_importer_boughto_logs';
         $log_items_table = $wpdb->prefix . 'fbf_importer_boughto_log_items';
-        $max_sql = $wpdb->prepare("SELECT MAX(log_id) AS max_log_id
-            FROM {$log_items_table}");
+        $max_sql = "SELECT MAX(log_id) AS max_log_id FROM {$log_items_table}";
         $log_id = $wpdb->get_col($max_sql)[0]+1?:1;
         $i = $wpdb->insert($logs_table, [
             'started' => wp_date('Y-m-d H:i:s'),

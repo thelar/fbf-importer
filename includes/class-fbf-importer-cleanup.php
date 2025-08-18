@@ -8,8 +8,8 @@ class Fbf_Importer_Cleanup
     private $stages = [
         'delete_logs',
         'hide_products',
-        'hide_products_without_images',
-        'write_rsp_xml',
+	    'hide_products_without_images',
+	    'write_rsp_xml',
     ];
     private $stage;
     private $products_to_hide;

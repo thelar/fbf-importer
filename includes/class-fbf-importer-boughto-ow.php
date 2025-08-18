@@ -34,8 +34,7 @@ class Fbf_Importer_Boughto_Ow
         }
 
         // Get all of the existing primary_ids from the table
-        $q = $wpdb->prepare("SELECT primary_id
-            FROM {$data_table}");
+        $q = "SELECT primary_id FROM {$data_table}";
         $pd_pids = $wpdb->get_col($q);
 
         // Start by reading all the Brands on Boughto
@@ -65,8 +64,16 @@ class Fbf_Importer_Boughto_Ow
                 // Loop through the returned brands
                 foreach($brands as $brand){
                     $brand_name = $brand['name'];
-                    $report['brand_count']++;
-                    $report['brands_names'][] = $brand_name;
+					if(isset($report['brand_count'])){
+						$report['brand_count']++;
+					}else{
+						$report['brand_count'] = 1;
+					}
+					if( isset( $report['brands_names'] ) ){
+						$report['brands_names'][] = $brand_name;
+					}else{
+						$report['brands_names'] = [$brand_name];
+					}
                     update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Reading ' . $brand_name . ' products from Boughto']);
 
                     $is_house_brand = false;
@@ -83,7 +90,11 @@ class Fbf_Importer_Boughto_Ow
                         $brand_data = json_decode(wp_remote_retrieve_body($response), true);
                         $pages = $brand_data['pagination']['total_pages'];
                         $products = $brand_data['results']; // First page
-                        $report['product_count']+= $brand_data['pagination']['total'];
+	                    if( isset( $report['product_count'] ) ){
+		                    $report['product_count']+= $brand_data['pagination']['total'];
+	                    }else{
+		                    $report['product_count'] = $brand_data['pagination']['total'];
+	                    }
                         if($pages > 1){
                             for($i=2;$i<=$pages;$i++){
                                 $url = sprintf('%s/search/wheels?brand=%s&page=%s%s', $this->boughto_api_url, $brand['name'], $i, $is_house_brand?'&ignore_no_price=1&ignore_no_stock=1':'');
@@ -149,10 +160,18 @@ class Fbf_Importer_Boughto_Ow
                                     'primary_id' => $primary_id
                                 ]);
                                 if($u){
-                                    $report['updates']++;
+									if( isset( $report['updates'] ) ){
+										$report['updates']++;
+									}else{
+										$report['updates'] = 1;
+									}
                                     unset($pd_pids[array_search($primary_id, $pd_pids)]);
                                 }else{
-                                    $report['update_errors']++;
+									if( isset( $report['update_errors'] ) ){
+										$report['update_errors']++;
+									}else{
+										$report['update_errors'] = 1;
+									}
                                 }
                             }else{
                                 // Insert the record
@@ -163,17 +182,29 @@ class Fbf_Importer_Boughto_Ow
                                     'data' => $sd
                                 ]);
                                 if($i){
-                                    $report['inserts']++;
+									if( isset( $report['inserts'] ) ){
+										$report['inserts']++;
+									}else{
+										$report['inserts'] = 1;
+									}
                                 }else{
-                                    $report['insert_errors']++;
+									if( isset( $report['insert_errors'] ) ){
+										$report['insert_errors']++;
+									}else{
+										$report['insert_errors'] = 1;
+									}
                                 }
                             }
                             update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Imported ' . count($this->boughto_items) . ' products from Boughto']);
                         }
                     }else if(wp_remote_retrieve_response_code($response)!==200){
-                        $report['errors'][] = $url . ' - ' . wp_remote_retrieve_response_code($response) . ' '  . wp_remote_retrieve_response_message($response);
+						if( isset( $report['errors'] ) ){
+							$report['errors'][] = $url . ' - ' . wp_remote_retrieve_response_code($response) . ' '  . wp_remote_retrieve_response_message($response);
+						}else{
+							$report['errors'] = [$url . ' - ' . wp_remote_retrieve_response_message($response)];
+						}
                     }else{
-                        $report['errors'] = $response->get_error_message();
+						$report['errors'] = $response->get_error_message();
                         break;
                     }
                 }
@@ -183,12 +214,25 @@ class Fbf_Importer_Boughto_Ow
                     set_transient('fbf-importer-boughto-nostock-items', $this->no_stock_items, DAY_IN_SECONDS);
                 }
             }else{
-                $report['errors'][] = 'Boughto returned ERROR when getting Brands';
+				if( isset( $report['errors'] ) ){
+					$report['errors'][] = 'Boughto returned ERROR when getting Brands';
+				}else{
+					$report['errors'] = ['Boughto returned ERROR when getting Brands'];
+
+				}
             }
         }else if(is_wp_error($response)){
-            $report['errors'][] = $response->get_error_message();
+			if( isset( $report['errors'] ) ){
+				$report['errors'][] = $response->get_error_message();
+			}else{
+				$report['errors'] = [$response->get_error_message()];
+			}
         }else if(wp_remote_retrieve_response_code($response)!==200){
-            $report['errors'][] = $url . ' - ' . wp_remote_retrieve_response_code($response) . ' ' . wp_remote_retrieve_response_message($response);
+			if( isset( $report['errors'] ) ){
+				$report['errors'][] = $url . ' - ' . wp_remote_retrieve_response_code($response) . ' ' . wp_remote_retrieve_response_message($response);
+			}else{
+				$report['errors'] = [$url . ' - ' . wp_remote_retrieve_response_code($response) . ' ' . wp_remote_retrieve_response_message($response)];
+			}
          }
 
 
@@ -204,9 +248,17 @@ class Fbf_Importer_Boughto_Ow
                         'primary_id' => $pid
                     ]);
                     if($u){
-                        $report['discontinued']++;
+						if( isset( $report['discontinued'] ) ){
+							$report['discontinued']++;
+						}else{
+							$report['discontinued'] = 1;
+						}
                     }else{
-                        $report['discontinue_errors']++;
+						if( isset( $report['discontinue_errors'] ) ){
+							$report['discontinue_errors']++;
+						}else{
+							$report['discontinue_errors'] = 1;
+						}
                     }
                 }
             }

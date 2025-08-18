@@ -87,13 +87,25 @@ class Fbf_Importer_Owapi
                             'id' => $in_ow_item['id']
                         ]);
                         if($u){
-                            $report['ow_id_updates']++;
+							if(isset($report['ow_id_updates'])){
+								$report['ow_id_updates']++;
+							}else{
+								$report['ow_id_updates'] = 1;
+							}
                         }else{
-                            $report['ow_id_update_errors']++;
+	                        if(isset($report['ow_id_update_errors'])){
+		                        $report['ow_id_update_errors']++;
+	                        }else{
+								$report['ow_id_update_errors'] = 1;
+	                        }
                         }
                     }else{
                         // Do nothing - the primary_id exists in both places so will need to check update dates later to see if we need to update record in OW
-                        $report['ow_id_update_not_required']++;
+	                    if(isset($report['ow_id_update_not_required'])){
+		                    $report['ow_id_update_not_required']++;
+	                    }else{
+							$report['ow_id_update_not_required'] = 1;
+	                    }
                     }
                 }
 
@@ -108,12 +120,24 @@ class Fbf_Importer_Owapi
                             'id' => $not_in_ow_item['id']
                         ]);
                         if($u){
-                            $report['ow_id_null']++;
+							if(isset($report['ow_id_null'])){
+								$report['ow_id_null']++;
+							}else{
+								$report['ow_id_null'] = 1;
+							}
                         }else{
-                            $report['ow_id_null_errors']++;
+							if(isset($report['ow_id_null_errors'])){
+								$report['ow_id_null_errors']++;
+							}else{
+								$report['ow_id_null_errors'] = 1;
+							}
                         }
                     }else{
-                        $report['ow_id_null_not_required']++;
+						if(isset($report['ow_id_not_required'])){
+							$report['ow_id_null_not_required']++;
+						}else{
+							$report['ow_id_not_required'] = 1;
+						}
                     }
                 }
             }
@@ -175,17 +199,40 @@ class Fbf_Importer_Owapi
                     ], [
                         'id' => $item_to_create['id']
                     ]);
-                    $report['ow_create_created']++;
-                    $report['ow_created_primary_ids'][] = $item_to_create['primary_id'];
+					if( isset( $report['ow_create_created'] ) ){
+						$report['ow_create_created']++;
+					}else{
+						$report['ow_create_created'] = 1;
+					}
+					if( isset( $report['ow_created_primary_ids'] ) ){
+						$report['ow_created_primary_ids'][] = $item_to_create['primary_id'];
+					}else{
+						$report['ow_created_primary_ids'] = [$item_to_create['primary_id']];
+					}
                 }else if($ow_insert['status']==='error'){
                     $errored_count++;
-                    $report['ow_create_errors']++;
-                    $report['ow_create_error_items'][] = [
-                        'primary_id' => $item_to_create['primary_id'],
-                        'errors' => $ow_insert['errors'],
-                        'response' => $ow_insert['response'],
-                        'ean' => unserialize($item_to_create['data'])->EAN,
-                    ];
+					if( isset( $report['ow_create_errors'] ) ){
+						$report['ow_create_errors']++;
+					}else{
+						$report['ow_create_errors'] = 1;
+					}
+					if( isset( $report['ow_create_error_items'] ) ){
+						$report['ow_create_error_items'][] = [
+							'primary_id' => $item_to_create['primary_id'],
+							'errors' => $ow_insert['errors'],
+							'response' => $ow_insert['response'],
+							'ean' => unserialize($item_to_create['data'])->EAN,
+						];
+					}else{
+						$report['ow_create_error_items'] = [
+							[
+								'primary_id' => $item_to_create['primary_id'],
+								'errors' => $ow_insert['errors'],
+								'response' => $ow_insert['response'],
+								'ean' => unserialize($item_to_create['data'])->EAN,
+							]
+						];
+					}
                 }
                 update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => sprintf('Creating new OW records, total: %s, created: %s, errored: %s', count($items_to_create), $created_count, $errored_count)]);
                 $i++;
@@ -248,17 +295,40 @@ class Fbf_Importer_Owapi
             $ow_discontinue = $this->ow_curl('variants/' . $item_to_discontinue['ow_id'], 'PUT', 200, json_encode($payload), ['Content-Type:application/json']);
             if($ow_discontinue['status']==='success'){
                 $discontinued_count++;
-                $report['ow_discontinue_updated']++;
-                $report['ow_discontinue_variant_ids'][] = $item_to_discontinue['ow_id'];
+				if( isset( $report['ow_discontinue_updated'] ) ){
+					$report['ow_discontinue_updated']++;
+				}else{
+					$report['ow_discontinue_updated'] = 1;
+				}
+				if( isset( $report['ow_discontinue_variant_ids'] ) ){
+					$report['ow_discontinue_variant_ids'][] = $item_to_discontinue['ow_id'];
+				}else{
+					$report['ow_discontinue_variant_ids'] = [$item_to_discontinue['ow_id']];
+				}
             }else if($ow_discontinue['status']==='error'){
                 $errored_count++;
-                $report['ow_discontinue_errors']++;
-                $report['ow_discontinue_error_items'][] = [
-                    'primary_id' => $item_to_discontinue['primary_id'],
-                    'ow_id' => $item_to_discontinue['ow_id'],
-                    'errors' => $ow_discontinue['errors'],
-                    'response' => $ow_discontinue['response'],
-                ];
+	            if( isset( $report['ow_discontinue_errors'] ) ){
+		            $report['ow_discontinue_errors']++;
+	            }else{
+		            $report['ow_discontinue_errors'] = 1;
+	            }
+				if( isset( $report['ow_discontinue_error_items'] ) ){
+					$report['ow_discontinue_error_items'][] = [
+						'primary_id' => $item_to_discontinue['primary_id'],
+						'ow_id' => $item_to_discontinue['ow_id'],
+						'errors' => $ow_discontinue['errors'],
+						'response' => $ow_discontinue['response'],
+					];
+				}else{
+					$report['ow_discontinue_error_items'] = [
+						[
+							'primary_id' => $item_to_discontinue['primary_id'],
+							'ow_id' => $item_to_discontinue['ow_id'],
+							'errors' => $ow_discontinue['errors'],
+							'response' => $ow_discontinue['response'],
+						]
+					];
+				}
             }
             update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => sprintf('Discontinuing OW records, total: %s, discontinued: %s, errored: %s', count($items_to_discontinue), $discontinued_count, $errored_count)]);
         }
@@ -330,8 +400,16 @@ class Fbf_Importer_Owapi
 
                 if($ow_update['status']==='success'){
                     $update_count++;
-                    $report['ow_update_updated']++;
-                    $report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
+					if( isset( $report['ow_update_updated'] ) ){
+						$report['ow_update_updated']++;
+					}else{
+						$report['ow_update_updated'] = 1;
+					}
+					if( isset( $report['ow_update_variant_ids'] ) ){
+						$report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
+					}else{
+						$report['ow_update_variant_ids'] = [$item_to_update['ow_id']];
+					}
                     $u = $wpdb->update($table, [
                         'updated' => wp_date('Y-m-d H:i:s')
                     ], [
@@ -339,14 +417,30 @@ class Fbf_Importer_Owapi
                     ]);
                 }else{
                     $errored_count++;
-                    $report['ow_update_errors']++;
-                    $report['ow_update_error_items'][] = [
-                        'primary_id' => $item_to_update['primary_id'],
-                        'ow_id' => $item_to_update['ow_id'],
-                        'errors' => $ow_update['errors'],
-                        'response' => $ow_update['response'],
-                        'ean' => unserialize($item_to_update['data'])->EAN,
-                    ];
+					if( isset( $report['ow_update_errors'] ) ){
+						$report['ow_update_errors']++;
+					}else{
+						$report['ow_update_errors'] = 1;
+					}
+					if( isset( $report['ow_update_error_items'] ) ){
+						$report['ow_update_error_items'][] = [
+							'primary_id' => $item_to_update['primary_id'],
+							'ow_id' => $item_to_update['ow_id'],
+							'errors' => $ow_update['errors'],
+							'response' => $ow_update['response'],
+							'ean' => unserialize($item_to_update['data'])->EAN,
+						];
+					}else{
+						$report['ow_update_error_items'] = [
+							[
+								'primary_id' => $item_to_update['primary_id'],
+								'ow_id' => $item_to_update['ow_id'],
+								'errors' => $ow_update['errors'],
+								'response' => $ow_update['response'],
+								'ean' => unserialize($item_to_update['data'])->EAN,
+							]
+						];
+					}
                 }
                 update_option($this->plugin_name . '-mts-ow', ['status' => 'RUNNING', 'stage' => sprintf('Updating OW records, total: %s, updated: %s, errored: %s', count($updates_required), $update_count, $errored_count)]);
             }
@@ -471,13 +565,25 @@ class Fbf_Importer_Owapi
                         'id' => $in_ow_item['id']
                     ]);
                     if($u){
-                        $report['ow_id_updates']++;
+						if( isset( $report['ow_id_updates'] ) ){
+							$report['ow_id_updates']++;
+						}else{
+							$report['ow_id_updates'] = 1;
+						}
                     }else{
-                        $report['ow_id_update_errors']++;
+	                    if( isset( $report['ow_id_update_errors'] ) ) {
+		                    $report['ow_id_update_errors'] ++;
+	                    }else{
+		                    $report['ow_id_update_errors'] = 1;
+	                    }
                     }
                 }else{
                     // Do nothing - the primary_id exists in both places so will need to check update dates later to see if we need to update record in OW
-                    $report['ow_id_update_not_required']++;
+	                if( isset( $report['ow_id_update_not_required'] ) ) {
+		                $report['ow_id_update_not_required']++;
+	                }else{
+						$report['ow_id_update_not_required'] = 1;
+	                }
                 }
             }
 
@@ -492,12 +598,24 @@ class Fbf_Importer_Owapi
                         'id' => $not_in_ow_item['id']
                     ]);
                     if($u){
-                        $report['ow_id_null']++;
+						if( isset( $report['ow_id_null'] ) ) {
+							$report['ow_id_null']++;
+						}else{
+							$report['ow_id_null'] = 1;
+						}
                     }else{
-                        $report['ow_id_null_errors']++;
+	                    if( isset( $report['ow_id_null_errors'] ) ) {
+		                    $report['ow_id_null_errors']++;
+	                    }else{
+		                    $report['ow_id_null_errors'] = 1;
+	                    }
                     }
                 }else{
-                    $report['ow_id_null_not_required']++;
+	                if( isset( $report['ow_id_null_not_required'] ) ) {
+		                $report['ow_id_null_not_required']++;
+	                }else{
+		                $report['ow_id_null_not_required'] = 1;
+	                }
                 }
             }
             // Add the end time to the log entry
@@ -550,17 +668,40 @@ class Fbf_Importer_Owapi
             $ow_discontinue = $this->ow_curl('variants/' . $item_to_discontinue['ow_id'], 'PUT', 200, json_encode($payload), ['Content-Type:application/json']);
             if($ow_discontinue['status']==='success'){
                 $discontinued_count++;
-                $report['ow_discontinue_updated']++;
-                $report['ow_discontinue_variant_ids'][] = $item_to_discontinue['ow_id'];
+				if( isset( $report['ow_discontinue_updated'] ) ){
+					$report['ow_discontinue_updated']++;
+				}else{
+					$report['ow_discontinue_updated'] = 1;
+				}
+				if( isset( $report['ow_discontinue_variant_ids'] ) ){
+					$report['ow_discontinue_variant_ids'][] = $item_to_discontinue['ow_id'];
+				}else{
+					$report['ow_discontinue_variant_ids'] = [$item_to_discontinue['ow_id']];
+				}
             }else if($ow_discontinue['status']==='error'){
                 $errored_count++;
-                $report['ow_discontinue_errors']++;
-                $report['ow_discontinue_error_items'][] = [
-                    'primary_id' => $item_to_discontinue['primary_id'],
-                    'ow_id' => $item_to_discontinue['ow_id'],
-                    'errors' => $ow_discontinue['errors'],
-                    'response' => $ow_discontinue['response'],
-                ];
+				if( isset( $report['ow_discontinue_errors'] ) ){
+					$report['ow_discontinue_errors']++;
+				}else{
+					$report['ow_discontinue_errors'] = 1;
+				}
+				if( isset( $report['ow_discontinue_error_items'] ) ){
+					$report['ow_discontinue_error_items'][] = [
+						'primary_id' => $item_to_discontinue['primary_id'],
+						'ow_id' => $item_to_discontinue['ow_id'],
+						'errors' => $ow_discontinue['errors'],
+						'response' => $ow_discontinue['response'],
+					];
+				}else{
+					$report['ow_discontinue_error_items'] = [
+						[
+							'primary_id' => $item_to_discontinue['primary_id'],
+							'ow_id' => $item_to_discontinue['ow_id'],
+							'errors' => $ow_discontinue['errors'],
+							'response' => $ow_discontinue['response'],
+						]
+					];
+				}
             }
             update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Discontinuing OW records, total: %s, discontinued: %s, errored: %s', count($items_to_discontinue), $discontinued_count, $errored_count)]);
         }
@@ -650,8 +791,16 @@ class Fbf_Importer_Owapi
 
                     if($ow_update['status']==='success'){
                         $update_count++;
-                        $report['ow_update_updated']++;
-                        $report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
+						if( isset( $report['ow_update_updated'] ) ){
+							$report['ow_update_updated']++;
+						}else{
+							$report['ow_update_updated'] = 1;
+						}
+						if( isset( $report['ow_update_variant_ids'] ) ){
+							$report['ow_update_variant_ids'][] = $item_to_update['ow_id'];
+						}else{
+							$report['ow_update_variant_ids'] = [$item_to_update['ow_id']];
+						}
                         $u = $wpdb->update($data_table, [
                             'updated' => wp_date('Y-m-d H:i:s')
                         ], [
@@ -659,23 +808,53 @@ class Fbf_Importer_Owapi
                         ]);
                     }else{
                         $errored_count++;
-                        $report['ow_update_errors']++;
-                        $report['ow_update_error_items'][] = [
-                            'primary_id' => $item_to_update['primary_id'],
-                            'ow_id' => $item_to_update['ow_id'],
-                            'errors' => $ow_update['errors'],
-                            'response' => $ow_update['response']
-                        ];
+						if( isset( $report['ow_update_errors'] ) ){
+							$report['ow_update_errors']++;
+						}else{
+							$report['ow_update_errors'] = 1;
+
+						}
+						if( isset( $report['ow_update_error_items'] ) ){
+							$report['ow_update_error_items'][] = [
+								'primary_id' => $item_to_update['primary_id'],
+								'ow_id' => $item_to_update['ow_id'],
+								'errors' => $ow_update['errors'],
+								'response' => $ow_update['response']
+							];
+						}else{
+							$report['ow_update_error_items'] = [
+								[
+									'primary_id' => $item_to_update['primary_id'],
+									'ow_id' => $item_to_update['ow_id'],
+									'errors' => $ow_update['errors'],
+									'response' => $ow_update['response']
+								]
+							];
+						}
                     }
                     update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Updating OW records, total: %s, updated: %s, errored: %s', count($updates_required), $update_count, $errored_count)]);
                 }else{
                     $errored_count++;
-                    $report['ow_update_get_variant_errors']++;
-                    $report['ow_update_get_variant_error_items'][] = [
-                        'primary_id' => $item_to_update['primary_id'],
-                        'ow_id' => $item_to_update['ow_id'],
-                        'errors' => 'Variant Sales ID is null',
-                    ];
+					if( isset( $report['ow_update_get_variant_errors'] ) ){
+						$report['ow_update_get_variant_errors']++;
+					}else{
+						$report['ow_update_get_variant_errors'] = 1;
+					}
+					if( isset( $report['ow_update_get_variant_error_items'] ) ){
+						$report['ow_update_get_variant_error_items'][] = [
+							'primary_id' => $item_to_update['primary_id'],
+							'ow_id' => $item_to_update['ow_id'],
+							'errors' => 'Variant Sales ID is null',
+						];
+					}else{
+						$report['ow_update_get_variant_error_items'] = [
+							[
+								'primary_id' => $item_to_update['primary_id'],
+								'ow_id' => $item_to_update['ow_id'],
+								'errors' => 'Variant Sales ID is null',
+							]
+						];
+					}
                 }
             }
         }
@@ -746,17 +925,40 @@ class Fbf_Importer_Owapi
                     ], [
                         'id' => $item_to_create['id']
                     ]);
-                    $report['ow_create_created']++;
-                    $report['ow_created_primary_ids'][] = $item_to_create['primary_id'];
+					if( isset( $report['ow_create_created'] ) ){
+						$report['ow_create_created']++;
+					}else{
+						$report['ow_create_created'] = 1;
+					}
+					if( isset( $report['ow_created_primary_ids'] ) ){
+						$report['ow_created_primary_ids'][] = $item_to_create['primary_id'];
+					}else{
+						$report['ow_created_primary_ids'] = [$item_to_create['primary_id']];
+					}
                 }else if($ow_insert['status']==='error'){
                     $errored_count++;
-                    $report['ow_create_errors']++;
-                    $report['ow_create_error_items'][] = [
-                        'primary_id' => $item_to_create['primary_id'],
-                        'errors' => $ow_insert['errors'],
-                        'response' => $ow_insert['response'],
-                        'ean' => unserialize($item_to_create['data'])->EAN,
-                    ];
+	                if( isset( $report['ow_create_errors'] ) ){
+						$report['ow_create_errors']++;
+					}else{
+						$report['ow_create_errors'] = 1;
+	                }
+					if( isset( $report['ow_create_error_items'] ) ){
+						$report['ow_create_error_items'][] = [
+							'primary_id' => $item_to_create['primary_id'],
+							'errors' => $ow_insert['errors'],
+							'response' => $ow_insert['response'],
+							'ean' => unserialize($item_to_create['data'])->EAN,
+						];
+					}else{
+						$report['ow_create_error_items'] = [
+							[
+								'primary_id' => $item_to_create['primary_id'],
+								'errors' => $ow_insert['errors'],
+								'response' => $ow_insert['response'],
+								'ean' => unserialize($item_to_create['data'])->EAN,
+							]
+						];
+					}
                 }
                 update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => sprintf('Creating new OW records, total: %s, created: %s, errored: %s', count($items_to_create), $created_count, $errored_count)]);
                 $i++;

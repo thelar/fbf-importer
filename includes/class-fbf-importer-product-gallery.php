@@ -7,6 +7,7 @@ class Fbf_Importer_Product_Gallery
     private $ebay_image_name;
     private $ebay_gallery_images;
     private $image_base;
+	private $image_ext;
     private $plugin_name;
     private $base_image_filepath;
     private static $source_image_dir = 'images';

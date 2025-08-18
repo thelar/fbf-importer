@@ -36,18 +36,17 @@ class Fbf_Importer_Pimberly_Ow
         }
 
         // Get all of the existing primary_ids from the table
-        $q = $wpdb->prepare("SELECT primary_id
-            FROM {$table}");
+        $q = "SELECT primary_id FROM {$table}";
         $pd_pids = $wpdb->get_col($q);
 
         do {
             $data = self::pimberly_curl($next);
             $pimberly_data = json_decode($data['response']);
-            $next = $pimberly_data->maxId;
+            $next = $pimberly_data->maxId ?? null;
             $response_code = $data['response_code'];
 
             if($data['status']==='success'){
-                if(is_array($pimberly_data->data)){
+                if(isset($pimberly_data->data)&&is_array($pimberly_data->data)){
                     foreach($pimberly_data->data as $product){
                         /*if(isset($_GET['collection'])){
                             $collection = $_GET['collection'];
@@ -72,10 +71,18 @@ class Fbf_Importer_Pimberly_Ow
                                 'primary_id' => $primary_id
                             ]);
                             if($u){
-                                $report['updates']++;
+								if(isset($report['updates'])){
+									$report['updates']++;
+								}else{
+									$report['updates'] = 1;
+								}
                                 unset($pd_pids[array_search($primary_id, $pd_pids)]);
                             }else{
-                                $report['update_errors']++;
+								if($report['update_errors']){
+									$report['update_errors']++;
+								}else{
+									$report['update_errors'] = 1;
+								}
                             }
                         }else{
                             // Insert the record
@@ -86,9 +93,17 @@ class Fbf_Importer_Pimberly_Ow
                                 'data' => $sd
                             ]);
                             if($i){
-                                $report['inserts']++;
+								if($report['inserts']){
+									$report['inserts']++;
+								}else{
+									$report['inserts'] = 1;
+								}
                             }else{
-                                $report['insert_errors']++;
+								if($report['insert_errors']){
+									$report['insert_errors']++;
+								}else{
+									$report['insert_errors'] = 1;
+								}
                             }
                         }
 
@@ -114,9 +129,17 @@ class Fbf_Importer_Pimberly_Ow
                         'primary_id' => $pid
                     ]);
                     if($u){
-                        $report['discontinued']++;
+						if(isset($report['discontinued'])){
+							$report['discontinued']++;
+						}else{
+							$report['discontinued'] = 1;
+						}
                     }else{
-                        $report['discontinue_errors']++;
+						if(isset($report['discontinue_errors'])){
+							$report['discontinue_errors']++;
+						}else{
+							$report['discontinue_errors'] = 1;
+						}
                     }
                 }
             }

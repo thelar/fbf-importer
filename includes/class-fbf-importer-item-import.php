@@ -428,20 +428,24 @@ class Fbf_Importer_Item_Import
                     }
                 }
 
+				// Get Shipping classes
+	            foreach(WC()->shipping()->get_shipping_classes() as $class){
+					if($class->name == 'Tyre'){
+						$tyre_shipping_class_id = $class->term_id;
+					}else if($class->name == 'Spacer'){
+						$spacer_shipping_class_id = $class->term_id;
+					}
+	            }
 
                 // Add tyre shipping class to tyres
-                if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('tyre')){
-                    if ($item['Wheel Tyre Accessory'] == 'Tyre'){
-                        $product->set_shipping_class_id($shipping_class_id);
-                    }
+                if ($item['Wheel Tyre Accessory'] == 'Tyre'){
+                    $product->set_shipping_class_id($tyre_shipping_class_id);
                 }
 
                 // Add spacer shipping class to spacers
-                if($shipping_class_id = WC_Product_Data_Store_CPT::get_shipping_class_id_by_slug('spacer')) {
-                    $match = preg_match('/^TTSPACE.*$/i', $sku); //If the SKU begins with TTSPACE
-                    if ($match === 1) {
-                        $product->set_shipping_class_id($shipping_class_id);
-                    }
+                $match = preg_match('/^TTSPACE.*$/i', $sku); //If the SKU begins with TTSPACE
+                if ($match === 1) {
+                    $product->set_shipping_class_id($spacer_shipping_class_id);
                 }
 
                 /*if($cat=='Alloy Wheel'||$cat=='Steel Wheel'){ // For now just turn backordering on for wheels
@@ -519,7 +523,7 @@ class Fbf_Importer_Item_Import
                                 if (isset($image_gallery_result['errors'])) {
                                     $status['errors'] = $image_gallery_result['errors'];
                                 } else {
-                                    $status['gallery_info'] = $image_gallery_result['gallery_info'];
+                                    $status['gallery_info'] = $image_gallery_result['gallery_info'] ?? null;
                                     $s = [];
                                     if(!empty($image_gallery_result['gallery_image_info'])){
                                         foreach($image_gallery_result['gallery_image_info'] as $gal_item_info){
@@ -898,6 +902,7 @@ class Fbf_Importer_Item_Import
     private function get_back_in_stock_date(WC_Product $product, $item)
     {
         $today = new DateTime();
+		$earliest = null;
         if(array_key_exists('PurchaseOrders', $item)){
             foreach($item['PurchaseOrders'] as $purchaseOrder){
                 $po_free_stock = (string)$purchaseOrder['PO Free Stock'];

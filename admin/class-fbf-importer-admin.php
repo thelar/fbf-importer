@@ -402,7 +402,6 @@ class Fbf_Importer_Admin {
             echo '</thead>';
 
             for($i=0;$i<count($logs);$i++){
-                $file = unserialize($logs[$i]['log'])['processingxml']['file'];
                 printf('<tr class="%s">', $i%2?"alternate":"");
                 printf('<td>%s</td>', $logs[$i]['started']);
                 printf('<td>%s</td>', $logs[$i]['ended']);
@@ -439,7 +438,6 @@ class Fbf_Importer_Admin {
             echo '</thead>';
 
             for($i=0;$i<count($logs);$i++){
-                $file = unserialize($logs[$i]['log'])['processingxml']['file'];
                 printf('<tr class="%s">', $i%2?"alternate":"");
                 printf('<td>%s</td>', $logs[$i]['started']);
                 printf('<td>%s</td>', $logs[$i]['ended']);

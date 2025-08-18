@@ -16,6 +16,12 @@ class Fbf_Importer_Dom_Validator
      * @var int
      */
     public $feedErrors = 0;
+	/**
+	 * Handler info
+	 *
+	 * @var DOMDocument
+	 */
+	private $handler;
     /**
      * Formatted libxml Error details
      *
