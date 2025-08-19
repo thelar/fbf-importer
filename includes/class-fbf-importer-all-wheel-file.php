@@ -40,14 +40,16 @@ class Fbf_Importer_All_Wheel_File
             $labels = $values[0];
             $data = [];
             for($i=1;$i<=count($values);$i++){
-                $row = $values[$i];
-                $row_data = [];
-                if(is_array($row)){
-                    foreach($row as $dk => $dv){
-                        $row_data[$labels[$dk]] = $dv;
-                    }
-                }
-                $data[] = $row_data;
+				if(isset($values[$i])){
+					$row = $values[$i];
+					$row_data = [];
+					if(is_array($row)){
+						foreach($row as $dk => $dv){
+							$row_data[$labels[$dk]] = $dv;
+						}
+					}
+					$data[] = $row_data;
+				}
             }
             return $data;
         }

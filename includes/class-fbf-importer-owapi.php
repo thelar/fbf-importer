@@ -769,17 +769,19 @@ class Fbf_Importer_Owapi
                     $variant = $this->ow_curl('variants/' . $item_to_update['ow_id'] . '?include_sales_info=true', 'GET', 200);
                     if($variant['status']==='success'){
                         $variant_a = json_decode($variant['response']);
-                        $variant_sales_id = $variant_a->variantSalesInfo[0]->Id;
+						if(isset($variant_a->variantSalesInfo[0])){
+							$variant_sales_id = $variant_a->variantSalesInfo[0]->Id;
 
-                        $u = $wpdb->update(
-                            $data_table,
-                            [
-                                'variant_sales_info_id' => $variant_sales_id
-                            ],
-                            [
-                                'id' => $item_to_update['id']
-                            ]
-                        );
+							$u = $wpdb->update(
+								$data_table,
+								[
+									'variant_sales_info_id' => $variant_sales_id
+								],
+								[
+									'id' => $item_to_update['id']
+								]
+							);
+						}
                     }
                 }else{
                     $variant_sales_id = $item_to_update['variant_sales_info_id'];
@@ -947,7 +949,7 @@ class Fbf_Importer_Owapi
 							'primary_id' => $item_to_create['primary_id'],
 							'errors' => $ow_insert['errors'],
 							'response' => $ow_insert['response'],
-							'ean' => unserialize($item_to_create['data'])->EAN,
+							'ean' => unserialize($item_to_create['data'])['EAN']??'',
 						];
 					}else{
 						$report['ow_create_error_items'] = [
@@ -955,7 +957,7 @@ class Fbf_Importer_Owapi
 								'primary_id' => $item_to_create['primary_id'],
 								'errors' => $ow_insert['errors'],
 								'response' => $ow_insert['response'],
-								'ean' => unserialize($item_to_create['data'])->EAN,
+								'ean' => unserialize($item_to_create['data'])['EAN']??'',
 							]
 						];
 					}
@@ -1051,8 +1053,9 @@ class Fbf_Importer_Owapi
         // Get the brand and figure out if it's a House Brand - this will dictate whether we are going to include the price in the Payload
         $brand = $data['range']['brand']['name'];
 
-        if($variant_sales_id){
-            $variantSalesInfo = null;
+	    $variantSalesInfo = null;
+
+	    if($variant_sales_id){
             if($brand_term = get_term_by('name', $brand, 'pa_brand-name')){
                 $term_id = $brand_term->term_id;
                 $is_house_brand = get_field('is_house_brand', 'term_' . $term_id);
@@ -1083,19 +1086,24 @@ class Fbf_Importer_Owapi
             $diameter = round($diameter_p[0]) . '"';
         }
 
-        if($pcds = $data['pcds'][0]['pcd']){
-            if(strstr($pcds, 'x')){
-                $pcd_parts = explode('x', $pcds);
-                if(round($pcd_parts[1]) == floatval($pcd_parts[1])){
-                    // Number is whole
-                    $pcd_part_2 = round($pcd_parts[1]);
-                }else{
-                    // Number is decimal
-                    $pcd_part_2 = number_format($pcd_parts[1], 1);
-                }
-                $pcd = $pcd_parts[0] . '/' . $pcd_part_2;
-            }
-        }
+		if(isset($data['pcds'][0]['pcd'])){
+			if($pcds = $data['pcds'][0]['pcd']){
+				if(strstr($pcds, 'x')){
+					$pcd_parts = explode('x', $pcds);
+					if(round($pcd_parts[1]) == floatval($pcd_parts[1])){
+						// Number is whole
+						$pcd_part_2 = round($pcd_parts[1]);
+					}else{
+						// Number is decimal
+						$pcd_part_2 = number_format($pcd_parts[1], 1);
+					}
+					$pcd = $pcd_parts[0] . '/' . $pcd_part_2;
+				}
+			}
+		}else{
+			$pcd = '';
+		}
+
 
         $supplier_image_exists = false;
         $in_all_wheel_file = array_search($data['product_code'], array_column($all_wheel_data, 'product_code'));
@@ -1139,7 +1147,7 @@ class Fbf_Importer_Owapi
             $color = ucwords(strtolower($data['range']['finish']));
         }
 
-        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), $color, $pcd?:'', (int) round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
+        $name = sprintf('%s x %s %s %s %s - %s - %s ET%s%s', $diameter, $width, ucwords(strtolower($data['range']['brand']['name'])), ucwords(strtolower($data['range']['design'])), ucwords(strtolower($data['range']['material'])), $color, $pcd, (int) round($data['offset_et']), !is_null($data['center_bore'])?' CB' . (float) $data['center_bore']:'');
         $description = $name;
         if($data['range']['material']=='alloy'){
             $material = 'Alloy Wheel';
@@ -1178,12 +1186,14 @@ class Fbf_Importer_Owapi
                 "m_5" => $color,
                 "m_6" => $data['load_rating'],
                 "m_7" => (int) round($data['offset_et']),
-                "m_10" => $pcd
             ]
         ];
         if($data['center_bore']){
             $payload['analysis']['n_3'] = $data['center_bore'];
         }
+		if(isset($pcd)){
+			$payload['analysis']['m_10'] = $pcd;
+		}
         if(!$include_code){
             unset($payload['variantInfo']['code']);
         }
