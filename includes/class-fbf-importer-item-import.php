@@ -439,13 +439,13 @@ class Fbf_Importer_Item_Import
 	            }
 
                 // Add tyre shipping class to tyres
-                if ($item['Wheel Tyre Accessory'] == 'Tyre'){
+                if ($item['Wheel Tyre Accessory'] == 'Tyre' && isset($tyre_shipping_class_id)){
                     $product->set_shipping_class_id($tyre_shipping_class_id);
                 }
 
                 // Add spacer shipping class to spacers
                 $match = preg_match('/^TTSPACE.*$/i', $sku); //If the SKU begins with TTSPACE
-                if ($match === 1) {
+                if ($match === 1 && isset($spacer_shipping_class_id)) {
                     $product->set_shipping_class_id($spacer_shipping_class_id);
                 }
 
@@ -1063,11 +1063,16 @@ class Fbf_Importer_Item_Import
                     if($rule['price_match']==='1'){
                         // Price match rule found - try to match SKU against data
                         if(key_exists($sku, $this->price_match_data)){
-                            if($rule['price_match_addition']){
-                                $addition = $rule['price_match_addition'];
-                            }else{
-                                $addition = 0;
-                            }
+							if(isset($rule['price_match_addition'])){
+								if($rule['price_match_addition']){
+									$addition = $rule['price_match_addition'];
+								}else{
+									$addition = 0;
+								}
+							}else{
+								$addition = 0;
+							}
+
                             return [
                                 'price_match' => true,
                                 'price' => ($this->price_match_data[$sku]['price'] + $addition) - ($this->fitting_cost * 1.2),
