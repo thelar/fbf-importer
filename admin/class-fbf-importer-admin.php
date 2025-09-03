@@ -368,13 +368,19 @@ class Fbf_Importer_Admin {
             echo '</thead>';
 
             for($i=0;$i<count($logs);$i++){
-                $file = unserialize($logs[$i]['log'])['processingxml']['file'];
+				if(isset($logs[$i]['log'])){
+					$file = unserialize($logs[$i]['log'])['processingxml']['file']??false;
+				}
                 printf('<tr class="%s">', $i%2?"alternate":"");
                 printf('<td>%s</td>', $logs[$i]['starttime']);
                 printf('<td>%s</td>', $logs[$i]['endtime']);
                 printf('<td>%s</td>', $logs[$i]['success']?'<span style="color:green;font-weight:bold;">Complete</span>':'<span style="color:dimgrey;font-weight:bold;">Running</span>');
                 printf('<td><a href="%s">%s</a></td>', get_admin_url() . 'options-general.php?page=' . $this->plugin_name . '&log_id=' . $logs[$i]['id'], 'View log');
-                printf('<td><form action="%s" method="post"><input type="hidden" name="action" value="%s"/><input type="hidden" name="file" value="%s"/><a href="#" onclick="this.closest(\'form\').submit();return false;">%s</a></form></td>', admin_url('admin-post.php'), 'fbf_importer_download_file', $file, 'Download XML');
+				if($file){
+					printf('<td><form action="%s" method="post"><input type="hidden" name="action" value="%s"/><input type="hidden" name="file" value="%s"/><a href="#" onclick="this.closest(\'form\').submit();return false;">%s</a></form></td>', admin_url('admin-post.php'), 'fbf_importer_download_file', $file, 'Download XML');
+				}else{
+					print('<td>&nbsp;</td>');
+				}
                 printf('</tr>');
             }
 
