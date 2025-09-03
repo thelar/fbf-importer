@@ -14,6 +14,7 @@ class Fbf_Importer_Item_Import
     private $tmp_products_table;
     private $suppliers;
     private $price_report_data = [];
+	private $supplier_stock_errors = [];
 
     public function __construct($plugin_name, $id, $min_stock, $rsp_rules, $price_match_data, $fitting_cost, $flat_fee)
     {
