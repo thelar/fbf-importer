@@ -133,10 +133,10 @@ class Fbf_Importer_Owapi
 							}
                         }
                     }else{
-						if(isset($report['ow_id_not_required'])){
+						if(isset($report['ow_id_null_not_required'])){
 							$report['ow_id_null_not_required']++;
 						}else{
-							$report['ow_id_not_required'] = 1;
+							$report['ow_id_null_not_required'] = 1;
 						}
                     }
                 }
