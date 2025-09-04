@@ -448,7 +448,7 @@ class Fbf_Importer_Owapi
 
         }
 
-        $eans = array_column($report['ow_update_error_items'], 'ean');
+        //$eans = array_column($report['ow_update_error_items'], 'ean');
 
         // Add the end time to the log entry
         $u = $wpdb->update($log_table, [
