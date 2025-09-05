@@ -204,7 +204,7 @@ class Fbf_Importer_Batch_Processor
         global $wpdb;
         $i = 1;
         foreach($this->batch_ids as $id){
-			if($id > 358){
+			if($i >= 358){
 				$q = $wpdb->prepare("SELECT *
                 FROM {$this->tmp_products_table}
                 WHERE id = %s", $id);
