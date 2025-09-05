@@ -204,10 +204,11 @@ class Fbf_Importer_Batch_Processor
         global $wpdb;
         $i = 1;
         foreach($this->batch_ids as $id){
-            $q = $wpdb->prepare("SELECT item
+            $q = $wpdb->prepare("SELECT *
                 FROM {$this->tmp_products_table}
                 WHERE id = %s", $id);
-            if($item = $wpdb->get_col($q)){
+            if($row = $wpdb->get_results($q, ARRAY_A)){
+				$item = $row['item'];
                 $option = get_option($this->plugin_name);
                 $option['num_items'] = count($this->batch_ids);
                 $option['current_item'] = $i;
