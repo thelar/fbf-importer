@@ -517,6 +517,7 @@ class Fbf_Importer_Item_Import
                                     $status['image_info'] = $main_image_result['info'];
                                 }
 
+
                                 $image_gallery_result = $image_gallery->gallery_process($status['action']);
 
                                 /*$image_handler = new Fbf_Importer_Product_Image($product_id, (string)$item['Image name']);
