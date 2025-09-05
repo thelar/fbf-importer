@@ -207,14 +207,14 @@ class Fbf_Importer_Batch_Processor
             $q = $wpdb->prepare("SELECT *
                 FROM {$this->tmp_products_table}
                 WHERE id = %s", $id);
-            if($row = $wpdb->get_results($q, ARRAY_A)){
+            if($row = $wpdb->get_row($q, ARRAY_A)){
 				$item = $row['item'];
                 $option = get_option($this->plugin_name);
                 $option['num_items'] = count($this->batch_ids);
                 $option['current_item'] = $i;
                 update_option($this->plugin_name, $option);
 
-                $item = unserialize($item[0]);
+                $item = unserialize($item);
 
                 // Process the item here
                 if(is_array($item) && !empty($item)){
