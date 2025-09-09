@@ -204,30 +204,28 @@ class Fbf_Importer_Batch_Processor
         global $wpdb;
         $i = 1;
         foreach($this->batch_ids as $id){
-			if($i >= 358){
-				$q = $wpdb->prepare("SELECT *
-                FROM {$this->tmp_products_table}
-                WHERE id = %s", $id);
-				if($row = $wpdb->get_row($q, ARRAY_A)){
-					$item = $row['item'];
-					$option = get_option($this->plugin_name);
-					$option['num_items'] = count($this->batch_ids);
-					$option['current_item'] = $i;
-					update_option($this->plugin_name, $option);
+			$q = $wpdb->prepare("SELECT *
+            FROM {$this->tmp_products_table}
+            WHERE id = %s", $id);
+			if($row = $wpdb->get_row($q, ARRAY_A)){
+				$item = $row['item'];
+				$option = get_option($this->plugin_name);
+				$option['num_items'] = count($this->batch_ids);
+				$option['current_item'] = $i;
+				update_option($this->plugin_name, $option);
 
-					$item = unserialize($item);
+				$item = unserialize($item);
 
-					// Process the item here
-					if(is_array($item) && !empty($item)){
-						require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-item-import.php';
-						$importer = new Fbf_Importer_Item_Import($this->plugin_name, $id, $this->min_stock, $this->rsp_rules, $this->price_match_data, $this->fitting_cost, $this->flat_fee);
-						$import = $importer->import($item);
-					}
+				// Process the item here
+				if(is_array($item) && !empty($item)){
+					require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-item-import.php';
+					$importer = new Fbf_Importer_Item_Import($this->plugin_name, $id, $this->min_stock, $this->rsp_rules, $this->price_match_data, $this->fitting_cost, $this->flat_fee);
+					$import = $importer->import($item);
 				}
 			}
+		}
 
-            $i++;
-        }
+        $i++;
 
         // After processing all the items set the status back to READYTOPROCESS incrementing the batch number by 1
         update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => $this->batch + 1, 'log_id' => $this->log_id]);
