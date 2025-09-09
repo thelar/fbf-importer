@@ -223,11 +223,12 @@ class Fbf_Importer_Batch_Processor
 					$import = $importer->import($item);
 				}
 			}
-		}
 
-        $i++;
+	        $i++;
+        }
 
-        // After processing all the items set the status back to READYTOPROCESS incrementing the batch number by 1
+
+	    // After processing all the items set the status back to READYTOPROCESS incrementing the batch number by 1
         update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => $this->batch + 1, 'log_id' => $this->log_id]);
     }
 }
