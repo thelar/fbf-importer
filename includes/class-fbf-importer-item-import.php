@@ -79,6 +79,12 @@ class Fbf_Importer_Item_Import
 					$tyre_profile = '';
 				}
 
+				if(isset($item['Tyre Type'])){
+					$tyre_type = (string) $item['Tyre Type'];
+				}else{
+					$tyre_type = '';
+				}
+
                 $name = sprintf('%s/%s%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $tyre_profile!='-'?$tyre_profile.'R':'', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
                 $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $tyre_profile!='-'?$tyre_profile.'R':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
 
@@ -386,7 +392,7 @@ class Fbf_Importer_Item_Import
                         // Set backordering based on when the product went out of stock - if it's been out of stock for
                         // more than 3 months, no backordering
                         // Mod 23 Nov 2022 - if Tyre is NOT AT or MT - don't allow backordering
-                        if((string)$item['Tyre Type']=='All Terrain'||(string)$item['Tyre Type']=='Mud Terrain'){
+                        if($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain'){
                             $now = new DateTime('now');
                             $stock_date = new DateTime();
                             $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
@@ -419,7 +425,7 @@ class Fbf_Importer_Item_Import
                         // Here if there is stock
 
                         // Mod 13 Jan 2023 - if it's NOT All Terrain or Mud Terrain - no backordering!
-                        if((string)$item['Tyre Type']=='All Terrain'||(string)$item['Tyre Type']=='Mud Terrain') {
+                        if($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain') {
                             $product->update_meta_data('_went_out_of_stock_on', '');
                             $product->set_backorders('notify');
 
