@@ -73,8 +73,14 @@ class Fbf_Importer_Item_Import
                     $model_title = '';
                 }
 
-                $name = sprintf('%s/%s%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'R':'', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
-                $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $item['Tyre Profile']!='-'?$item['Tyre Profile'].'R':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
+				if(isset($item['Tyre Profile'])){
+					$tyre_profile = (string) $item['Tyre Profile'];
+				}else{
+					$tyre_profile = '';
+				}
+
+                $name = sprintf('%s/%s%s %s %s %s %s %s %s Tyre', $item['Tyre Width'] ?? '', $tyre_profile!='-'?$tyre_profile.'R':'', $item['Tyre Size'] ?? '', $brand_title, $model_title, $item['Tyre Vehicle Specific'] ?? '',  isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
+                $name_gpf = sprintf('%s/%s%s %s %s %s %s %s %s', $item['Tyre Width'] ?? '', $tyre_profile!='-'?$tyre_profile.'R':'', $item['Tyre Size'] ?? '', (string) $item['Brand Name'] , $model_title, $item['Tyre Vehicle Specific'] ?? '', isset($item['Tyre Type'])&&(string)$item['Tyre Type']!=='Summer'&&(string)$item['Tyre Type']!=='All Year' ? $item['Tyre Type'] : '', $white_lettering == 'True' ? 'White Letter' : '', $item['Load/Speed Rating'] ?? '');
 
                 if(in_array((string)$item['Tyre Type'], ['All Terrain', 'Mud Terrain', 'All Season', 'Winter']) && !empty($model_title)){
                     $name_display = sprintf('%s %s %s %s %s', $brand_title, $model_title, (string)$item['Tyre Type'], $white_lettering == 'True' ? 'White Letter' : '', $runflat == 'True' ? 'Runflat' : '');
@@ -261,7 +267,7 @@ class Fbf_Importer_Item_Import
 
                             //If it's a tyre and has a key of 'Tyre Size' then we need to add a further attribute for size label which is a combination of {tyre_width}/{tyre_profile}/{tyre_size}
                             if($ak==='Tyre Size'){
-                                $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$item['Tyre Profile'], (string)$item['Tyre Size']);
+                                $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$tyre_profile, (string)$item['Tyre Size']);
                                 $new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
                                 $new_attrs['pa_tyre-size-label'] = $new_size_attr;
                             }
