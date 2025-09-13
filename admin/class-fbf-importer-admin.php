@@ -111,8 +111,14 @@ class Fbf_Importer_Admin {
          */
 
         wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin.js', array( 'jquery' ), $this->version, false );
+	    $ajax_params = array(
+		    'ajax_url' => admin_url('admin-ajax.php'),
+		    'ajax_nonce' => wp_create_nonce($this->plugin_name),
+	    );
+	    wp_localize_script($this->plugin_name, 'fbf_importer_admin', $ajax_params);
 
-        if($hook_suffix == $this->mts_ow_id()){
+
+	    if($hook_suffix == $this->mts_ow_id()){
             wp_enqueue_script( $this->plugin_name . '-mts-ow', plugin_dir_url( __FILE__ ) . 'js/fbf-importer-admin-mts-ow.js', array( 'jquery' ), $this->version, false );
             $ajax_params = array(
                 'ajax_url' => admin_url('admin-ajax.php'),
@@ -480,7 +486,11 @@ class Fbf_Importer_Admin {
             $item_text = sprintf('(item %s of %s items)', $option['current_item'], $option['num_items']);
         }
 
-        return sprintf($option['status'] . ' %s %s %s', $batch_text ?? '', $stage_text ?? '', $item_text ?? '');
+		if($option['status']==='PROCESSING'){
+			$restart_link = sprintf('<a id="fbf-importer-reset-batch" href="#" data-log-id="%s" data-batch="%s">Reset batch</a>', $option['log_id'], $option['batch']);
+		}
+
+        return sprintf($option['status'] . ' %s %s %s %s', $batch_text ?? '', $stage_text ?? '', $item_text ?? '', $restart_link ?? '');
     }
 
     private function display_log()

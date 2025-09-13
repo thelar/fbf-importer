@@ -76,6 +76,30 @@
 				},
 			});
 		});
+
+        $('#fbf-importer-reset-batch').bind('click', function(){
+            console.log('reset batch');
+            console.log($(this));
+            let data = {
+                action: 'fbf_importer_reset_batch',
+                log_id: $(this).attr('data-log-id'),
+                batch: $(this).attr('data-batch'),
+                ajax_nonce: fbf_importer_admin.ajax_nonce,
+            };
+            $.ajax({
+                // eslint-disable-next-line no-undef
+                url: fbf_importer_admin.ajax_url,
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status==='success') {
+                        console.log(response);
+                    }
+                },
+            })
+            return false;
+        })
 	});
 
 })( jQuery );

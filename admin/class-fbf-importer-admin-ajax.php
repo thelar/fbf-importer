@@ -91,4 +91,22 @@ class Fbf_Importer_Admin_Ajax
         echo json_encode($status);
         die();
     }
+
+	public function fbf_importer_reset_batch() {
+		$batch = strip_tags($_POST['batch']);
+		$log_id = strip_tags($_POST['log_id']);
+		$option = [
+			'status' => 'READYTOPROCESS',
+			'batch' => $batch,
+			'log_id' => $log_id,
+		];
+		if($update = update_option($this->plugin_name, $option)){
+			$resp['status'] = 'success';
+		}else{
+			$resp['status'] = 'error';
+			$resp['error'] = 'Unable to update ' . $this->plugin_name;
+		}
+		echo json_encode($resp);
+		die();
+	}
 }
