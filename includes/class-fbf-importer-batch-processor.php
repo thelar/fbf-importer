@@ -212,6 +212,8 @@ class Fbf_Importer_Batch_Processor
 				$option = get_option($this->plugin_name);
 				$option['num_items'] = count($this->batch_ids);
 				$option['current_item'] = $i;
+				$option['mypid'] = getmypid();
+				$option['item_start_time'] = time();
 				update_option($this->plugin_name, $option);
 
 				$item = unserialize($item);

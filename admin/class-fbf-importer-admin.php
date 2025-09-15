@@ -986,6 +986,25 @@ class Fbf_Importer_Admin {
         }
     }
 
+	public function check_import()
+	{
+		echo 'checking import' . PHP_EOL;
+		$option = get_option($this->plugin_name, ['status' => 'STOPPED']);
+		if($option['status']==='PROCESSING' && $option['stage']==='import_stock'){
+			// Check here
+			$pid = $option['mypid']??null;
+			$batch = $option['batch']??null;
+			$log_id = $option['log_id']??null;
+			$item = $option['current_item']??null;
+			$item_start_time = $option['item_start_time']??null;
+			$current_time = time();
+			if($pid && $item_start_time){
+				$item_time = ($current_time - $item_start_time) / 60;
+				echo 'Current item: ' . $item . ' has been processing for: ' . $item_time . ' minutes'. PHP_EOL;
+			}
+		}
+	}
+
     /**
      * Perform the free stock update
      *

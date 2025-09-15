@@ -177,6 +177,9 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
             $data = $google_sheet->read('14Itwv5zfBk0-PwUWBME-dx-Z7wuNu2-QoiGGLQdtT7w', 'AW Update', true);
             var_dump($data);
             exit;
+        }else if($wp->request == 'api/v2/check_import'){
+			$this->check_import();
+			exit;
         }
     }
 
