@@ -988,7 +988,7 @@ class Fbf_Importer_Admin {
 
 	public function check_import()
 	{
-		echo 'checking import' . PHP_EOL;
+		echo 'checking import' . '<br/>';
 		$option = get_option($this->plugin_name, ['status' => 'STOPPED']);
 		if($option['status']==='PROCESSING' && $option['stage']==='import_stock'){
 			// Check here
@@ -1000,7 +1000,8 @@ class Fbf_Importer_Admin {
 			$current_time = time();
 			if($pid && $item_start_time){
 				$item_time = ($current_time - $item_start_time) / 60;
-				echo 'Current item: ' . $item . ' has been processing for: ' . $item_time . ' minutes'. PHP_EOL;
+				echo 'Current item: ' . $item . ' has been processing for: ' . $item_time . ' minutes<br/>';
+				echo 'Process id: ' . $pid . '<br/>';
 			}
 		}
 	}
