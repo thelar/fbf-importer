@@ -989,7 +989,7 @@ class Fbf_Importer_Admin {
 	public function check_import()
 	{
 		$html = '<p>Checking import</p>';
-		$timeout_mins = 5;
+		$timeout_mins = 3;
 		$option = get_option($this->plugin_name, ['status' => 'STOPPED']);
 		if($option['status']==='PROCESSING' && $option['stage']==='import_stock'){
 			// Check here
