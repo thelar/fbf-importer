@@ -989,6 +989,7 @@ class Fbf_Importer_Admin {
 	public function check_import()
 	{
 		echo 'checking import' . '<br/>';
+		$timeout_mins = 5;
 		$option = get_option($this->plugin_name, ['status' => 'STOPPED']);
 		if($option['status']==='PROCESSING' && $option['stage']==='import_stock'){
 			// Check here
@@ -1002,6 +1003,36 @@ class Fbf_Importer_Admin {
 				$item_time = ($current_time - $item_start_time) / 60;
 				echo 'Current item: ' . $item . ' has been processing for: ' . $item_time . ' minutes<br/>';
 				echo 'Process id: ' . $pid . '<br/>';
+
+				if($item_time > $timeout_mins){
+					/*echo 'Resetting current batch: ' . $batch . '<br/>';
+					$option['status'] = 'READYTOPROCESS';
+					if(isset($option['max_batch'])){
+						unset($option['max_batch']);
+					}
+					if(isset($option['stage'])){
+						unset($option['stage']);
+					}
+					if(isset($option['num_items'])){
+						unset($option['num_items']);
+					}
+					if(isset($option['current_item'])){
+						unset($option['current_item']);
+					}
+					if(isset($option['mypid'])){
+						unset($option['mypid']);
+					}
+					if(isset($option['item_start_time'])){
+						unset($option['item_start_time']);
+					}
+					update_option($this->plugin_name, $option);*/
+					$output = exec(sprintf(''), $e_output, $result_code);
+					echo '<pre>';
+					print_r($output);
+					print_r($e_output);
+					print_r($result_code);
+					echo '<pre>';
+				}
 			}
 		}
 	}
