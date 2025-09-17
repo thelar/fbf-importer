@@ -1001,11 +1001,13 @@ class Fbf_Importer_Admin {
 			$current_time = time();
 			if($pid && $item_start_time){
 				$item_time = ($current_time - $item_start_time) / 60;
-				echo 'Current item: ' . $item . ' has been processing for: ' . $item_time . ' minutes<br/>';
-				echo 'Process id: ' . $pid . '<br/>';
+				//echo 'Current item: ' . $item . ' has been processing for: ' . $item_time . ' minutes<br/>';
+				//echo 'Process id: ' . $pid . '<br/>';
 
 				if($item_time > $timeout_mins){
-					echo 'Resetting current batch: ' . $batch . '<br/>';
+					$html = sprintf('<p>Current item: %s has been processing for: %s minutes</p>', $item, $item_time);
+					$html.= sprintf('<p>Process id: %s</p>', $pid);
+					$html.= '<p>Resetting option to:</p>';
 					$option['status'] = 'READYTOPROCESS';
 					if(isset($option['max_batch'])){
 						unset($option['max_batch']);
@@ -1025,18 +1027,21 @@ class Fbf_Importer_Admin {
 					if(isset($option['item_start_time'])){
 						unset($option['item_start_time']);
 					}
+					$html.= '<pre>';
+					$html.= print_r($option, true);
+					$html.= '</pre>';
+
 					/*update_option($this->plugin_name, $option);*/
-					$pid = 1871902;
 					$output = exec( sprintf( 'ps -fp %s', $pid ), $e_output, $result_code );
 					if(isset($e_output[1])){
 						//Process exists
+						$html.= '<p>Process exists - performing kill</p>';
 						exec( sprintf( 'kill -9 %s', $pid ) );
+					}else{
+						$html.= '<p>Process does not exist - nothing to kill</p>';
 					}
-					echo '<pre>';
-					print_r($output);
-					print_r($e_output);
-					print_r($result_code);
-					echo '<pre>';
+
+					echo $html;
 				}
 			}
 		}
