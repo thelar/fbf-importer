@@ -1026,11 +1026,11 @@ class Fbf_Importer_Admin {
 						unset($option['item_start_time']);
 					}
 					update_option($this->plugin_name, $option);*/
-					$output = exec( sprintf( 'kill -9 %s', $pid ), $e_output, $result_code );
+					$output = shell_exec( sprintf( 'kill -9 %s', $pid ) );
 					echo '<pre>';
 					print_r($output);
-					print_r($e_output);
-					print_r($result_code);
+					/*print_r($e_output);
+					print_r($result_code);*/
 					echo '<pre>';
 				}
 			}
