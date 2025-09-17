@@ -1005,7 +1005,7 @@ class Fbf_Importer_Admin {
 				echo 'Process id: ' . $pid . '<br/>';
 
 				if($item_time > $timeout_mins){
-					/*echo 'Resetting current batch: ' . $batch . '<br/>';
+					echo 'Resetting current batch: ' . $batch . '<br/>';
 					$option['status'] = 'READYTOPROCESS';
 					if(isset($option['max_batch'])){
 						unset($option['max_batch']);
@@ -1025,9 +1025,13 @@ class Fbf_Importer_Admin {
 					if(isset($option['item_start_time'])){
 						unset($option['item_start_time']);
 					}
-					update_option($this->plugin_name, $option);*/
+					/*update_option($this->plugin_name, $option);*/
 					$pid = 1871902;
 					$output = exec( sprintf( 'ps -fp %s', $pid ), $e_output, $result_code );
+					if(isset($e_output[1])){
+						//Process exists
+						exec( sprintf( 'kill -9 %s', $pid ) );
+					}
 					echo '<pre>';
 					print_r($output);
 					print_r($e_output);
