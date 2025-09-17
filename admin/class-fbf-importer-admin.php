@@ -988,7 +988,7 @@ class Fbf_Importer_Admin {
 
 	public function check_import()
 	{
-		echo 'checking import' . '<br/>';
+		$html = '<p>Checking import</p>';
 		$timeout_mins = 5;
 		$option = get_option($this->plugin_name, ['status' => 'STOPPED']);
 		if($option['status']==='PROCESSING' && $option['stage']==='import_stock'){
@@ -1005,7 +1005,7 @@ class Fbf_Importer_Admin {
 				//echo 'Process id: ' . $pid . '<br/>';
 
 				if($item_time > $timeout_mins){
-					$html = sprintf('<p>Current item: %s has been processing for: %s minutes</p>', $item, $item_time);
+					$html.= sprintf('<p>Current item: %s has been processing for: %s minutes</p>', $item, $item_time);
 					$html.= sprintf('<p>Process id: %s</p>', $pid);
 					$html.= '<p>Resetting option to:</p>';
 					$option['status'] = 'READYTOPROCESS';
@@ -1031,17 +1031,28 @@ class Fbf_Importer_Admin {
 					$html.= print_r($option, true);
 					$html.= '</pre>';
 
-					/*update_option($this->plugin_name, $option);*/
-					$output = exec( sprintf( 'ps -fp %s', $pid ), $e_output, $result_code );
-					if(isset($e_output[1])){
-						//Process exists
-						$html.= '<p>Process exists - performing kill</p>';
-						exec( sprintf( 'kill -9 %s', $pid ) );
-					}else{
-						$html.= '<p>Process does not exist - nothing to kill</p>';
+					$update = update_option($this->plugin_name, $option);
+
+					if($update){
+						$html.= sprintf('<p>Updated option: %s</p>', $update);
+						$output = exec( sprintf( 'ps -fp %s', $pid ), $e_output, $result_code );
+						if(isset($e_output[1])){
+							//Process exists
+							$html.= '<p>Process exists - performing kill</p>';
+							exec( sprintf( 'kill -9 %s', $pid ) );
+						}else{
+							$html.= '<p>Process does not exist - nothing to kill</p>';
+						}
 					}
 
-					echo $html;
+					// Send email
+					$from = 'noreply@4x4tyres.co.uk';
+					$headers = "From: 4x4 Website <" . $from . '>' . PHP_EOL;
+					$headers.= "Reply-To: " . $from . PHP_EOL;
+					$headers.= "MIME-Version: 1.0" . PHP_EOL;
+					$headers.= "Content-Type: text/html; charset=ISO-8859-1" . PHP_EOL;
+					$subject = 'fbf-importer check_import reset triggered';
+					wp_mail('kevin.price-ward@4x4tyres.co.uk', $subject, $html, $headers);
 				}
 			}
 		}
