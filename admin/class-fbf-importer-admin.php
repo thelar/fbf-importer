@@ -1026,8 +1026,8 @@ class Fbf_Importer_Admin {
 						unset($option['item_start_time']);
 					}
 					update_option($this->plugin_name, $option);*/
-					$pid = 1852797;
-					$output = exec( sprintf( 'kill -9 %s', $pid ), $e_output, $result_code );
+					$pid = 1871902;
+					$output = exec( sprintf( 'ps -fp %s', $pid ), $e_output, $result_code );
 					echo '<pre>';
 					print_r($output);
 					print_r($e_output);
