@@ -27,12 +27,34 @@ class Fbf_Importer_Product_Gallery
         }else{
             $this->base_image_filepath = ABSPATH . '../../supplier/' . self::$source_image_dir . '/';
         }
+		$preferred_image_types = [
+			'webp',
+			'png',
+			'jpg',
+			'gif'
+		];
 
         // Main image
         $this->main_image = $this->base_image_filepath . $this->image_name;
 
         // Get all of the images for the gallery
         $this->gallery_images = glob($this->base_image_filepath . $this->image_base . '_[0-9]*.{jpg,gif,png,webp}', GLOB_BRACE);
+		if(!empty($this->gallery_images)){
+			$pref = [];
+			$gallery_info = [];
+			foreach($this->gallery_images as $image){
+				$gallery_info[pathinfo($image)['filename']][] = $image;
+			}
+			foreach($gallery_info as $b => $image_array){
+				foreach($preferred_image_types as $type){
+					if (in_array($this->base_image_filepath . $b . '.' . $type, $this->gallery_images)){
+						$pref[] = $this->base_image_filepath . $b . '.' . $type;
+						break;
+					}
+				}
+			}
+			$this->gallery_images = $pref;
+		}
 
         // Ebay main image
         if(file_exists($this->base_image_filepath . $this->image_base . '_ebay' . '.' . $this->image_ext)){
@@ -41,6 +63,22 @@ class Fbf_Importer_Product_Gallery
 
         // Get all of the images for eBay
         $this->ebay_gallery_images = glob($this->base_image_filepath . $this->image_base . '_ebay_[0-9]*.{jpg,gif,png,webp}', GLOB_BRACE);
+	    if(!empty($this->ebay_gallery_images)){
+		    $pref = [];
+		    $gallery_info = [];
+		    foreach($this->ebay_gallery_images as $image){
+			    $gallery_info[pathinfo($image)['filename']][] = $image;
+		    }
+		    foreach($gallery_info as $b => $image_array){
+			    foreach($preferred_image_types as $type){
+				    if (in_array($this->base_image_filepath . $b . '.' . $type, $this->gallery_images)){
+					    $pref[] = $this->base_image_filepath . $b . '.' . $type;
+					    break;
+				    }
+			    }
+		    }
+		    $this->ebay_gallery_images = $pref;
+	    }
     }
 
     public function process($action)
