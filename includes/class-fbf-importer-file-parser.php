@@ -573,7 +573,8 @@ class Fbf_Importer_File_Parser {
                             'Tuff Torque',
                             'Urban',
                             'VBS',
-                            'Rogue Alloy'
+                            'Rogue Alloy',
+	                        'Kahn'
                         ];
                         if(!in_array((string)$item['Brand Name'], $house_wheel_brands)){
                             if($product->get_stock_quantity()<=0){

@@ -55,11 +55,12 @@ class Fbf_Importer_Boughto_Ow
             if($data['status']==='success'){
                 $brands = $data['brands'];
 
-                /*// TMP filter out just Calibre
-                $calibre = $brands[array_search('Calibre', array_column($brands, 'name'))];
+                // TMP filter out just Calibre
+	            //TODO Uncomment when Calibre is back in stock
+                $calibre = $brands[array_search('Kahn', array_column($brands, 'name'))];
                 $brands = [
                     $calibre
-                ];*/
+                ];
 
                 // Loop through the returned brands
                 foreach($brands as $brand){
