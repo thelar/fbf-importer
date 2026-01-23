@@ -57,10 +57,10 @@ class Fbf_Importer_Boughto_Ow
 
                 // TMP filter out just Calibre
 	            //TODO Uncomment when Calibre is back in stock
-                $calibre = $brands[array_search('Kahn', array_column($brands, 'name'))];
+                /*$calibre = $brands[array_search('Kahn', array_column($brands, 'name'))];
                 $brands = [
                     $calibre
-                ];
+                ];*/
 
                 // Loop through the returned brands
                 foreach($brands as $brand){
