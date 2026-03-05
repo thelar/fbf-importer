@@ -133,43 +133,54 @@ class Fbf_Importer_Item_Import
                     'Fit On Drive' => 'fit-on-drive',
                 ];
             } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
-                //It's a Wheel
-                array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
+	            //It's a Wheel
+	            array_push( $mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD' );
 
-                if(isset($item['Model Name'])){
-                    $model_title = (string) $item['Model Name'];
-                    $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel', ' High X', 'High X'], '', $model_title);
-                }else{
-                    $model_title = '';
-                }
+	            if ( isset( $item['Model Name'] ) ) {
+		            $model_title = (string) $item['Model Name'];
+		            $model_title = str_ireplace( [
+			            ' steel',
+			            'steel',
+			            ' alloy',
+			            'alloy',
+			            ' wheel',
+			            'wheel',
+			            ' High X',
+			            'High X'
+		            ], '', $model_title );
+	            } else {
+		            $model_title = '';
+	            }
 
-                $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
-                $name_display = sprintf('%s %s %s x %s ET%s %s', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
-                $attrs = [
-                    'Brand Name' => 'brand-name',
-                    'Model Name' => 'model-name',
-                    'List on eBay' => [
-                        'slug' => 'list-on-ebay',
-                        'scope' => 'global',
-                        'mapping' => [
-                            '0.0000' => 'False',
-                            '1.0000' => 'True'
-                        ]
-                    ],
-                    'Wheel TUV' => 'wheel-tuv',
-                    'Include in Price Match' => 'include-in-price-match',
-                    'Wheel Size' => 'wheel-size',
-                    'Wheel Width' => 'wheel-width',
-                    'Wheel Colour' => 'wheel-colour',
-                    'Wheel Load Rating' => 'wheel-load-rating',
-                    'Wheel Offset' => 'wheel-offset',
-                    'Wheel PCD' => 'wheel-pcd',
-                    'Centre Bore' => 'centre-bore',
-                    'EAN' => [
-                        'slug' => 'ean',
-                        'scope' => 'local'
-                    ]
-                ];
+	            $name         = sprintf( '%s %s %s %s x %s ET%s %s', isset( $item['Brand Name'] ) ? $item['Brand Name'] : '', $model_title, isset( $item['Wheel Tyre Accessory'] ) ? $item['Wheel Tyre Accessory'] : '', isset( $item['Wheel Size'] ) ? $item['Wheel Size'] : '', isset( $item['Wheel Width'] ) ? $item['Wheel Width'] : '', isset( $item['Wheel Offset'] ) ? $item['Wheel Offset'] : '', isset( $item['Wheel Colour'] ) ? $item['Wheel Colour'] : '' );
+	            $name_display = sprintf( '%s %s %s x %s ET%s %s', $model_title, isset( $item['Wheel Tyre Accessory'] ) ? $item['Wheel Tyre Accessory'] : '', isset( $item['Wheel Size'] ) ? $item['Wheel Size'] : '', isset( $item['Wheel Width'] ) ? $item['Wheel Width'] : '', isset( $item['Wheel Offset'] ) ? $item['Wheel Offset'] : '', isset( $item['Wheel Colour'] ) ? $item['Wheel Colour'] : '' );
+	            $attrs        = [
+		            'Brand Name'             => 'brand-name',
+		            'Model Name'             => 'model-name',
+		            'List on eBay'           => [
+			            'slug'    => 'list-on-ebay',
+			            'scope'   => 'global',
+			            'mapping' => [
+				            '0.0000' => 'False',
+				            '1.0000' => 'True'
+			            ]
+		            ],
+		            'Wheel TUV'              => 'wheel-tuv',
+		            'Include in Price Match' => 'include-in-price-match',
+		            'Wheel Size'             => 'wheel-size',
+		            'Wheel Width'            => 'wheel-width',
+		            'Wheel Colour'           => 'wheel-colour',
+		            'Wheel Load Rating'      => 'wheel-load-rating',
+		            'Wheel Offset'           => 'wheel-offset',
+		            'Wheel PCD'              => 'wheel-pcd',
+		            'Centre Bore'            => 'centre-bore',
+		            'EAN'                    => [
+			            'slug'  => 'ean',
+			            'scope' => 'local'
+		            ]
+	            ];
+            } else if ($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
+				// It's a Trailer Tyre/Wheel
             } else {
                 //It's an Accessory
                 $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
