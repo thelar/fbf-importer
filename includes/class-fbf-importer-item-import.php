@@ -31,7 +31,7 @@ class Fbf_Importer_Item_Import
         $this->suppliers = $this->build_suppliers();
     }
 
-    public function import($item)
+    public function import($item, $ow_variants = [])
     {
         global $wpdb;
         $sku = (string)$item['Product Code'];
@@ -132,6 +132,51 @@ class Fbf_Importer_Item_Import
                     'Mud Snow' => 'mud-snow',
                     'Fit On Drive' => 'fit-on-drive',
                 ];
+            } else if ($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
+	            // It's a Trailer Tyre/Wheel
+	            if(!empty($ow_variants)) {
+		            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+		            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, 1);
+		            $token = $auth->get_valid_token();
+		            $variant_id = $ow_variants[array_search($sku, array_column($ow_variants, 'variantCode'))]->variantID;
+		            $variant = $this->ow_curl($token, 'variants/' . $variant_id, 'GET', 200);
+		            if($variant['status']!=='error') {
+			            $variant_a = json_decode( $variant['response'] );
+						$name = $variant_a[0]->variantInfo->description;
+						$name_display = null;
+			            $attrs = [
+				            'Load/Speed Rating' => 'load-speed-rating',
+				            'Brand Name' => 'brand-name',
+				            'Tyre Width' => 'tyre-width',
+				            'Tyre Size' => 'tyre-size',
+				            'List on eBay' => [
+					            'slug' => 'list-on-ebay',
+					            'scope' => 'global',
+					            'mapping' => [
+						            '0.0000' => 'False',
+						            '1.0000' => 'True'
+					            ]
+				            ],
+				            'EAN' => [
+					            'slug' => 'ean',
+					            'scope' => 'local'
+				            ],
+				            'Wheel Size' => 'wheel-size',
+				            'Wheel Width' => 'wheel-width',
+				            'Wheel Colour' => 'wheel-colour',
+				            'Wheel Offset' => 'wheel-offset',
+				            'Wheel PCD' => 'wheel-pcd',
+				            'Centre Bore' => 'centre-bore',
+			            ];
+
+		            }else{
+						$status['errors'][] = 'Error getting OW API variant data for ' . $sku;
+		            }
+	            }else{
+					$status['errors'][] = 'No OW API variant data - $ow_variants is empty';
+	            }
+
+
             } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
 	            //It's a Wheel
 	            array_push( $mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD' );
@@ -179,8 +224,6 @@ class Fbf_Importer_Item_Import
 			            'scope' => 'local'
 		            ]
 	            ];
-            } else if ($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
-				// It's a Trailer Tyre/Wheel
             } else {
                 //It's an Accessory
                 $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
@@ -1286,4 +1329,69 @@ class Fbf_Importer_Item_Import
         }
         return $suppliers_a;
     }
+
+
+	private function ow_curl($token, $url, $method, $expected_response, $body=null, $headers=[])
+	{
+		$curl = curl_init();
+		$resp = [];
+		$opt_headers = [
+			'Authorization: Bearer ' . $token
+		];
+		if(!empty($headers)){
+			foreach($headers as $header){
+				$opt_headers[] = $header;
+			}
+		}
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://4x4tyres.orderwisecloud.com/owapi/' . $url,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => $method,
+			CURLOPT_HTTPHEADER => $opt_headers,
+		));
+		if(!is_null($body)){
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+		}
+
+		$response = curl_exec($curl);
+
+		if (curl_errno($curl)) {
+			$resp['status'] = 'error';
+			$resp['errors'][] = curl_error($curl);
+		}else {
+			$resp['response'] = $response;
+			$resp['response_code'] = curl_getinfo($curl)['http_code'];
+			if(curl_getinfo($curl)['http_code']!==$expected_response){
+				$resp['status'] = 'error';
+				switch(curl_getinfo($curl)['http_code']){
+					case 204:
+						$resp['errors'][] = 'No content';
+						break;
+					case 400:
+						$resp['errors'][]= 'Bad request';
+						break;
+					case 401:
+						$resp['errors'][] = 'Not authorized';
+						break;
+					case 403:
+						$resp['errors'][] = 'Forbidden';
+						break;
+					case 500:
+						$resp['errors'][] = 'Internal server error';
+						break;
+				}
+			}else{
+				$resp['status'] = 'success';
+			}
+		}
+
+		curl_close($curl);
+		return $resp;
+	}
 }
