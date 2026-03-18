@@ -133,6 +133,11 @@ class Fbf_Importer_Item_Import
                     'Fit On Drive' => 'fit-on-drive',
                 ];
             } else if ($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
+				if($item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel'){
+					array_push($mandatory, 'Tyre Width', 'Tyre Size', 'Wheel Size', 'Wheel Width', 'Wheel Offset', 'Wheel Colour');
+				}else{
+					array_push($mandatory, 'Load/Speed Rating', 'Tyre Width', 'Tyre Size', 'Wheel Size', 'Wheel Width', 'Wheel Offset', 'Wheel Colour', 'Wheel PCD');
+				}
 	            // It's a Trailer Tyre/Wheel
 	            if(!empty($ow_variants)) {
 		            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
@@ -145,7 +150,6 @@ class Fbf_Importer_Item_Import
 						$name = $variant_a[0]->variantInfo->description;
 						$name_display = null;
 			            $attrs = [
-				            'Load/Speed Rating' => 'load-speed-rating',
 				            'Brand Name' => 'brand-name',
 				            'Tyre Width' => 'tyre-width',
 				            'Tyre Size' => 'tyre-size',
@@ -165,9 +169,12 @@ class Fbf_Importer_Item_Import
 				            'Wheel Width' => 'wheel-width',
 				            'Wheel Colour' => 'wheel-colour',
 				            'Wheel Offset' => 'wheel-offset',
-				            'Wheel PCD' => 'wheel-pcd',
-				            'Centre Bore' => 'centre-bore',
 			            ];
+
+			            if($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel'){
+				            $attrs['Wheel PCD'] = 'wheel-pcd';
+				            $attrs['Load/Speed Rating'] = 'wheel-load-rating';
+			            }
 
 		            }else{
 						$status['errors'][] = 'Error getting OW API variant data for ' . $sku;
@@ -327,9 +334,11 @@ class Fbf_Importer_Item_Import
 
                             //If it's a tyre and has a key of 'Tyre Size' then we need to add a further attribute for size label which is a combination of {tyre_width}/{tyre_profile}/{tyre_size}
                             if($ak==='Tyre Size'){
-                                $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$tyre_profile, (string)$item['Tyre Size']);
-                                $new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
-                                $new_attrs['pa_tyre-size-label'] = $new_size_attr;
+								if(isset($tyre_profile)){
+									$combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$tyre_profile, (string)$item['Tyre Size']);
+									$new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
+									$new_attrs['pa_tyre-size-label'] = $new_size_attr;
+								}
                             }
 
                             $new_attr = $this->check_attribute($product, $av, $item[$ak], $wc_attrs);
@@ -447,7 +456,7 @@ class Fbf_Importer_Item_Import
                         // Set backordering based on when the product went out of stock - if it's been out of stock for
                         // more than 3 months, no backordering
                         // Mod 23 Nov 2022 - if Tyre is NOT AT or MT - don't allow backordering
-                        if($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain'){
+                        if(isset($tyre_type) && ($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain')){
                             $now = new DateTime('now');
                             $stock_date = new DateTime();
                             $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
