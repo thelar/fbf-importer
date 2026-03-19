@@ -302,6 +302,14 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[1]['mapping_array'] = array('1', '1', '13', '14');
         $supplier_array[1]['delimiter'] = ",";
 
+	    $supplier_array[2]['name'] = "TYRELINE";
+		$supplier_array[2]['read_filename'] = "Tyreline_stock_price.xlsx";
+		$supplier_array[2]['write_filename'] = "tyreline";
+		$supplier_array[2]['cell_1a'] = "TLINE";
+		$supplier_array[2]['data_start_row'] = "1";
+		$supplier_array[2]['mapping_array'] = array('0', '0', '13', '15');
+		$supplier_array[2]['delimiter'] = ",";
+
         if (!function_exists('tep_xls_to_csv_single_file')){
             function tep_xls_to_csv_single_file($inputfile, $outputfile) {
 
