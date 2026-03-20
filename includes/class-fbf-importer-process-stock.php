@@ -23,13 +23,13 @@ class Fbf_Importer_Stock_Processor
 
         //$file = file_get_contents('ssh2.sftp://4x4tyressftp:Evilct7848!@SFTP.wheelpros.com:22/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv');
 
-        $connection = ssh2_connect('SFTP.wheelpros.com', 22);
+        /*$connection = ssh2_connect('SFTP.wheelpros.com', 22);
         ssh2_auth_password($connection, '4x4tyressftp', getenv('WHEELPROS_FTP_PASS'));
         $sftp = ssh2_sftp($connection);
         $stream = fopen("ssh2.sftp://$sftp/CommonFeed/GBP/WHEEL/wheelInvPriceData.csv", 'r');
         $contents = stream_get_contents($stream);
         file_put_contents(self::UPLOAD_LOCATION . 'wheelpros/wheelpros.csv', $contents);
-        @fclose($stream);
+        @fclose($stream);*/
 
 //        var_dump(ABSPATH);
 //        var_dump(__DIR__);
@@ -303,11 +303,11 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[1]['delimiter'] = ",";
 
 	    $supplier_array[2]['name'] = "TYRELINE";
-		$supplier_array[2]['read_filename'] = "Tyreline_stock_price.xlsx";
+		$supplier_array[2]['read_filename'] = "Tyreline_stock_price.csv";
 		$supplier_array[2]['write_filename'] = "tyreline";
 		$supplier_array[2]['cell_1a'] = "TLINE";
 		$supplier_array[2]['data_start_row'] = "1";
-		$supplier_array[2]['mapping_array'] = array('0', '0', '13', '15');
+		$supplier_array[2]['mapping_array'] = array('0', '0', '19', '18');
 		$supplier_array[2]['delimiter'] = ",";
 
         if (!function_exists('tep_xls_to_csv_single_file')){
