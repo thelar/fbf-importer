@@ -489,7 +489,7 @@ class Fbf_Importer_Item_Import
                         // Here if there is stock
 
                         // Mod 13 Jan 2023 - if it's NOT All Terrain or Mud Terrain - no backordering!
-                        if($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain') {
+                        if(isset($tyre_type) && ($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain')) {
                             $product->update_meta_data('_went_out_of_stock_on', '');
                             $product->set_backorders('notify');
 
@@ -650,7 +650,7 @@ class Fbf_Importer_Item_Import
                 }*/
 
                 //RSP calculation
-                if ($item['Wheel Tyre Accessory'] == 'Tyre') {
+                if ($item['Wheel Tyre Accessory'] == 'Tyre'||$item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
                     if((string)$item['Include in Price Match']=='True'){
                         // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
                         $rsp = $this->get_rsp($item, $product_id, (float)$product->get_regular_price());
