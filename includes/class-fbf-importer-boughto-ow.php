@@ -57,9 +57,9 @@ class Fbf_Importer_Boughto_Ow
 
                 // TMP filter out just Calibre
 	            //TODO Uncomment when Calibre is back in stock
-                /*$calibre = $brands[array_search('Kahn', array_column($brands, 'name'))];
+                /*$dezent = $brands[array_search('Dezent', array_column($brands, 'name'))];
                 $brands = [
-                    $calibre
+	                $dezent
                 ];*/
 
                 // Loop through the returned brands
@@ -84,7 +84,7 @@ class Fbf_Importer_Boughto_Ow
                     }
 
                     // Now get all the individual wheels in each brand
-                    $url = sprintf('%s/search/wheels?brand=%s%s', $this->boughto_api_url, $brand['name'], $is_house_brand?'&ignore_no_price=1&ignore_no_stock=1':'');
+                    $url = sprintf('%s/search/wheels?brand=%s&itemsPerPage=500%s', $this->boughto_api_url, $brand['name'], $is_house_brand?'&ignore_no_price=1&ignore_no_stock=1':'');
                     $response = wp_remote_get($url, $headers);
                     sleep(1);
                     if(is_array($response) && wp_remote_retrieve_response_code($response)===200){
@@ -101,7 +101,7 @@ class Fbf_Importer_Boughto_Ow
 	                    }
                         if($pages > 1){
                             for($i=2;$i<=$pages;$i++){
-                                $url = sprintf('%s/search/wheels?brand=%s&page=%s%s', $this->boughto_api_url, $brand['name'], $i, $is_house_brand?'&ignore_no_price=1&ignore_no_stock=1':'');
+                                $url = sprintf('%s/search/wheels?brand=%s&itemsPerPage=500&page=%s%s', $this->boughto_api_url, $brand['name'], $i, $is_house_brand?'&ignore_no_price=1&ignore_no_stock=1':'');
                                 $response = wp_remote_get($url, $headers);
                                 sleep(1);
                                 if(is_array($response)){
@@ -122,7 +122,7 @@ class Fbf_Importer_Boughto_Ow
 
                         // If not an in-house brand - get ALL the items anyway and compare difference
                         if(!$is_house_brand){
-                            $nhb_url = sprintf('%s/search/wheels?brand=%s&ignore_no_price=1&ignore_no_stock=1', $this->boughto_api_url, $brand['name']);
+                            $nhb_url = sprintf('%s/search/wheels?brand=%s&itemsPerPage=500&ignore_no_price=1&ignore_no_stock=1', $this->boughto_api_url, $brand['name']);
                             $nhb_response = wp_remote_get($nhb_url, $headers);
                             sleep(1);
                             if(is_array($nhb_response) && wp_remote_retrieve_response_code($nhb_response)===200){
@@ -131,7 +131,7 @@ class Fbf_Importer_Boughto_Ow
                                 $nhb_products = $nhb_brand_data['results']; // First page
                                 if($nhb_pages > 1){
                                     for($i=2;$i<=$nhb_pages;$i++){
-                                        $nhb_url = sprintf('%s/search/wheels?brand=%s&page=%s&ignore_no_price=1&ignore_no_stock=1', $this->boughto_api_url, $brand['name'], $i);
+                                        $nhb_url = sprintf('%s/search/wheels?brand=%s&itemsPerPage=500&page=%s&ignore_no_price=1&ignore_no_stock=1', $this->boughto_api_url, $brand['name'], $i);
                                         $nhb_response = wp_remote_get($nhb_url, $headers);
                                         sleep(1);
                                         if(is_array($nhb_response)){
