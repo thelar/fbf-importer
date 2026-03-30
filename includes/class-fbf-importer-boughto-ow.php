@@ -91,6 +91,9 @@ class Fbf_Importer_Boughto_Ow
                         $brand_data = json_decode(wp_remote_retrieve_body($response), true);
                         $pages = $brand_data['pagination']['total_pages'];
                         $products = $brand_data['results']; // First page
+
+	                    update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Reading ' . $brand_name . ' products from Boughto (Read page 1 of ' . $pages . ')']);
+
 	                    if( isset( $report['product_count'] ) ){
 		                    $report['product_count']+= $brand_data['pagination']['total'];
 	                    }else{
@@ -104,12 +107,16 @@ class Fbf_Importer_Boughto_Ow
                                 if(is_array($response)){
                                     $brand_data = json_decode(wp_remote_retrieve_body($response), true);
                                     $products = array_merge($products, $brand_data['results']);
+
+	                                update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Reading ' . $brand_name . ' products from Boughto (Read page ' . $i . ' of ' . $pages . ')']);
                                 }else{
                                     $report['errors'] = $response->get_error_message();
                                     break 2;
                                 }
                             }
                         }
+
+
 
 
 
@@ -146,6 +153,7 @@ class Fbf_Importer_Boughto_Ow
                         $brand_products[$brand_name] = $products;
 
                         // now either add to database or update
+	                    update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Reading ' . $brand_name . ' products from Boughto (ready to write to DB)']);
                         foreach($products as $product){
                             $primary_id = $product['product_code'];
                             $sd = serialize($product);
