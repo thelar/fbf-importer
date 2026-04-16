@@ -90,13 +90,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[2]['mapping_array'] = array('0', '16', '13', '15');
         $supplier_array[2]['delimiter'] = ",";*/
 
-        $supplier_array[3]['name'] = "MALVERN";
+        /*$supplier_array[3]['name'] = "MALVERN";
         $supplier_array[3]['read_filename'] = "cooper.xls";
         $supplier_array[3]['write_filename'] = "malvern";
         $supplier_array[3]['cell_1a'] = "MALVERN";
         $supplier_array[3]['data_start_row'] = "3";
         $supplier_array[3]['mapping_array'] = array('0', '1', '4', '7');
-        $supplier_array[3]['delimiter'] = ",";
+        $supplier_array[3]['delimiter'] = ",";*/
 
         /*$supplier_array[2]['name'] = "ROGUE";
         $supplier_array[2]['read_filename'] = "rogue.csv";
