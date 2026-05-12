@@ -10,6 +10,7 @@ class Fbf_Importer_Batch_Processor
         'get_rsp_rules',
         'build_price_match_data',
         'build_stock_array',
+	    'read_ow_variants',
         'import_stock',
     ];
     private $stage;
@@ -29,6 +30,7 @@ class Fbf_Importer_Batch_Processor
     private $batch_ids;
     private $log_id;
     private $logger;
+	public $ow_variants;
 
     public function __construct($plugin_name)
     {
@@ -199,6 +201,17 @@ class Fbf_Importer_Batch_Processor
         }
     }
 
+	private function read_ow_variants() {
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+		$auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, 1);
+		$token = $auth->get_valid_token();
+		$variants = $this->ow_curl($token,'stock/variants?limit=200000', 'GET', 200);
+		if($variants['status']!=='error') {
+			$variants_a = json_decode( $variants['response'] );
+			$this->ow_variants = $variants_a;
+		}
+	}
+
     private function import_stock()
     {
         global $wpdb;
@@ -222,7 +235,7 @@ class Fbf_Importer_Batch_Processor
 				if(is_array($item) && !empty($item)){
 					require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-item-import.php';
 					$importer = new Fbf_Importer_Item_Import($this->plugin_name, $id, $this->min_stock, $this->rsp_rules, $this->price_match_data, $this->fitting_cost, $this->flat_fee);
-					$import = $importer->import($item);
+					$import = $importer->import($item, $this->ow_variants);
 				}
 			}
 
@@ -233,4 +246,68 @@ class Fbf_Importer_Batch_Processor
 	    // After processing all the items set the status back to READYTOPROCESS incrementing the batch number by 1
         update_option($this->plugin_name, ['status' => 'READYTOPROCESS', 'batch' => $this->batch + 1, 'log_id' => $this->log_id]);
     }
+
+	private function ow_curl($token, $url, $method, $expected_response, $body=null, $headers=[])
+	{
+		$curl = curl_init();
+		$resp = [];
+		$opt_headers = [
+			'Authorization: Bearer ' . $token
+		];
+		if(!empty($headers)){
+			foreach($headers as $header){
+				$opt_headers[] = $header;
+			}
+		}
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://4x4tyres.orderwisecloud.com/owapi/' . $url,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => $method,
+			CURLOPT_HTTPHEADER => $opt_headers,
+		));
+		if(!is_null($body)){
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+		}
+
+		$response = curl_exec($curl);
+
+		if (curl_errno($curl)) {
+			$resp['status'] = 'error';
+			$resp['errors'][] = curl_error($curl);
+		}else {
+			$resp['response'] = $response;
+			$resp['response_code'] = curl_getinfo($curl)['http_code'];
+			if(curl_getinfo($curl)['http_code']!==$expected_response){
+				$resp['status'] = 'error';
+				switch(curl_getinfo($curl)['http_code']){
+					case 204:
+						$resp['errors'][] = 'No content';
+						break;
+					case 400:
+						$resp['errors'][]= 'Bad request';
+						break;
+					case 401:
+						$resp['errors'][] = 'Not authorized';
+						break;
+					case 403:
+						$resp['errors'][] = 'Forbidden';
+						break;
+					case 500:
+						$resp['errors'][] = 'Internal server error';
+						break;
+				}
+			}else{
+				$resp['status'] = 'success';
+			}
+		}
+
+		curl_close($curl);
+		return $resp;
+	}
 }

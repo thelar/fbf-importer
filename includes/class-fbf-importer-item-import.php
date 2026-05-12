@@ -31,7 +31,7 @@ class Fbf_Importer_Item_Import
         $this->suppliers = $this->build_suppliers();
     }
 
-    public function import($item)
+    public function import($item, $ow_variants = [])
     {
         global $wpdb;
         $sku = (string)$item['Product Code'];
@@ -132,44 +132,105 @@ class Fbf_Importer_Item_Import
                     'Mud Snow' => 'mud-snow',
                     'Fit On Drive' => 'fit-on-drive',
                 ];
+            } else if ($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
+				if($item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel'){
+					array_push($mandatory, 'Tyre Width', 'Tyre Size', 'Wheel Size', 'Wheel Width', 'Wheel Offset', 'Wheel Colour');
+				}else{
+					array_push($mandatory, 'Load/Speed Rating', 'Tyre Width', 'Tyre Size', 'Wheel Size', 'Wheel Width', 'Wheel Offset', 'Wheel Colour', 'Wheel PCD');
+				}
+	            // It's a Trailer Tyre/Wheel
+	            if(!empty($ow_variants)) {
+		            require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+		            $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, 1);
+		            $token = $auth->get_valid_token();
+		            $variant_id = $ow_variants[array_search($sku, array_column($ow_variants, 'variantCode'))]->variantID;
+		            $variant = $this->ow_curl($token, 'variants/' . $variant_id, 'GET', 200);
+		            if($variant['status']!=='error') {
+			            $variant_a = json_decode( $variant['response'] );
+						$name = $variant_a[0]->variantInfo->description;
+						$name_display = null;
+			            $attrs = [
+				            'Brand Name' => 'brand-name',
+				            'Tyre Width' => 'tyre-width',
+				            'Tyre Size' => 'tyre-size',
+				            'List on eBay' => [
+					            'slug' => 'list-on-ebay',
+					            'scope' => 'global',
+					            'mapping' => [
+						            '0.0000' => 'False',
+						            '1.0000' => 'True'
+					            ]
+				            ],
+				            'EAN' => [
+					            'slug' => 'ean',
+					            'scope' => 'local'
+				            ],
+				            'Wheel Size' => 'wheel-size',
+				            'Wheel Width' => 'wheel-width',
+				            'Wheel Colour' => 'wheel-colour',
+				            'Wheel Offset' => 'wheel-offset',
+			            ];
+
+			            if($item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel'){
+				            $attrs['Wheel PCD'] = 'wheel-pcd';
+				            $attrs['Load/Speed Rating'] = 'wheel-load-rating';
+			            }
+
+		            }else{
+						$status['errors'][] = 'Error getting OW API variant data for ' . $sku;
+		            }
+	            }else{
+					$status['errors'][] = 'No OW API variant data - $ow_variants is empty';
+	            }
+
+
             } else if ($item['Wheel Tyre Accessory'] != 'Accessories') {
-                //It's a Wheel
-                array_push($mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD');
+	            //It's a Wheel
+	            array_push( $mandatory, 'Wheel TUV', 'Wheel Size', 'Wheel Width', 'Wheel Colour', 'Wheel Load Rating', 'Wheel Offset', 'Wheel PCD' );
 
-                if(isset($item['Model Name'])){
-                    $model_title = (string) $item['Model Name'];
-                    $model_title = str_ireplace([' steel', 'steel', ' alloy', 'alloy', ' wheel', 'wheel', ' High X', 'High X'], '', $model_title);
-                }else{
-                    $model_title = '';
-                }
+	            if ( isset( $item['Model Name'] ) ) {
+		            $model_title = (string) $item['Model Name'];
+		            $model_title = str_ireplace( [
+			            ' steel',
+			            'steel',
+			            ' alloy',
+			            'alloy',
+			            ' wheel',
+			            'wheel',
+			            ' High X',
+			            'High X'
+		            ], '', $model_title );
+	            } else {
+		            $model_title = '';
+	            }
 
-                $name = sprintf('%s %s %s %s x %s ET%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
-                $name_display = sprintf('%s %s %s x %s ET%s %s', $model_title, isset($item['Wheel Tyre Accessory']) ? $item['Wheel Tyre Accessory'] : '', isset($item['Wheel Size']) ? $item['Wheel Size'] : '', isset($item['Wheel Width']) ? $item['Wheel Width'] : '', isset($item['Wheel Offset']) ? $item['Wheel Offset'] : '', isset($item['Wheel Colour']) ? $item['Wheel Colour'] : '');
-                $attrs = [
-                    'Brand Name' => 'brand-name',
-                    'Model Name' => 'model-name',
-                    'List on eBay' => [
-                        'slug' => 'list-on-ebay',
-                        'scope' => 'global',
-                        'mapping' => [
-                            '0.0000' => 'False',
-                            '1.0000' => 'True'
-                        ]
-                    ],
-                    'Wheel TUV' => 'wheel-tuv',
-                    'Include in Price Match' => 'include-in-price-match',
-                    'Wheel Size' => 'wheel-size',
-                    'Wheel Width' => 'wheel-width',
-                    'Wheel Colour' => 'wheel-colour',
-                    'Wheel Load Rating' => 'wheel-load-rating',
-                    'Wheel Offset' => 'wheel-offset',
-                    'Wheel PCD' => 'wheel-pcd',
-                    'Centre Bore' => 'centre-bore',
-                    'EAN' => [
-                        'slug' => 'ean',
-                        'scope' => 'local'
-                    ]
-                ];
+	            $name         = sprintf( '%s %s %s %s x %s ET%s %s', isset( $item['Brand Name'] ) ? $item['Brand Name'] : '', $model_title, isset( $item['Wheel Tyre Accessory'] ) ? $item['Wheel Tyre Accessory'] : '', isset( $item['Wheel Size'] ) ? $item['Wheel Size'] : '', isset( $item['Wheel Width'] ) ? $item['Wheel Width'] : '', isset( $item['Wheel Offset'] ) ? $item['Wheel Offset'] : '', isset( $item['Wheel Colour'] ) ? $item['Wheel Colour'] : '' );
+	            $name_display = sprintf( '%s %s %s x %s ET%s %s', $model_title, isset( $item['Wheel Tyre Accessory'] ) ? $item['Wheel Tyre Accessory'] : '', isset( $item['Wheel Size'] ) ? $item['Wheel Size'] : '', isset( $item['Wheel Width'] ) ? $item['Wheel Width'] : '', isset( $item['Wheel Offset'] ) ? $item['Wheel Offset'] : '', isset( $item['Wheel Colour'] ) ? $item['Wheel Colour'] : '' );
+	            $attrs        = [
+		            'Brand Name'             => 'brand-name',
+		            'Model Name'             => 'model-name',
+		            'List on eBay'           => [
+			            'slug'    => 'list-on-ebay',
+			            'scope'   => 'global',
+			            'mapping' => [
+				            '0.0000' => 'False',
+				            '1.0000' => 'True'
+			            ]
+		            ],
+		            'Wheel TUV'              => 'wheel-tuv',
+		            'Include in Price Match' => 'include-in-price-match',
+		            'Wheel Size'             => 'wheel-size',
+		            'Wheel Width'            => 'wheel-width',
+		            'Wheel Colour'           => 'wheel-colour',
+		            'Wheel Load Rating'      => 'wheel-load-rating',
+		            'Wheel Offset'           => 'wheel-offset',
+		            'Wheel PCD'              => 'wheel-pcd',
+		            'Centre Bore'            => 'centre-bore',
+		            'EAN'                    => [
+			            'slug'  => 'ean',
+			            'scope' => 'local'
+		            ]
+	            ];
             } else {
                 //It's an Accessory
                 $name = sprintf('%s %s', isset($item['Brand Name']) ? $item['Brand Name'] : '', isset($item['Model Name']) ? $item['Model Name'] : '');
@@ -273,9 +334,11 @@ class Fbf_Importer_Item_Import
 
                             //If it's a tyre and has a key of 'Tyre Size' then we need to add a further attribute for size label which is a combination of {tyre_width}/{tyre_profile}/{tyre_size}
                             if($ak==='Tyre Size'){
-                                $combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$tyre_profile, (string)$item['Tyre Size']);
-                                $new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
-                                $new_attrs['pa_tyre-size-label'] = $new_size_attr;
+								if(isset($tyre_profile)){
+									$combined_size = sprintf('%s/%s/%s', (string)$item['Tyre Width'], (string)$tyre_profile, (string)$item['Tyre Size']);
+									$new_size_attr = $this->check_attribute($product, 'tyre-size-label', $combined_size, $wc_attrs);
+									$new_attrs['pa_tyre-size-label'] = $new_size_attr;
+								}
                             }
 
                             $new_attr = $this->check_attribute($product, $av, $item[$ak], $wc_attrs);
@@ -393,7 +456,7 @@ class Fbf_Importer_Item_Import
                         // Set backordering based on when the product went out of stock - if it's been out of stock for
                         // more than 3 months, no backordering
                         // Mod 23 Nov 2022 - if Tyre is NOT AT or MT - don't allow backordering
-                        if($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain'){
+                        if(isset($tyre_type) && ($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain')){
                             $now = new DateTime('now');
                             $stock_date = new DateTime();
                             $stock_date->setTimestamp($product->get_meta('_went_out_of_stock_on'));
@@ -426,7 +489,7 @@ class Fbf_Importer_Item_Import
                         // Here if there is stock
 
                         // Mod 13 Jan 2023 - if it's NOT All Terrain or Mud Terrain - no backordering!
-                        if($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain') {
+                        if(isset($tyre_type) && ($tyre_type=='All Terrain'||$tyre_type=='Mud Terrain')) {
                             $product->update_meta_data('_went_out_of_stock_on', '');
                             $product->set_backorders('notify');
 
@@ -587,7 +650,7 @@ class Fbf_Importer_Item_Import
                 }*/
 
                 //RSP calculation
-                if ($item['Wheel Tyre Accessory'] == 'Tyre') {
+                if ($item['Wheel Tyre Accessory'] == 'Tyre'||$item['Wheel Tyre Accessory'] == 'HS Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'ATV Trailer Tyre and Wheel' || $item['Wheel Tyre Accessory'] == 'LG Tyre and Wheel') {
                     if((string)$item['Include in Price Match']=='True'){
                         // $rsp_price = round($this->get_rsp($item, $product_id, $is_variable ? (float)wc_get_product($children[0])->get_regular_price() : (float)$product->get_regular_price()) * 1.2,2); //Added vat here, 12-05-20 dealt with sending regular price of variant
                         $rsp = $this->get_rsp($item, $product_id, (float)$product->get_regular_price());
@@ -1275,4 +1338,69 @@ class Fbf_Importer_Item_Import
         }
         return $suppliers_a;
     }
+
+
+	private function ow_curl($token, $url, $method, $expected_response, $body=null, $headers=[])
+	{
+		$curl = curl_init();
+		$resp = [];
+		$opt_headers = [
+			'Authorization: Bearer ' . $token
+		];
+		if(!empty($headers)){
+			foreach($headers as $header){
+				$opt_headers[] = $header;
+			}
+		}
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://4x4tyres.orderwisecloud.com/owapi/' . $url,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => $method,
+			CURLOPT_HTTPHEADER => $opt_headers,
+		));
+		if(!is_null($body)){
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+		}
+
+		$response = curl_exec($curl);
+
+		if (curl_errno($curl)) {
+			$resp['status'] = 'error';
+			$resp['errors'][] = curl_error($curl);
+		}else {
+			$resp['response'] = $response;
+			$resp['response_code'] = curl_getinfo($curl)['http_code'];
+			if(curl_getinfo($curl)['http_code']!==$expected_response){
+				$resp['status'] = 'error';
+				switch(curl_getinfo($curl)['http_code']){
+					case 204:
+						$resp['errors'][] = 'No content';
+						break;
+					case 400:
+						$resp['errors'][]= 'Bad request';
+						break;
+					case 401:
+						$resp['errors'][] = 'Not authorized';
+						break;
+					case 403:
+						$resp['errors'][] = 'Forbidden';
+						break;
+					case 500:
+						$resp['errors'][] = 'Internal server error';
+						break;
+				}
+			}else{
+				$resp['status'] = 'success';
+			}
+		}
+
+		curl_close($curl);
+		return $resp;
+	}
 }
