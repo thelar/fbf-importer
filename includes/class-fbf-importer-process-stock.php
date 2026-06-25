@@ -61,7 +61,10 @@ class Fbf_Importer_Stock_Processor
         // Street Track Life
         file_put_contents(self::UPLOAD_LOCATION . 'street_track/stock.csv', fopen("https://docs.google.com/spreadsheets/d/1KQXgqLNU4ehtGXcTBzXTUNZXvFkgFNGNyJuOPraoNQw/export?format=csv&gid=0", 'r'));
 
-        $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
+	    // Rogue
+	    file_put_contents(self::UPLOAD_LOCATION . 'rogue/stock.csv', fopen("https://docs.google.com/spreadsheets/d/16qBkQ5nhslwjNA18Dc0J-PYwzrTvizVDpXiZRzEbkgc/export?format=csv&gid=0", 'r'));
+
+	    $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
         $data_columns_array = array('1', '3', '5', '6'); //A2, C2, E2, F2
 
         $supplier_array = array();
@@ -98,13 +101,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[3]['mapping_array'] = array('0', '1', '4', '7');
         $supplier_array[3]['delimiter'] = ",";*/
 
-        /*$supplier_array[2]['name'] = "ROGUE";
-        $supplier_array[2]['read_filename'] = "rogue.csv";
-        $supplier_array[2]['write_filename'] = "rogue";
-        $supplier_array[2]['cell_1a'] = "ROGUETR";
-        $supplier_array[2]['data_start_row'] = "4";
-        $supplier_array[2]['mapping_array'] = array('1', '1', '8', '10');
-        $supplier_array[2]['delimiter'] = ",";*/
+        $supplier_array[3]['name'] = "ROGUE";
+        $supplier_array[3]['read_filename'] = "stock.csv";
+        $supplier_array[3]['write_filename'] = "rogue";
+        $supplier_array[3]['cell_1a'] = "ROGUETR";
+        $supplier_array[3]['data_start_row'] = "1";
+        $supplier_array[3]['mapping_array'] = [ '0', '0', '15', '13' ];
+        $supplier_array[3]['delimiter'] = ",";
 
         /*$supplier_array[4]['name'] = "DELDO";
         $supplier_array[4]['read_filename'] = "deldo47545.csv"; //"TOPGEAR.csv";
