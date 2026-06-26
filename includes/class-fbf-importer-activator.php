@@ -64,7 +64,7 @@ class Fbf_Importer_Activator {
           id mediumint(9) NOT NULL AUTO_INCREMENT,
           product_id mediumint(9),
           batch tinyint(1),
-          sku varchar(40),
+          sku varchar(60),
           is_white_lettering boolean,
           item text NOT NULL,
           rsp text,
