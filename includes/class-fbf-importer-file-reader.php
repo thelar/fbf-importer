@@ -18,6 +18,9 @@ class Fbf_Importer_File_Reader
     private $mapping;
     private $batch;
     private $logger;
+	private $ow_variants = [];
+	private $ttw_names_key = 'trailer_tyre_wheel_names';
+	private $token;
 
     public function __construct($plugin_name)
     {
@@ -111,6 +114,17 @@ class Fbf_Importer_File_Reader
 
     private function process_file($log_id)
     {
+		// Read the OW variants
+	    $a = 1;
+	    update_option($this->plugin_name, ['status' => 'READINGOWVARIANTS', 'log_id' => $log_id]);
+	    $this->read_ow_variants();
+
+		// Get the trailer tyre and wheel names trasient
+	    $trailer_tyre_names = get_transient($this->ttw_names_key);
+		if(empty($trailer_tyre_names)){
+			$trailer_tyre_names = [];
+		}
+
         update_option($this->plugin_name, ['status' => 'PROCESSINGXML', 'log_id' => $log_id]);
 
         // For logging
@@ -151,6 +165,21 @@ class Fbf_Importer_File_Reader
                         $log_info['items']++;
                         $node = simplexml_import_dom($doc->importNode($xml->expand(), true));
                         $item = $this->map_item($node);
+
+						// If it is a Trailer Tyre and Wheel - get the title
+						if($item['Wheel Tyre Accessory']=='HS Trailer Tyre and Wheel'||$item['Wheel Tyre Accessory']=='ATV Trailer Tyre and Wheel'||$item['Wheel Tyre Accessory']=='LG Tyre and Wheel'){
+							// If the title is not in the transient, get it from the OW API
+							if(!array_key_exists($item['Product Code'], $trailer_tyre_names)){
+								$variant_id = $this->ow_variants[array_search($item['Product Code'], array_column($this->ow_variants, 'variantCode'))]->variantID;
+								$variant = $this->ow_curl($this->token, 'variants/' . $variant_id, 'GET', 200);
+								if($variant['status']!=='error') {
+									$variant_a = json_decode( $variant['response'] );
+									$name = $variant_a[0]->variantInfo->description;
+									$trailer_tyre_names[$item['Product Code']] = $name;
+								}
+							}
+						}
+
                         $insert = $wpdb->insert(
                             $table_name,
                             [
@@ -203,6 +232,9 @@ class Fbf_Importer_File_Reader
                     }
                 }
             }
+
+			// Save the transient
+	        set_transient($this->ttw_names_key, $trailer_tyre_names, WEEK_IN_SECONDS);
 
             // Move the file
             $new_file_info = pathinfo($new_file);
@@ -263,4 +295,79 @@ class Fbf_Importer_File_Reader
         }
         return $item;
     }
+
+	private function read_ow_variants() {
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-owapi-auth.php';
+		$auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, 1);
+		$this->token = $auth->get_valid_token();
+		$variants = $this->ow_curl($this->token,'stock/variants?limit=200000', 'GET', 200);
+		if($variants['status']!=='error') {
+			$variants_a = json_decode( $variants['response'] );
+			$this->ow_variants = $variants_a;
+		}
+	}
+
+	private function ow_curl($token, $url, $method, $expected_response, $body=null, $headers=[])
+	{
+		$curl = curl_init();
+		$resp = [];
+		$opt_headers = [
+			'Authorization: Bearer ' . $token
+		];
+		if(!empty($headers)){
+			foreach($headers as $header){
+				$opt_headers[] = $header;
+			}
+		}
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://4x4tyres.orderwisecloud.com/owapi/' . $url,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => $method,
+			CURLOPT_HTTPHEADER => $opt_headers,
+		));
+		if(!is_null($body)){
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+		}
+
+		$response = curl_exec($curl);
+
+		if (curl_errno($curl)) {
+			$resp['status'] = 'error';
+			$resp['errors'][] = curl_error($curl);
+		}else {
+			$resp['response'] = $response;
+			$resp['response_code'] = curl_getinfo($curl)['http_code'];
+			if(curl_getinfo($curl)['http_code']!==$expected_response){
+				$resp['status'] = 'error';
+				switch(curl_getinfo($curl)['http_code']){
+					case 204:
+						$resp['errors'][] = 'No content';
+						break;
+					case 400:
+						$resp['errors'][]= 'Bad request';
+						break;
+					case 401:
+						$resp['errors'][] = 'Not authorized';
+						break;
+					case 403:
+						$resp['errors'][] = 'Forbidden';
+						break;
+					case 500:
+						$resp['errors'][] = 'Internal server error';
+						break;
+				}
+			}else{
+				$resp['status'] = 'success';
+			}
+		}
+
+		curl_close($curl);
+		return $resp;
+	}
 }
