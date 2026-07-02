@@ -31,8 +31,6 @@ class Fbf_Importer_Item_Import
         $this->tmp_products_table = $wpdb->prefix . 'fbf_importer_tmp_products';
 
         $this->suppliers = $this->build_suppliers();
-
-		$this->ttw_names = get_transient($this->ttw_names_key);
     }
 
     public function import($item, $ow_variants = [])
@@ -143,6 +141,7 @@ class Fbf_Importer_Item_Import
 					array_push($mandatory, 'Load/Speed Rating', 'Tyre Width', 'Tyre Size', 'Wheel Size', 'Wheel Width', 'Wheel Offset', 'Wheel Colour', 'Wheel PCD');
 				}
 	            // It's a Trailer Tyre/Wheel
+	            $this->ttw_names = get_transient($this->ttw_names_key);
 	            if(!empty($this->ttw_names)) {
 		            if(isset($this->ttw_names[$sku])) {
 						$name = $this->ttw_names[$sku];
