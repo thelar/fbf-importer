@@ -460,7 +460,7 @@ class Fbf_Importer_Owapi
         update_option($this->plugin_name . '-mts-ow', ['status' => 'READYFOROWCREATE', 'log_id' => $log_id]);
     }
 
-    public function run_boughto_ow_prepare($log_id)
+    public function  run_boughto_ow_prepare($log_id)
     {
         global $wpdb;
         $data_table = $wpdb->prefix . 'fbf_importer_boughto_data';
@@ -483,8 +483,16 @@ class Fbf_Importer_Owapi
             $ow_skus = array_column($variants_a, 'variantCode');
             $ow_ids = array_column($variants_a, 'variantID');
 
+			// Change to uppercase
+	        $ow_skus = $this->changeStringsToUpperCase($ow_skus);
+
+
             // Addition - get the SKU's that are nostock items on Boughto and also appear on OW
-            $potential_exclusions = array_intersect(get_transient('fbf-importer-boughto-nostock-items'), $ow_skus);
+	        if(get_transient('fbf-importer-boughto-nostock-items') && is_array(get_transient('fbf-importer-boughto-nostock-items'))){
+		        $potential_exclusions = array_intersect(get_transient('fbf-importer-boughto-nostock-items'), $ow_skus);
+	        }else{
+				$potential_exclusions = [];
+	        }
             // then go through the $potential_exclusions checking the free stock
             $potential_exclusions_with_free_stock = [];
             $i_e = 0;
@@ -541,7 +549,7 @@ class Fbf_Importer_Owapi
 
             if(!empty($all_bd_not_dc)) {
                 foreach ($all_bd_not_dc as $bd_item) {
-                    if (in_array($bd_item['primary_id'], $ow_skus)) {
+                    if (in_array(strtoupper($bd_item['primary_id']), $ow_skus)) {
                         $in_ow[] = $bd_item;
                     } else {
                         $not_in_ow[] = $bd_item;
@@ -1264,4 +1272,14 @@ class Fbf_Importer_Owapi
         curl_close($curl);
         return $resp;
     }
+
+	function changeStringsToUpperCase($array)
+	{
+		return array_map(function($value) {
+			if (is_string($value)) {
+				return strtoupper($value);
+			}
+			return $value;
+		}, $array);
+	}
 }
