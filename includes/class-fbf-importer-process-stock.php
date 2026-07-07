@@ -106,7 +106,7 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[3]['write_filename'] = "rogue";
         $supplier_array[3]['cell_1a'] = "ROGUETR";
         $supplier_array[3]['data_start_row'] = "1";
-        $supplier_array[3]['mapping_array'] = [ '0', '0', '15', '13' ];
+        $supplier_array[3]['mapping_array'] = [ '0', '0', '14', '13' ];
         $supplier_array[3]['delimiter'] = ",";
 
         /*$supplier_array[4]['name'] = "DELDO";
