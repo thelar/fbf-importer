@@ -560,7 +560,7 @@ class Fbf_Importer_Owapi
             // For all items that ARE in OW, we need to check that the ow_id in BD is the same as the VariantID from OW
             foreach($in_ow as $in_ow_item){
                 $primary_id = $in_ow_item['primary_id'];
-                $variant_pos = array_search($primary_id, array_column($variants_a, 'variantCode'));
+                $variant_pos = array_search( strtoupper( $primary_id ), $ow_skus);
                 $variant = $variants_a[$variant_pos];
 
                 // Is the ow_id in PD the same as variantCode?
