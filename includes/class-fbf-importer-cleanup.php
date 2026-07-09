@@ -116,6 +116,7 @@ class Fbf_Importer_Cleanup
             $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
             $product_to_hide->set_backorders('no');
             update_post_meta($hide_id, '_import_hidden', 'hide');
+            update_post_meta($hide_id, '_yoast_wpseo_meta-robots-noindex', true);
             $product_to_hide->save();
 
             $i++;
@@ -167,6 +168,7 @@ class Fbf_Importer_Cleanup
                     $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
                     $product_to_hide->set_backorders('no');
                     update_post_meta($pid, '_import_hidden', 'hide');
+                    update_post_meta($pid, '_yoast_wpseo_meta-robots-noindex', true);
                     if(!$product_to_hide->save()){
                         $status['errors'] = 'Could not ' . wc_strtolower($status['action']) . ' ' . $name;
                     }
