@@ -62,8 +62,8 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
         // if endpoint
         if ($wp->request == 'api/v2/import') {
             // Your own function to process end point
-            //$this->fbf_importer_run_import('automatic');
-            //$this->fbf_importer_run_pimberly_to_ow_import();
+            $this->fbf_importer_run_import('automatic');
+            $this->fbf_importer_run_pimberly_to_ow_import();
             $this->fbf_importer_run_boughto_to_ow_import();
             exit;
         }else if($wp->request == 'api/v2/import_pimberly'){
