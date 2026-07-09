@@ -78,8 +78,8 @@ class Fbf_Importer_Cleanup
                     'operator' => 'NOT IN'
                 ]
             ],
-            'meta_key'=>'_import_hidden',
-            'meta_compare'=>'NOT EXISTS'
+            //'meta_key'=>'_import_hidden',
+            //'meta_compare'=>'NOT EXISTS'
         ]);
 
         $q = 'SELECT product_id FROM ' . $this->tmp_products_table;
