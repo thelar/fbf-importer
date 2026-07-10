@@ -180,6 +180,16 @@ class Fbf_Importer_Api extends Fbf_Importer_Admin
         }else if($wp->request == 'api/v2/check_import'){
 			$this->check_import();
 			exit;
+        }else if($wp->request == 'api/v2/check_boughto_update'){
+	        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi-auth.php';
+	        $auth = new Fbf_Importer_Owapi_Auth($this->plugin_name, $this->version);
+	        $token = $auth->get_valid_token();
+	        if($token){
+		        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-fbf-importer-owapi.php';
+		        $owapi = new Fbf_Importer_Owapi($this->plugin_name, $this->version, $token);
+		        $owapi->run_boughto_ow_update_test($_GET['sku']);
+	        }
+			exit;
         }
     }
 

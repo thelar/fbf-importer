@@ -879,6 +879,75 @@ class Fbf_Importer_Owapi
         update_option($this->plugin_name . '-boughto-ow', ['status' => 'READYFOROWCREATE', 'log_id' => $log_id]);
     }
 
+	public function run_boughto_ow_update_test($ow_id) {
+		global $wpdb;
+		$data_table = $wpdb->prefix . 'fbf_importer_boughto_data';
+		$variants = $this->ow_curl('stock/variants?limit=200000', 'GET', 200);
+		if($variants['status']!=='error') {
+			$variants_a = json_decode( $variants['response'] );
+			$ow_skus    = array_column( $variants_a, 'variantCode' );
+			$ow_ids     = array_column( $variants_a, 'variantID' );
+
+			if(!in_array($ow_id, $ow_ids)) {
+				echo $ow_id . ' not found in $ow_ids';
+				exit;
+			}
+
+			$pd_sql  = $wpdb->prepare( "SELECT * 
+                FROM {$data_table}
+                WHERE discontinued=%s AND ow_id=%s", false, $ow_id );
+
+			printf('<pre>%s</pre>', $pd_sql);
+
+			$pd_item = $wpdb->get_results( $pd_sql, ARRAY_A );
+
+			if ( count($pd_item) ) {
+				$updates_required[] = $pd_item[0];
+			}
+
+			printf('<p>Updates required count: %s</p>', count($updates_required));
+
+			require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-fbf-importer-all-wheel-file.php';
+			$google_sheet = new Fbf_Importer_All_Wheel_File();
+			$all_wheel_data = $google_sheet->read('14Itwv5zfBk0-PwUWBME-dx-Z7wuNu2-QoiGGLQdtT7w', 'AW Update', true);
+
+			foreach($updates_required as $item_to_update) {
+				// This is where we differ from the Pimberly data in that we cannot compare dates because Boughto does not have a modified date in its data - therefore we  have to assume that EVERYTHING requires an update
+				// First we need to get the variant_sales_info_id - if we don't have it we will need to obtain it from OW
+				$variant_sales_id = null;
+				if ( is_null( $item_to_update['variant_sales_info_id'] ) ) {
+					$variant = $this->ow_curl( 'variants/' . $item_to_update['ow_id'] . '?include_sales_info=true', 'GET', 200 );
+					if ( $variant['status'] === 'success' ) {
+						$variant_a = json_decode( $variant['response'] );
+						if ( isset( $variant_a->variantSalesInfo[0] ) ) {
+							$variant_sales_id = $variant_a->variantSalesInfo[0]->Id;
+
+							$u = $wpdb->update(
+								$data_table,
+								[
+									'variant_sales_info_id' => $variant_sales_id
+								],
+								[
+									'id' => $item_to_update['id']
+								]
+							);
+						}
+					}
+				}else{
+					$variant_sales_id = $item_to_update['variant_sales_info_id'];
+				}
+
+				if(!is_null($variant_sales_id)) {
+					$payload = $this->get_create_wheel_item_payload( $item_to_update, $all_wheel_data, $variant_sales_id, false );
+
+					echo '<pre>';
+					print_r( $payload );
+					echo '</pre>';
+				}
+			}
+		}
+	}
+
     public function run_boughto_ow_create($log_id)
     {
         global $wpdb;
@@ -1114,7 +1183,11 @@ class Fbf_Importer_Owapi
 
 
         $supplier_image_exists = false;
-        $in_all_wheel_file = array_search($data['product_code'], array_column($all_wheel_data, 'product_code'));
+        if( array_search( strtoupper( $data['product_code'] ), array_column($all_wheel_data, 'product_code')) !== -1){
+			$in_all_wheel_file = array_search( strtoupper( $data['product_code'] ), array_column($all_wheel_data, 'product_code'));
+        }else{
+			$in_all_wheel_file = false;
+        }
         if($in_all_wheel_file!==false){
             if(!empty($all_wheel_data[$in_all_wheel_file]['Image URL'])){
                 $file_name = basename($all_wheel_data[$in_all_wheel_file]['Image URL']);
