@@ -78,8 +78,7 @@ class Fbf_Importer_Cleanup
                     'operator' => 'NOT IN'
                 ]
             ],
-            //'meta_key'=>'_import_hidden',
-            'meta_key'=>'_yoast_wpseo_meta-robots-noindex',
+            'meta_key'=>'_import_hidden',
             'meta_compare'=>'NOT EXISTS'
         ]);
 
