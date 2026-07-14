@@ -78,8 +78,8 @@ class Fbf_Importer_Cleanup
                     'operator' => 'NOT IN'
                 ]
             ],
-            'meta_key'=>'_import_hidden',
-            'meta_compare'=>'NOT EXISTS'
+            //'meta_key'=>'_import_hidden',
+            //'meta_compare'=>'NOT EXISTS'
         ]);
 
         $q = 'SELECT product_id FROM ' . $this->tmp_products_table;
@@ -116,6 +116,7 @@ class Fbf_Importer_Cleanup
             $product_to_hide->set_stock_quantity(0); // Removes ability to sell product
             $product_to_hide->set_backorders('no');
             update_post_meta($hide_id, '_import_hidden', 'hide');
+            update_post_meta($hide_id, '_import_hide_not_in_xml', 'hide');
             update_post_meta($hide_id, '_yoast_wpseo_meta-robots-noindex', true);
             $product_to_hide->save();
 

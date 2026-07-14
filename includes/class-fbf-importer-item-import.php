@@ -288,6 +288,7 @@ class Fbf_Importer_Item_Import
                 $product->set_catalog_visibility('visible');
                 //$product->set_regular_price(round((string)$item['RSP Exc Vat'], 2));
                 delete_post_meta($product->get_id(), '_import_hidden');
+                delete_post_meta($product->get_id(), '_import_hide_not_in_xml');
                 delete_post_meta($product->get_id(), '_yoast_wpseo_meta-robots-noindex');
 
                 //Price
