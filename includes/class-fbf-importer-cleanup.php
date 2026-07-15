@@ -78,8 +78,8 @@ class Fbf_Importer_Cleanup
                     'operator' => 'NOT IN'
                 ]
             ],
-            //'meta_key'=>'_import_hidden',
-            'meta_key'=>'_import_hide_not_in_xml',
+            'meta_key'=>'_import_hidden',
+            //'meta_key'=>'_import_hide_not_in_xml',
             'meta_compare'=>'NOT EXISTS'
         ]);
 
