@@ -155,7 +155,7 @@ class Fbf_Importer_Boughto_Ow
                         // now either add to database or update
 	                    update_option($this->plugin_name . '-boughto-ow', ['status' => 'RUNNING', 'stage' => 'Reading ' . $brand_name . ' products from Boughto (ready to write to DB)']);
                         foreach($products as $product){
-                            $primary_id = $product['product_code'];
+                            $primary_id = strtoupper($product['product_code']);
                             $sd = serialize($product);
                             $this->boughto_items[] = $primary_id;
 
