@@ -201,10 +201,12 @@ class Fbf_Importer_Cleanup
             $RSP_Inc = $xml->createElement("RSP_Inc", $node['RSP_Inc']);
             $price_match = $xml->createElement("Price_Match", (string)$node['Price_Match']);
 			$cheapest = $xml->createElement("Cheapest", (string)$node['Cheapest']);
+			$brand = $xml->createElement("Brand", (string)$node['Brand']);
             $variant->appendChild($variant_code);
             $variant->appendChild($RSP_Inc);
             $variant->appendChild($price_match);
 			$variant->appendChild($cheapest);
+			$variant->appendChild($brand);
             $root->appendChild($variant);
         }
         if(function_exists('get_home_path')){

@@ -696,7 +696,8 @@ class Fbf_Importer_Item_Import
                             'Variant_Code' => $sku,
                             'RSP_Inc' => $rsp_price,
                             'Price_Match' => $rsp_price_match,
-	                        'Cheapest' => $this->price_match_data[$sku]['cheapest']?:false
+	                        'Cheapest' => $this->price_match_data[$sku]['cheapest']?:false,
+	                        'Brand' => $item['Brand Name']
                         ]);
                     }else{
                         $status['errors'][] = 'RSP was calculated as zero';
@@ -705,7 +706,8 @@ class Fbf_Importer_Item_Import
                             'Variant_Code' => $sku,
                             'RSP_Inc' => round((float)$item['RSP Exc Vat'] * 1.2, 2),
                             'Price_Match' => $rsp_price_match,
-	                        'Cheapest' => false
+	                        'Cheapest' => false,
+	                        'Brand' => $item['Brand Name']
                         ]);
                     }
 
