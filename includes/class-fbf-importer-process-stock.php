@@ -64,6 +64,10 @@ class Fbf_Importer_Stock_Processor
 	    // Rogue
 	    file_put_contents(self::UPLOAD_LOCATION . 'rogue/stock.csv', fopen("https://docs.google.com/spreadsheets/d/16qBkQ5nhslwjNA18Dc0J-PYwzrTvizVDpXiZRzEbkgc/export?format=csv&gid=0", 'r'));
 
+	    // Velare
+	    file_put_contents(self::UPLOAD_LOCATION . 'velare/stock.csv', fopen("https://docs.google.com/spreadsheets/d/1TN6ADlibIozRuVClI_FccDuR2oV_ZESKpGfwKT6rWu0/export?format=csv&gid=565887117", 'r'));
+
+
 	    $headers_array = array('STCODE', 'SPCODE', 'COST', 'QTY'); //A2, C2, E2, F2
         $data_columns_array = array('1', '3', '5', '6'); //A2, C2, E2, F2
 
@@ -312,6 +316,14 @@ class Fbf_Importer_Stock_Processor
 		$supplier_array[2]['data_start_row'] = "1";
 		$supplier_array[2]['mapping_array'] = array('0', '0', '19', '18');
 		$supplier_array[2]['delimiter'] = ",";
+
+	    $supplier_array[4]['name'] = "VELARE";
+		$supplier_array[4]['read_filename'] = "stock.csv";
+		$supplier_array[4]['write_filename'] = "velare";
+		$supplier_array[4]['cell_1a'] = "VELARE";
+		$supplier_array[4]['data_start_row'] = "1";
+		$supplier_array[4]['mapping_array'] = array('14', '14', '11', '9');
+		$supplier_array[4]['delimiter'] = ",";
 
         if (!function_exists('tep_xls_to_csv_single_file')){
             function tep_xls_to_csv_single_file($inputfile, $outputfile) {
