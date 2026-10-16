@@ -418,6 +418,7 @@ class Fbf_Importer_Item_Import
                         'Challenger',
                         'DV8',
                         'DV8 Works',
+                        'Dv8 Works',
                         'Lucari',
                         'Navis',
                         'OEM Style',
