@@ -395,7 +395,7 @@ class Fbf_Importer_Owapi
             }
 
             foreach($updates_required as $item_to_update){
-                $payload  = $this->get_create_item_payload($item_to_update, false);
+                $payload  = $this->get_create_item_payload($item_to_update, false, false);
                 $ow_update = $this->ow_curl('variants/' . $item_to_update['ow_id'], 'PUT', 200, $payload, ['Content-Type:application/json']);
 
                 if($ow_update['status']==='success'){
@@ -1062,7 +1062,7 @@ class Fbf_Importer_Owapi
         ]);
     }
 
-    private function get_create_item_payload($item, $include_code=true)
+    private function get_create_item_payload($item, $include_code=true, $update_price_match=true)
     {
         $data = unserialize($item['data']);
 
@@ -1109,7 +1109,6 @@ class Fbf_Importer_Owapi
                 "l_5" => $data->{'Run Flat'}==='Y',
                 "l_6" => $data->{'M+S'}==='Y',
                 "l_7" => false,
-                "l_10" => true,
                 "m_1" => $data->{'Rolling Resistance'},
                 "m_2" => "Tyre",
                 "m_8" => $data->{'Wet Grip'},
@@ -1120,6 +1119,9 @@ class Fbf_Importer_Owapi
         if(!$include_code){
             unset($payload['variantInfo']['code']);
         }
+		if($update_price_match){
+			$payload['analysis']['l_10'] = true;
+		}
         return json_encode($payload);
     }
 
