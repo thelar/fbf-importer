@@ -409,9 +409,18 @@ class Fbf_Importer_Stock_Processor
 
                             }
 
-                            if ($supplier_id == 13 || $supplier_id == 1) {
+                            if ($supplier_id == 13 || $supplier_id == 1 || $supplier_id == 6) {
                                 $write_array[$row][$data_columns_array[2]] =  str_replace("£","",$write_array[$row][$data_columns_array[2]]);
                             }
+
+							if($supplier_id == 6){
+								$write_array[$row][$data_columns_array[2]] = trim($write_array[$row][$data_columns_array[2]]);
+								if($write_array[$row][$data_columns_array[3]] == ""){
+									$write_array[$row][$data_columns_array[3]] = "0";
+								}else{
+									$write_array[$row][$data_columns_array[3]] = trim($write_array[$row][$data_columns_array[3]]);
+								}
+							}
 
                             if($supplier_id == 4) {
                                 $write_array[$row][$data_columns_array[2]] = str_replace(",",".",$write_array[$row][$data_columns_array[2]]);
