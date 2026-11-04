@@ -129,13 +129,13 @@ class Fbf_Importer_Stock_Processor
         $supplier_array[5]['mapping_array'] = array('0', '4', '2', '3');
         $supplier_array[5]['delimiter'] = ",";*/
 
-        /*$supplier_array[6]['name'] = "yoko";
-        $supplier_array[6]['read_filename'] = "yoko.csv";
-        $supplier_array[6]['write_filename'] = "yokohama";
-        $supplier_array[6]['cell_1a'] = "YOKOH";
+        $supplier_array[6]['name'] = "ROMAC";
+        $supplier_array[6]['read_filename'] = "Romac Wheels 4x4.csv";
+        $supplier_array[6]['write_filename'] = "romac";
+        $supplier_array[6]['cell_1a'] = "ROMAC";
         $supplier_array[6]['data_start_row'] = "2";
-        $supplier_array[6]['mapping_array'] = array('0', '0', '16', '11');
-        $supplier_array[6]['delimiter'] = ",";*/
+        $supplier_array[6]['mapping_array'] = array('2', '2', '26', '27');
+        $supplier_array[6]['delimiter'] = ",";
 
         $supplier_array[7]['name'] = "ets";
         $supplier_array[7]['read_filename'] = "edentyresales.csv";
